@@ -47,6 +47,16 @@ const thumbUrl = cloudinaryFromRow(photo, 'f_auto,q_auto,w_900');
           <p class="featured-detail">
             <span>◎</span>{photo.location}
           </p>
+          {photo.camera && (
+            <p class="featured-detail">
+              <span>📷</span>{photo.camera} {photo.lens && `· ${photo.lens}`}
+            </p>
+          )}
+          {photo.film_stock && (
+            <p class="featured-detail">
+              <span>🎞️</span>{photo.film_stock}
+            </p>
+          )}
           {photo.simulation && (
             <p class="featured-detail">
               <span>⬡</span>{photo.simulation}

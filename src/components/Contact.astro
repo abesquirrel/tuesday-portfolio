@@ -1,10 +1,16 @@
----
-// Update these links to your real social/contact handles
-const links = [
-  { label: 'Email',      href: 'mailto:paul@paulrojas.quest' },
-  { label: 'Instagram',  href: 'https://instagram.com/' },
-  { label: 'Flickr',     href: 'https://flickr.com/' },
-  { label: 'VSCO',       href: 'https://vsco.co/' },
+import type { SocialLink } from '../types/photo';
+
+interface Props {
+  links: SocialLink[];
+}
+const { links } = Astro.props;
+
+// Fallbacks for local dev
+const displayLinks = links.length > 0 ? links : [
+  { label: 'Email',      url: 'mailto:paul@paulrojas.quest' },
+  { label: 'Instagram',  url: 'https://instagram.com/' },
+  { label: 'Flickr',     url: 'https://flickr.com/' },
+  { label: 'VSCO',       url: 'https://vsco.co/' },
 ];
 ---
 
@@ -26,8 +32,8 @@ const links = [
         <div class="contact-divider"></div>
 
         <nav class="contact-links" aria-label="Social and contact links">
-          {links.map((l) => (
-            <a href={l.href} target={l.href.startsWith('mailto') ? '_self' : '_blank'} rel="noopener noreferrer">
+          {displayLinks.map((l) => (
+            <a href={l.url} target={l.url.startsWith('mailto') ? '_self' : '_blank'} rel="noopener noreferrer">
               {l.label}
             </a>
           ))}

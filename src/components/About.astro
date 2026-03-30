@@ -1,8 +1,16 @@
----
-import { cloudinaryUrl } from '../utils/cloudinary';
-
 // Swap this public_id when you upload your portrait to Cloudinary
 const portraitUrl = cloudinaryUrl('portfolio/about/portrait', 'f_auto,q_auto,w_600,h_750,c_fill,g_face');
+
+interface Props {
+  settings: Record<string, string>;
+}
+const { settings } = Astro.props;
+
+// Fallbacks for when settings aren't loaded (e.g. local dev without DB)
+const bio = settings.about_bio || "My name is Paul Rojas. I shoot film — mostly street, mostly in places where nobody's watching. The name of this site isn't a mystery: most of my best rolls happen on completely unremarkable days that I only remember because I had a camera.";
+const currentlyShooting = settings.about_currently_shooting || "Nikkormat FT2 · Nikon 50mm f/1.4 AI · Konica 100 VX / Kodak Color 200";
+const developing = settings.about_developing || "HC-110 (Dilution B) · D-76 1:1";
+const alsoShooting = settings.about_also_shooting || "Fujifilm X-T20 · Classic Chrome · Acros · Eterna Cinema";
 ---
 
 <section id="about">
@@ -28,33 +36,13 @@ const portraitUrl = cloudinaryUrl('portfolio/about/portrait', 'f_auto,q_auto,w_6
         </h2>
 
         <div class="about-body">
-          <p>
-            My name is <strong>Paul Rojas</strong>. I shoot film — mostly street, mostly in places
-            where nobody's watching. The name of this site isn't a mystery: most of my best rolls
-            happen on completely unremarkable days that I only remember because I had a camera.
-          </p>
-          <p>
-            I started shooting in the analogue dark — expired rolls, broken light seals, cameras
-            that required a certain relationship before they'd work right. The Nikkormat and I have
-            come to an understanding.
-          </p>
-          <p>
-            I also shoot with a Fujifilm X-T20 body. Not as a concession to convenience — the
-            simulations matter. Classic Chrome reads like a faded print. Acros renders shadows the
-            way HC-110 used to. The intent is the same; the chemistry is just different.
-          </p>
-          <p>
-            I don't bracket. I don't shoot in burst. Every frame has a cost, and that cost makes
-            you pay attention.
-          </p>
+          <p set:html={bio.replace(/\n/g, '<br />')} />
         </div>
 
         <div class="camera-note">
-          <strong>Currently shooting:</strong>&nbsp; Nikkormat FT2 &nbsp;·&nbsp;
-          Nikon 50mm f/1.4 AI &nbsp;·&nbsp; Konica 100 VX / Kodak Color 200&nbsp;<br />
-          <strong>Developing:</strong>&nbsp; HC-110 (Dilution B) &nbsp;·&nbsp; D-76 1:1<br />
-          <strong>Also shooting:</strong>&nbsp; Fujifilm X-T20 &nbsp;·&nbsp;
-          Classic Chrome &nbsp;·&nbsp; Acros &nbsp;·&nbsp; Eterna Cinema
+          <strong>Currently shooting:</strong>&nbsp; {currentlyShooting}<br />
+          <strong>Developing:</strong>&nbsp; {developing}<br />
+          <strong>Also shooting:</strong>&nbsp; {alsoShooting}
         </div>
       </div>
 

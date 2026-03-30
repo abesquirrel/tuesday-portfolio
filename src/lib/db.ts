@@ -1,4 +1,4 @@
-import type { Photo } from '../types/photo';
+import type { Photo, SiteSetting, SocialLink } from '../types/photo';
 
 /**
  * Unified data fetcher for the portfolio.
@@ -35,7 +35,10 @@ export async function getPhotos(db?: any): Promise<Photo[]> {
       roll:           p.roll ?? '',
       location:       p.location ?? '',
       medium:         p.medium ?? 'film',
-      simulation:     p.simulation ?? null, // optional Fujifilm sim
+      simulation:     p.simulation ?? null,
+      camera:         p.camera ?? null,
+      lens:           p.lens ?? null,
+      film_stock:     p.filmStock ?? null,
       sort_order:     i,
       is_featured:    p.isFeatured ? 1 : 0,
     }));
@@ -43,4 +46,40 @@ export async function getPhotos(db?: any): Promise<Photo[]> {
     console.error('Local JSON fallback failed:', e);
     return [];
   }
+}
+
+/**
+ * Fetches site settings (bio, gear notes, etc.)
+ */
+export async function getSettings(db?: any): Promise<Record<string, string>> {
+  if (db) {
+    try {
+      const result = await db.prepare('SELECT * FROM site_settings').all();
+      const settings: Record<string, string> = {};
+      (result.results as SiteSetting[]).forEach((row) => {
+        settings[row.key] = row.value;
+      });
+      return settings;
+    } catch (e) {
+      console.error('D1 settings query failed:', e);
+    }
+  }
+  return {};
+}
+
+/**
+ * Fetches social links
+ */
+export async function getSocialLinks(db?: any): Promise<SocialLink[]> {
+  if (db) {
+    try {
+      const result = await db
+        .prepare('SELECT * FROM social_links ORDER BY sort_order ASC')
+        .all();
+      return result.results as SocialLink[];
+    } catch (e) {
+      console.error('D1 social_links query failed:', e);
+    }
+  }
+  return [];
 }

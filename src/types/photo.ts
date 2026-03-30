@@ -12,6 +12,21 @@ export interface Photo {
   location:       string;
   medium:         'film' | 'digital';
   simulation:     string | null;   // Fujifilm sim name
+  camera:         string | null;
+  lens:           string | null;
+  film_stock:     string | null;
   sort_order:     number;
   is_featured:    number;          // 0 | 1 (SQLite boolean)
+}
+
+export interface SiteSetting {
+  key:   string;
+  value: string;
+}
+
+export interface SocialLink {
+  id:         number;
+  label:      string;
+  url:        string;
+  sort_order: number;
 }

@@ -33,7 +33,7 @@ const gridPhotos = photos.filter((p) => p.is_featured === 0);
                 alt={photo.title}
                 class="lightbox-trigger"
                 data-full={full}
-                data-caption={`${photo.title} — ${photo.location}`}
+                data-caption={`${photo.title} — ${photo.location}${photo.camera ? ` | ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}`}
                 loading="lazy"
                 decoding="async"
               />
@@ -41,6 +41,8 @@ const gridPhotos = photos.filter((p) => p.is_featured === 0);
                 <p class="cell-title">{photo.title}</p>
                 <p class="cell-meta">
                   {photo.roll} &nbsp;·&nbsp; {photo.location}
+                  {photo.camera && <>&nbsp;·&nbsp; {photo.camera}</>}
+                  {photo.film_stock && <>&nbsp;·&nbsp; {photo.film_stock}</>}
                   {photo.simulation && <>&nbsp;·&nbsp; <em>{photo.simulation}</em></>}
                 </p>
               </div>

@@ -7,14 +7,16 @@ import About from '../components/About.astro';
 import Contact from '../components/Contact.astro';
 import '../styles/global.scss';
 
-import { getPhotos } from '../lib/db';
-import type { Photo } from '../types/photo';
+import { getPhotos, getSettings, getSocialLinks } from '../lib/db';
+import type { Photo, SocialLink } from '../types/photo';
 
 // Server-rendered so D1 bindings are available at request time
 export const prerender = false;
 
 const db = (Astro.locals as any).runtime?.env?.DB;
 const photosData: Photo[] = await getPhotos(db);
+const settings: Record<string, string> = await getSettings(db);
+const socialLinks: SocialLink[] = await getSocialLinks(db);
 
 const featuredPhoto = photosData.find((p) => p.is_featured === 1) || photosData[0];
 ---
@@ -28,7 +30,7 @@ const featuredPhoto = photosData.find((p) => p.is_featured === 1) || photosData[
 
   <Gallery photos={photosData} />
 
-  <About />
+  <About settings={settings} />
 
-  <Contact />
+  <Contact links={socialLinks} />
 </BaseLayout>

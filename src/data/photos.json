@@ -6,6 +6,7 @@
     "caption": "The light came through just right. I almost missed it.",
     "roll": "Roll 01",
     "location": "Queens, NY",
+    "medium": "film",
     "isFeatured": true
   },
   {
@@ -15,6 +16,7 @@
     "caption": "Nobody was awake except the clerk and the neon.",
     "roll": "Roll 01",
     "location": "Brooklyn, NY",
+    "medium": "film",
     "isFeatured": false
   },
   {
@@ -24,6 +26,7 @@
     "caption": "Shot on Tri-X pushed to 1600.",
     "roll": "Roll 02",
     "location": "Chicago, IL",
+    "medium": "film",
     "isFeatured": false
   },
   {
@@ -33,6 +36,8 @@
     "caption": "She didn't notice me. That was the point.",
     "roll": "Roll 02",
     "location": "Chicago, IL",
+    "medium": "digital",
+    "simulation": "Classic Chrome",
     "isFeatured": false
   },
   {
@@ -42,6 +47,8 @@
     "caption": "Everything was the same grey.",
     "roll": "Roll 03",
     "location": "Detroit, MI",
+    "medium": "digital",
+    "simulation": "Acros",
     "isFeatured": false
   },
   {
@@ -51,6 +58,7 @@
     "caption": "Condensation and the parking lot beyond.",
     "roll": "Roll 03",
     "location": "Detroit, MI",
+    "medium": "film",
     "isFeatured": false
   },
   {
@@ -60,6 +68,7 @@
     "caption": "Ilford HP5. The grain felt right.",
     "roll": "Roll 04",
     "location": "Pittsburgh, PA",
+    "medium": "film",
     "isFeatured": false
   },
   {
@@ -69,6 +78,8 @@
     "caption": "Cold enough that the camera almost wouldn't wind.",
     "roll": "Roll 04",
     "location": "Pittsburgh, PA",
+    "medium": "digital",
+    "simulation": "Eterna Cinema",
     "isFeatured": false
   },
   {
@@ -78,6 +89,7 @@
     "caption": "He'd been standing there a while before I saw him.",
     "roll": "Roll 05",
     "location": "Cleveland, OH",
+    "medium": "film",
     "isFeatured": false
   }
 ]

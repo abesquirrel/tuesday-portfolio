@@ -9,6 +9,8 @@ interface Photo {
   roll: string;
   location: string;
   isFeatured: boolean;
+  medium?: 'film' | 'digital';
+  simulation?: string;
 }
 
 interface Props {
@@ -22,7 +24,7 @@ const gridPhotos = photos.filter((p) => !p.isFeatured);
 <section id="gallery">
   <div class="container-fluid px-0">
     <div class="container mb-5 reveal">
-      <p class="section-eyebrow">The Rolls</p>
+      <p class="section-eyebrow">Film &amp; Simulation</p>
       <h2 class="section-title" style="font-size:clamp(1.4rem,3vw,2rem);">
         Everything else worth keeping.
       </h2>
@@ -46,7 +48,10 @@ const gridPhotos = photos.filter((p) => !p.isFeatured);
               />
               <div class="gallery-cell-overlay">
                 <p class="cell-title">{photo.title}</p>
-                <p class="cell-meta">{photo.roll} &nbsp;·&nbsp; {photo.location}</p>
+                <p class="cell-meta">
+                  {photo.roll} &nbsp;·&nbsp; {photo.location}
+                  {photo.simulation && <>&nbsp;·&nbsp; <em>{photo.simulation}</em></>}
+                </p>
               </div>
             </div>
           );

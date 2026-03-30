@@ -1,0 +1,83 @@
+[
+  {
+    "id": "featured",
+    "publicId": "portfolio/featured/main",
+    "title": "Somewhere on the 7 Train",
+    "caption": "The light came through just right. I almost missed it.",
+    "roll": "Roll 01",
+    "location": "Queens, NY",
+    "isFeatured": true
+  },
+  {
+    "id": "photo-01",
+    "publicId": "portfolio/grid/photo-01",
+    "title": "Corner Store, 6am",
+    "caption": "Nobody was awake except the clerk and the neon.",
+    "roll": "Roll 01",
+    "location": "Brooklyn, NY",
+    "isFeatured": false
+  },
+  {
+    "id": "photo-02",
+    "publicId": "portfolio/grid/photo-02",
+    "title": "The Long Platform",
+    "caption": "Shot on Tri-X pushed to 1600.",
+    "roll": "Roll 02",
+    "location": "Chicago, IL",
+    "isFeatured": false
+  },
+  {
+    "id": "photo-03",
+    "publicId": "portfolio/grid/photo-03",
+    "title": "Between Shifts",
+    "caption": "She didn't notice me. That was the point.",
+    "roll": "Roll 02",
+    "location": "Chicago, IL",
+    "isFeatured": false
+  },
+  {
+    "id": "photo-04",
+    "publicId": "portfolio/grid/photo-04",
+    "title": "Overpass, Late Summer",
+    "caption": "Everything was the same grey.",
+    "roll": "Roll 03",
+    "location": "Detroit, MI",
+    "isFeatured": false
+  },
+  {
+    "id": "photo-05",
+    "publicId": "portfolio/grid/photo-05",
+    "title": "Diner Window",
+    "caption": "Condensation and the parking lot beyond.",
+    "roll": "Roll 03",
+    "location": "Detroit, MI",
+    "isFeatured": false
+  },
+  {
+    "id": "photo-06",
+    "publicId": "portfolio/grid/photo-06",
+    "title": "The Last Bus",
+    "caption": "Ilford HP5. The grain felt right.",
+    "roll": "Roll 04",
+    "location": "Pittsburgh, PA",
+    "isFeatured": false
+  },
+  {
+    "id": "photo-07",
+    "publicId": "portfolio/grid/photo-07",
+    "title": "Rooftop, February",
+    "caption": "Cold enough that the camera almost wouldn't wind.",
+    "roll": "Roll 04",
+    "location": "Pittsburgh, PA",
+    "isFeatured": false
+  },
+  {
+    "id": "photo-08",
+    "publicId": "portfolio/grid/photo-08",
+    "title": "After the Shift",
+    "caption": "He'd been standing there a while before I saw him.",
+    "roll": "Roll 05",
+    "location": "Cleveland, OH",
+    "isFeatured": false
+  }
+]

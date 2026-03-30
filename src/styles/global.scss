@@ -1,0 +1,581 @@
+// ─── Bootstrap variable overrides via SCSS variables ─────────────────────────
+// These must be defined BEFORE Bootstrap is imported.
+
+$darkroom-black:    #0e0d0b;
+$darkroom-deep:     #1a1916;
+$darkroom-mid:      #2c2b28;
+$darkroom-border:   #3a3935;
+$silver-bright:     #c8c4bc;
+$silver-dim:        #7a7671;
+$accent-amber:      #c8a96e;
+$accent-amber-dark: #8c6f3c;
+$off-white:         #f0ede8;
+
+// Bootstrap overrides (must use ! default pattern via direct variable assignment)
+$body-bg:           $darkroom-black;
+$body-color:        $silver-bright;
+$link-color:        $accent-amber;
+$link-hover-color:  $accent-amber-dark;
+$font-family-sans-serif: ('Libre Baskerville', Georgia, serif);
+$font-family-monospace:  ('Courier New', Courier, monospace);
+$headings-font-family:   ('Playfair Display', Georgia, serif);
+$headings-color:     $silver-bright;
+$headings-font-weight: 400;
+$border-color:       $darkroom-border;
+$border-radius:      0;
+$border-radius-lg:   0;
+$border-radius-sm:   0;
+$card-bg:            $darkroom-mid;
+$card-border-color:  $darkroom-border;
+$hr-color:           $darkroom-border;
+$hr-opacity:         1;
+$navbar-dark-color:           rgba($silver-bright, 0.75);
+$navbar-dark-hover-color:     $accent-amber;
+$navbar-dark-active-color:    $accent-amber;
+$navbar-dark-brand-color:     $silver-bright;
+$btn-border-radius:    0;
+$btn-border-radius-sm: 0;
+$btn-border-radius-lg: 0;
+
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
+@import '../../node_modules/bootstrap/scss/bootstrap';
+
+// ─── Google Fonts are loaded in BaseLayout.astro via <link> ──────────────────
+
+// ─── Grain overlay — applied via ::after on body ─────────────────────────────
+body {
+  position: relative;
+  min-height: 100vh;
+  letter-spacing: 0.01em;
+
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    opacity: 0.035;
+    pointer-events: none;
+    z-index: 9999;
+  }
+}
+
+// ─── Navbar ───────────────────────────────────────────────────────────────────
+#mainNav {
+  background-color: transparent;
+  transition: background-color 0.3s ease, padding 0.3s ease;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+
+  &.navbar-scrolled {
+    background-color: rgba($darkroom-black, 0.97);
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid $darkroom-border;
+  }
+
+  .navbar-brand {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    color: $silver-bright;
+    font-style: italic;
+
+    .brand-em {
+      color: $accent-amber;
+      font-style: normal;
+    }
+  }
+
+  .nav-link {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba($silver-bright, 0.7);
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    transition: color 0.2s;
+
+    &:hover,
+    &.active {
+      color: $accent-amber;
+    }
+  }
+}
+
+// ─── Masthead ─────────────────────────────────────────────────────────────────
+#masthead {
+  position: relative;
+  height: 100svh;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: $darkroom-black;
+
+  .masthead-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.55;
+    transform: scale(1.03);
+    transition: opacity 1.2s ease;
+    filter: grayscale(20%) contrast(1.05);
+  }
+
+  .masthead-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba($darkroom-black, 0.2) 0%,
+      rgba($darkroom-black, 0.5) 60%,
+      rgba($darkroom-black, 0.95) 100%
+    );
+  }
+
+  .masthead-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 1.5rem;
+    animation: fadeUp 1.2s ease both;
+  }
+
+  .masthead-eyebrow {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: $accent-amber;
+    margin-bottom: 1.25rem;
+    opacity: 0.9;
+  }
+
+  .masthead-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2.5rem, 7vw, 5.5rem);
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.1;
+    color: $silver-bright;
+    margin-bottom: 1.5rem;
+
+    em {
+      color: $accent-amber;
+      font-style: normal;
+    }
+  }
+
+  .masthead-sub {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: rgba($silver-bright, 0.6);
+    letter-spacing: 0.05em;
+    max-width: 420px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+
+  .scroll-cue {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba($silver-bright, 0.4);
+    font-family: 'Courier New', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    animation: scrollBob 2s ease-in-out infinite;
+    text-decoration: none;
+
+    &:hover { color: $accent-amber; }
+
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, rgba($silver-bright, 0.4), transparent);
+    }
+  }
+}
+
+// ─── Section shared styles ────────────────────────────────────────────────────
+.section-eyebrow {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: $accent-amber;
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 400;
+  color: $silver-bright;
+}
+
+// ─── Featured Photo ───────────────────────────────────────────────────────────
+#featured {
+  background-color: $darkroom-deep;
+  padding: 5rem 0;
+
+  .featured-frame {
+    position: relative;
+    overflow: hidden;
+    cursor: zoom-in;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba($accent-amber, 0.15);
+      pointer-events: none;
+    }
+
+    img {
+      width: 100%;
+      display: block;
+      transition: transform 0.6s ease, filter 0.4s ease;
+      filter: grayscale(15%) contrast(1.05);
+    }
+
+    &:hover img {
+      transform: scale(1.02);
+      filter: grayscale(0%) contrast(1.05);
+    }
+
+    .featured-badge {
+      position: absolute;
+      top: 1.25rem;
+      left: 1.25rem;
+      background: rgba($darkroom-black, 0.85);
+      border: 1px solid $darkroom-border;
+      color: $accent-amber;
+      font-family: 'Courier New', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.75rem;
+    }
+  }
+
+  .featured-meta {
+    padding-top: 2rem;
+
+    .featured-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 400;
+      font-style: italic;
+      color: $silver-bright;
+      margin-bottom: 0.75rem;
+    }
+
+    .featured-caption {
+      color: rgba($silver-bright, 0.6);
+      font-size: 0.95rem;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    .featured-detail {
+      font-family: 'Courier New', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      color: $silver-dim;
+      text-transform: uppercase;
+
+      span { color: $accent-amber; margin-right: 0.5rem; }
+    }
+  }
+}
+
+// ─── Gallery Grid ─────────────────────────────────────────────────────────────
+#gallery {
+  background-color: $darkroom-black;
+  padding: 5rem 0;
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background-color: $darkroom-border;
+  }
+
+  .gallery-cell {
+    position: relative;
+    overflow: hidden;
+    background-color: $darkroom-deep;
+    aspect-ratio: 3 / 2;
+
+    &:nth-child(3n+1) { aspect-ratio: 4 / 3; }
+    &:nth-child(5n+2) { aspect-ratio: 1 / 1; }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: grayscale(25%) contrast(1.05);
+      transition: transform 0.5s ease, filter 0.4s ease;
+    }
+
+    .gallery-cell-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba($darkroom-black, 0.85) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.25rem;
+
+      .cell-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 0.95rem;
+        font-style: italic;
+        color: $silver-bright;
+        margin-bottom: 0.25rem;
+      }
+
+      .cell-meta {
+        font-family: 'Courier New', monospace;
+        font-size: 0.6rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: $accent-amber;
+      }
+    }
+
+    &:hover {
+      img {
+        transform: scale(1.05);
+        filter: grayscale(0%) contrast(1.05);
+      }
+      .gallery-cell-overlay { opacity: 1; }
+    }
+  }
+}
+
+// ─── About ────────────────────────────────────────────────────────────────────
+#about {
+  background-color: $darkroom-deep;
+  padding: 6rem 0;
+
+  .about-portrait {
+    position: relative;
+
+    img {
+      width: 100%;
+      display: block;
+      filter: grayscale(40%) contrast(1.05) sepia(10%);
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -1rem;
+      left: -1rem;
+      right: 1rem;
+      bottom: 1rem;
+      border: 1px solid rgba($accent-amber, 0.2);
+      pointer-events: none;
+      z-index: 0;
+    }
+  }
+
+  .about-body {
+    color: rgba($silver-bright, 0.75);
+    font-size: 1rem;
+    line-height: 1.9;
+
+    p + p { margin-top: 1.25rem; }
+
+    strong { color: $silver-bright; font-weight: 400; }
+  }
+
+  .camera-note {
+    margin-top: 2rem;
+    padding: 1rem 1.25rem;
+    border-left: 2px solid $accent-amber;
+    background-color: rgba($accent-amber, 0.04);
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: $silver-dim;
+    line-height: 1.8;
+
+    strong { color: $accent-amber; font-style: normal; }
+  }
+}
+
+// ─── Contact ──────────────────────────────────────────────────────────────────
+#contact {
+  background-color: $darkroom-black;
+  padding: 6rem 0;
+  text-align: center;
+
+  .contact-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: 2.5rem;
+
+    a {
+      font-family: 'Courier New', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: $silver-dim;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      padding-bottom: 2px;
+      transition: color 0.2s, border-color 0.2s;
+
+      &:hover {
+        color: $accent-amber;
+        border-color: $accent-amber;
+      }
+    }
+  }
+
+  .contact-divider {
+    width: 40px;
+    height: 1px;
+    background-color: $darkroom-border;
+    margin: 2rem auto;
+  }
+
+  .contact-note {
+    font-size: 0.82rem;
+    color: $silver-dim;
+    max-width: 380px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+footer {
+  background-color: $darkroom-deep;
+  border-top: 1px solid $darkroom-border;
+  padding: 2rem 0;
+  text-align: center;
+
+  .footer-text {
+    font-family: 'Courier New', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: $silver-dim;
+  }
+}
+
+// ─── Lightbox (pure CSS) ──────────────────────────────────────────────────────
+.lightbox-trigger { cursor: zoom-in; }
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba($darkroom-black, 0.97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+
+  &.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  img {
+    max-width: 92vw;
+    max-height: 90svh;
+    object-fit: contain;
+    filter: grayscale(5%) contrast(1.05);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    color: $silver-dim;
+    font-family: 'Courier New', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover { color: $accent-amber; }
+  }
+
+  .lightbox-caption {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: rgba($silver-bright, 0.5);
+    font-size: 0.8rem;
+    font-style: italic;
+    white-space: nowrap;
+  }
+}
+
+// ─── Animations ───────────────────────────────────────────────────────────────
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scrollBob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(6px); }
+}
+
+// Staggered reveal on scroll
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+
+  &.revealed {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+// ─── Responsive tweaks ────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  #about .about-portrait {
+    &::before { display: none; }
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+
+    .gallery-cell {
+      aspect-ratio: 1 / 1 !important;
+    }
+  }
+}

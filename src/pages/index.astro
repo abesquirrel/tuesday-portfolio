@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Masthead from '../components/Masthead.astro';
+import FeaturedPhoto from '../components/FeaturedPhoto.astro';
+import Gallery from '../components/Gallery.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+import '../styles/global.scss';
+
+import photosData from '../data/photos.json';
+
+const featuredPhoto = photosData.find((p) => p.isFeatured)!;
+---
+
+<BaseLayout>
+  <Masthead heroPublicId={featuredPhoto.publicId} />
+
+  <FeaturedPhoto
+    publicId={featuredPhoto.publicId}
+    title={featuredPhoto.title}
+    caption={featuredPhoto.caption}
+    roll={featuredPhoto.roll}
+    location={featuredPhoto.location}
+  />
+
+  <Gallery photos={photosData} />
+
+  <About />
+
+  <Contact />
+</BaseLayout>

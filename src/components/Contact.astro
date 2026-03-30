@@ -1,0 +1,39 @@
+---
+// Update these links to your real social/contact handles
+const links = [
+  { label: 'Email',      href: 'mailto:paul@paulrojas.quest' },
+  { label: 'Instagram',  href: 'https://instagram.com/' },
+  { label: 'Flickr',     href: 'https://flickr.com/' },
+  { label: 'VSCO',       href: 'https://vsco.co/' },
+];
+---
+
+<section id="contact">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7 reveal">
+
+        <p class="section-eyebrow">Contact</p>
+        <h2 class="section-title mb-3" style="font-size:clamp(1.6rem,3vw,2.2rem);">
+          Say something.
+        </h2>
+
+        <p class="contact-note">
+          If a photo meant something to you, or you want to talk film, cameras,
+          or missed moments — reach out.
+        </p>
+
+        <div class="contact-divider"></div>
+
+        <nav class="contact-links" aria-label="Social and contact links">
+          {links.map((l) => (
+            <a href={l.href} target={l.href.startsWith('mailto') ? '_self' : '_blank'} rel="noopener noreferrer">
+              {l.label}
+            </a>
+          ))}
+        </nav>
+
+      </div>
+    </div>
+  </div>
+</section>

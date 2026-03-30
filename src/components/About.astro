@@ -1,0 +1,56 @@
+---
+import { cloudinaryUrl } from '../utils/cloudinary';
+
+// Swap this public_id when you upload your portrait to Cloudinary
+const portraitUrl = cloudinaryUrl('portfolio/about/portrait', 'f_auto,q_auto,w_600,h_750,c_fill,g_face');
+---
+
+<section id="about">
+  <div class="container">
+    <div class="row g-5 align-items-start">
+
+      <div class="col-lg-4 reveal">
+        <div class="about-portrait">
+          <img
+            src={portraitUrl}
+            alt="Paul Rojas"
+            width="600"
+            height="750"
+            loading="lazy"
+          />
+        </div>
+      </div>
+
+      <div class="col-lg-8 reveal">
+        <p class="section-eyebrow">About</p>
+        <h2 class="section-title mb-4" style="font-size:clamp(1.6rem,3vw,2.2rem);">
+          The photographer behind the camera.
+        </h2>
+
+        <div class="about-body">
+          <p>
+            My name is <strong>Paul Rojas</strong>. I shoot film — mostly street, mostly in places
+            where nobody's watching. The name of this site isn't a mystery: most of my best rolls
+            happen on completely unremarkable days that I only remember because I had a camera.
+          </p>
+          <p>
+            I started shooting in the analogue dark — expired rolls, broken light seals, cameras
+            that required a certain relationship before they'd work right. The Nikkormat and I have
+            come to an understanding.
+          </p>
+          <p>
+            I don't bracket. I don't shoot in burst. Every frame has a cost, and that cost makes
+            you pay attention.
+          </p>
+        </div>
+
+        <div class="camera-note">
+          <strong>Currently shooting:</strong>&nbsp; Nikkormat FTn &nbsp;·&nbsp;
+          Nikon 50mm f/1.4 AI &nbsp;·&nbsp; Ilford HP5+ / Kodak Tri-X&nbsp;<br />
+          <strong>Developing:</strong>&nbsp; HC-110 (Dilution B) &nbsp;·&nbsp; D-76 1:1
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,6 @@
+# Cloudflare Pages build configuration
+# Set these in the Cloudflare Pages dashboard → Settings → Environment variables
+
+[build]
+command = "npm run build"
+output_directory = "dist"

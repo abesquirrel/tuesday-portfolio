@@ -1,0 +1,181 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'I Think It Was Tuesday',
+  description = 'A film photography portfolio by Paul Rojas. Shot on Nikkormat. Moments that were probably a Tuesday.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://tuesday.paulrojas.quest" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://tuesday.paulrojas.quest" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Global styles -->
+    <style is:global>
+      html { scroll-behavior: smooth; }
+      * { box-sizing: border-box; }
+      img { max-width: 100%; height: auto; }
+    </style>
+  </head>
+
+  <body>
+    <!-- ── Navigation ───────────────────────────────────────────────────── -->
+    <nav id="mainNav" class="navbar navbar-expand-lg navbar-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#masthead">
+          I think it was <span class="brand-em">Tuesday</span>
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarContent"
+          aria-controls="navbarContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="#featured">Featured</a></li>
+            <li class="nav-item"><a class="nav-link" href="#gallery">Gallery</a></li>
+            <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── Main content slot ────────────────────────────────────────────── -->
+    <main>
+      <slot />
+    </main>
+
+    <!-- ── Footer ───────────────────────────────────────────────────────── -->
+    <footer>
+      <div class="container">
+        <p class="footer-text">
+          © {new Date().getFullYear()} Paul Rojas &nbsp;·&nbsp; tuesday.paulrojas.quest
+          &nbsp;·&nbsp; All photographs shot on film
+        </p>
+      </div>
+    </footer>
+
+    <!-- ── Lightbox container ────────────────────────────────────────────── -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+      <button class="lightbox-close" id="lightboxClose">✕ &nbsp;Close</button>
+      <img id="lightboxImg" src="" alt="" />
+      <p class="lightbox-caption" id="lightboxCaption"></p>
+    </div>
+
+    <!-- ── Bootstrap JS ──────────────────────────────────────────────────── -->
+    <script>
+      import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+    </script>
+
+    <!-- ── Nav scroll behaviour ─────────────────────────────────────────── -->
+    <script>
+      const nav = document.getElementById('mainNav');
+      const onScroll = () => {
+        nav?.classList.toggle('navbar-scrolled', window.scrollY > 60);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      // Smooth scrollspy active state
+      const sections = document.querySelectorAll('section[id]');
+      const navLinks = document.querySelectorAll('#mainNav .nav-link');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((l) => l.classList.remove('active'));
+              const active = document.querySelector(`#mainNav a[href="#${entry.target.id}"]`);
+              active?.classList.add('active');
+            }
+          });
+        },
+        { rootMargin: '-40% 0px -55% 0px' }
+      );
+      sections.forEach((s) => observer.observe(s));
+    </script>
+
+    <!-- ── Scroll reveal ─────────────────────────────────────────────────── -->
+    <script>
+      const revealEls = document.querySelectorAll('.reveal');
+      const revealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('revealed');
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.12 }
+      );
+      revealEls.forEach((el) => revealObserver.observe(el));
+    </script>
+
+    <!-- ── Lightbox ──────────────────────────────────────────────────────── -->
+    <script>
+      const lightbox     = document.getElementById('lightbox');
+      const lightboxImg  = document.getElementById('lightboxImg') as HTMLImageElement;
+      const lightboxCap  = document.getElementById('lightboxCaption');
+      const lightboxClose = document.getElementById('lightboxClose');
+
+      document.querySelectorAll('.lightbox-trigger').forEach((el) => {
+        el.addEventListener('click', () => {
+          const src = el.getAttribute('data-full') || (el as HTMLImageElement).src;
+          const cap = el.getAttribute('data-caption') || '';
+          if (lightboxImg) lightboxImg.src = src;
+          if (lightboxCap) lightboxCap.textContent = cap;
+          lightbox?.classList.add('open');
+          document.body.style.overflow = 'hidden';
+        });
+      });
+
+      const closeLightbox = () => {
+        lightbox?.classList.remove('open');
+        document.body.style.overflow = '';
+        if (lightboxImg) lightboxImg.src = '';
+      };
+
+      lightboxClose?.addEventListener('click', closeLightbox);
+      lightbox?.addEventListener('click', (e) => {
+        if (e.target === lightbox) closeLightbox();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
+      });
+    </script>
+  </body>
+</html>

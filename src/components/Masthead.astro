@@ -1,0 +1,38 @@
+---
+import { cloudinaryHero } from '../utils/cloudinary';
+
+interface Props {
+  heroPublicId: string;
+}
+const { heroPublicId } = Astro.props;
+const heroUrl = cloudinaryHero(heroPublicId);
+---
+
+<section id="masthead">
+  <div
+    class="masthead-bg"
+    style={`background-image: url('${heroUrl}')`}
+    role="img"
+    aria-label="Featured photograph — hero"
+  ></div>
+  <div class="masthead-overlay"></div>
+
+  <div class="masthead-content">
+    <p class="masthead-eyebrow">Film Photography Portfolio</p>
+    <h1 class="masthead-title">
+      I think it was<br /><em>Tuesday</em>
+    </h1>
+    <p class="masthead-sub">
+      Street photography shot on film. Moments that didn't announce themselves.
+    </p>
+    <a href="#featured" class="btn btn-outline-light btn-sm px-4 py-2"
+      style="font-family:'Courier New',monospace;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;">
+      View the work
+    </a>
+  </div>
+
+  <a class="scroll-cue" href="#featured" aria-label="Scroll down">
+    <span class="scroll-line"></span>
+    scroll
+  </a>
+</section>

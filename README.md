@@ -68,17 +68,22 @@ npx wrangler d1 execute tuesday-photos --remote --file=./db/seed.sql
 ## Adding & Managing Photos
 
 ### 1. The CLI Upload Tool (Recommended)
-The project includes a specialized script to handle Cloudinary uploads and D1 record insertion in one step.
+The project includes a specialized script to handle Cloudinary uploads, local optimization, and D1 record insertion in one step.
 
 ```bash
-# Upload a local image
+# Upload a single image
 npm run upload -- path/to/your/photo.jpg
+
+# Bulk upload an entire folder
+npm run upload -- path/to/album_folder/
 ```
 
-The script will prompt you for:
-- **Title**, **Album**, **Location**, and **Roll**.
-- **Metadata** (Camera, Lens, Film Stock).
-- **Medium** (Film vs Digital).
+The script features:
+- **Bulk Upload**: Pass directories or multiple files at once.
+- **Local Optimization**: Auto-converts to **WebP** and ensures files are **< 1MB**.
+- **Batch Metadata**: Set an Album, Location, and Camera once for a whole batch.
+- **Individual Metadata**: Custom **Title** and **Is Featured?** toggles per image.
+- **Database Sync**: Processes all uploads and executes a single SQL update for your local D1.
 
 ### 2. Manual SQL
 Alternatively, you can run a SQL `INSERT` via Wrangler:

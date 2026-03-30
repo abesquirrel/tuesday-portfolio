@@ -1,4 +1,4 @@
-import type { Photo, SiteSetting, SocialLink } from '../types/photo';
+import type { Photo, SiteSetting, SocialLink, Album } from '../types/photo';
 
 /**
  * Unified data fetcher for the portfolio.
@@ -13,7 +13,7 @@ export async function getPhotos(db?: any): Promise<Photo[]> {
   if (db) {
     try {
       const result = await db
-        .prepare('SELECT * FROM photos ORDER BY sort_order ASC')
+        .prepare('SELECT p.*, a.title as album_title FROM photos p LEFT JOIN albums a ON p.album_id = a.id ORDER BY p.sort_order ASC')
         .all();
       return result.results as Photo[];
     } catch (e) {
@@ -39,6 +39,7 @@ export async function getPhotos(db?: any): Promise<Photo[]> {
       camera:         p.camera ?? null,
       lens:           p.lens ?? null,
       film_stock:     p.filmStock ?? null,
+      album_id:       p.albumId ?? null,
       sort_order:     i,
       is_featured:    p.isFeatured ? 1 : 0,
     }));
@@ -79,6 +80,23 @@ export async function getSocialLinks(db?: any): Promise<SocialLink[]> {
       return result.results as SocialLink[];
     } catch (e) {
       console.error('D1 social_links query failed:', e);
+    }
+  }
+  return [];
+}
+
+/**
+ * Fetches all albums
+ */
+export async function getAlbums(db?: any): Promise<Album[]> {
+  if (db) {
+    try {
+      const result = await db
+        .prepare('SELECT * FROM albums ORDER BY sort_order ASC')
+        .all();
+      return result.results as Album[];
+    } catch (e) {
+      console.error('D1 albums query failed:', e);
     }
   }
   return [];

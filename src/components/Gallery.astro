@@ -1,13 +1,21 @@
----
 import { cloudinaryFromRow, cloudinaryThumb } from '../utils/cloudinary';
-import type { Photo } from '../types/photo';
+import type { Photo, Album } from '../types/photo';
 
 interface Props {
   photos: Photo[];
+  albums: Album[];
 }
 
-const { photos } = Astro.props;
+const { photos, albums } = Astro.props;
 const gridPhotos = photos.filter((p) => p.is_featured === 0);
+
+// Helper to get photos for a specific album
+const getAlbumPhotos = (albumId: string | null) => 
+  gridPhotos.filter(p => p.album_id === albumId);
+
+// Albums that actually have photos
+const activeAlbums = albums.filter(a => getAlbumPhotos(a.id).length > 0);
+const uncategorizedPhotos = getAlbumPhotos(null);
 ---
 
 <section id="gallery">
@@ -19,37 +27,113 @@ const gridPhotos = photos.filter((p) => p.is_featured === 0);
       </h2>
     </div>
 
-    <div class="gallery-grid">
-      {
-        gridPhotos.map((photo) => {
-          const thumb = photo.cloudinary_url
-            ? cloudinaryFromRow(photo, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto')
-            : cloudinaryThumb(photo.public_id);
-          const full  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1400');
-          return (
-            <div class="gallery-cell">
-              <img
-                src={thumb}
-                alt={photo.title}
-                class="lightbox-trigger"
-                data-full={full}
-                data-caption={`${photo.title} — ${photo.location}${photo.camera ? ` | ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}`}
-                loading="lazy"
-                decoding="async"
-              />
-              <div class="gallery-cell-overlay">
-                <p class="cell-title">{photo.title}</p>
-                <p class="cell-meta">
-                  {photo.roll} &nbsp;·&nbsp; {photo.location}
-                  {photo.camera && <>&nbsp;·&nbsp; {photo.camera}</>}
-                  {photo.film_stock && <>&nbsp;·&nbsp; {photo.film_stock}</>}
-                  {photo.simulation && <>&nbsp;·&nbsp; <em>{photo.simulation}</em></>}
-                </p>
-              </div>
-            </div>
-          );
-        })
-      }
-    </div>
+    {
+      activeAlbums.map((album) => (
+        <div class="album-section mb-5">
+          <div class="container mb-4 reveal">
+            <h3 class="album-title">{album.title}</h3>
+            {album.description && <p class="album-description text-muted small">{album.description}</p>}
+          </div>
+          
+          <div class="gallery-grid">
+            {getAlbumPhotos(album.id).map((photo) => {
+              const thumb = photo.cloudinary_url
+                ? cloudinaryFromRow(photo, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto')
+                : cloudinaryThumb(photo.public_id);
+              const full  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1400');
+              return (
+                <div class="gallery-cell">
+                  <img
+                    src={thumb}
+                    alt={photo.title}
+                    class="lightbox-trigger"
+                    data-full={full}
+                    data-caption={`${photo.title} — ${photo.location}${photo.camera ? ` | ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}`}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div class="gallery-cell-overlay">
+                    <p class="cell-title">{photo.title}</p>
+                    <p class="cell-meta">
+                      {photo.roll} &nbsp;·&nbsp; {photo.location}
+                      {photo.camera && <>&nbsp;·&nbsp; {photo.camera}</>}
+                      {photo.film_stock && <>&nbsp;·&nbsp; {photo.film_stock}</>}
+                      {photo.simulation && <>&nbsp;·&nbsp; <em>{photo.simulation}</em></>}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))
+    }
+
+    {
+      uncategorizedPhotos.length > 0 && (
+        <div class="album-section mb-5">
+          <div class="container mb-4 reveal">
+            <h3 class="album-title">Other Moments</h3>
+          </div>
+          <div class="gallery-grid">
+            {uncategorizedPhotos.map((photo) => {
+              const thumb = photo.cloudinary_url
+                ? cloudinaryFromRow(photo, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto')
+                : cloudinaryThumb(photo.public_id);
+              const full  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1400');
+              return (
+                <div class="gallery-cell">
+                  <img
+                    src={thumb}
+                    alt={photo.title}
+                    class="lightbox-trigger"
+                    data-full={full}
+                    data-caption={`${photo.title} — ${photo.location}${photo.camera ? ` | ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}`}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div class="gallery-cell-overlay">
+                    <p class="cell-title">{photo.title}</p>
+                    <p class="cell-meta">
+                      {photo.roll} &nbsp;·&nbsp; {photo.location}
+                      {photo.camera && <>&nbsp;·&nbsp; {photo.camera}</>}
+                      {photo.film_stock && <>&nbsp;·&nbsp; {photo.film_stock}</>}
+                      {photo.simulation && <>&nbsp;·&nbsp; <em>{photo.simulation}</em></>}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )
+    }
   </div>
 </section>
+
+<style>
+  .album-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+    display: inline-block;
+  }
+  .album-title::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 30px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.3;
+  }
+  .album-description {
+    letter-spacing: 0.05em;
+    max-width: 600px;
+  }
+  .album-section {
+    padding-top: 2rem;
+  }
+</style>

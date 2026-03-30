@@ -15,6 +15,7 @@ export interface Photo {
   camera:         string | null;
   lens:           string | null;
   film_stock:     string | null;
+  album_id:       string | null;   // link to album
   sort_order:     number;
   is_featured:    number;          // 0 | 1 (SQLite boolean)
 }
@@ -29,4 +30,11 @@ export interface SocialLink {
   label:      string;
   url:        string;
   sort_order: number;
+}
+
+export interface Album {
+  id:          string;
+  title:       string;
+  description: string;
+  sort_order:  number;
 }

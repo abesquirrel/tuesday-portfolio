@@ -10,6 +10,7 @@ Built with **Astro 4**, **Bootstrap 5**, **Cloudinary**, and **Cloudflare D1**.
 
 This site is built as a **Hybrid/SSR** application on Cloudflare Pages.
 - **Data Source**: Cloudflare D1 (SQLite-based edge database).
+  - Tables: `photos`, `albums`, `site_settings`, `social_links`.
 - **Images**: Cloudinary (auto-format, auto-quality, responsive).
 - **Framework**: Astro 4 with the Cloudflare adapter.
 
@@ -64,17 +65,36 @@ npx wrangler d1 execute tuesday-photos --remote --file=./db/seed.sql
 
 ---
 
-## Adding Photos
+## Adding & Managing Photos
 
-Photos are managed in the `photos` table in D1. Each entry:
+### 1. The CLI Upload Tool (Recommended)
+The project includes a specialized script to handle Cloudinary uploads and D1 record insertion in one step.
+
+```bash
+# Upload a local image
+npm run upload -- path/to/your/photo.jpg
+```
+
+The script will prompt you for:
+- **Title**, **Album**, **Location**, and **Roll**.
+- **Metadata** (Camera, Lens, Film Stock).
+- **Medium** (Film vs Digital).
+
+### 2. Manual SQL
+Alternatively, you can run a SQL `INSERT` via Wrangler:
 - `id`: unique-slug
 - `public_id`: Cloudinary path (e.g., `portfolio/roll-01/frame-05`)
-- `title`: Image title
-- `caption`: Description
-- `location`: Where it was shot
+- `album_id`: Links to a record in the `albums` table.
 - `is_featured`: Set to `1` for the hero image.
 
-To add new photos, you can run a SQL `INSERT` via Wrangler or use the Cloudflare Dashboard.
+---
+
+## Album Management
+
+Photos are automatically grouped by album in the Gallery.
+- **Create an Album**: Add a row to the `albums` table via Wrangler or the Cloudflare Dashboard.
+- **Empty Albums**: Albums with no photos are automatically hidden from the UI.
+- **Uncategorized**: Photos without an `album_id` appear in the "Other Moments" section.
 
 ---
 
@@ -82,8 +102,10 @@ To add new photos, you can run a SQL `INSERT` via Wrangler or use the Cloudflare
 
 Add these to your `.env` (local) and Cloudflare Pages (production):
 - `PUBLIC_CLOUDINARY_CLOUD_NAME`: Your Cloudinary cloud name.
+- `CLOUDINARY_API_KEY`: Required for the upload script.
+- `CLOUDINARY_API_SECRET`: Required for the upload script.
 
-Without this, the site falls back to `picsum.photos` placeholders.
+Without `PUBLIC_CLOUDINARY_CLOUD_NAME`, the site falls back to `picsum.photos` placeholders.
 
 ---
 

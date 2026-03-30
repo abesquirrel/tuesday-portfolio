@@ -1,0 +1,12 @@
+# Cloudflare Pages / Wrangler configuration
+# Run `npx wrangler d1 create tuesday-photos` and paste the returned
+# database_id below before running local dev or deploying.
+
+name                  = "tuesday-portfolio"
+compatibility_date    = "2024-01-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding       = "DB"               # accessed as env.DB in Astro server routes
+database_name = "tuesday-photos"
+database_id   = "b1d28fad-85e0-4d18-944c-eb042560f898"

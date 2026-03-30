@@ -7,20 +7,48 @@ import About from '../components/About.astro';
 import Contact from '../components/Contact.astro';
 import '../styles/global.scss';
 
-import photosData from '../data/photos.json';
+import type { Photo } from '../types/photo';
 
-const featuredPhoto = photosData.find((p) => p.isFeatured)!;
+// Server-rendered so D1 bindings are available at request time
+export const prerender = false;
+
+// ── Data source: D1 (production) or JSON (local dev without Wrangler) ────────
+let photosData: Photo[];
+
+const db = (Astro.locals as any).runtime?.env?.DB;
+
+if (db) {
+  const result = await db
+    .prepare('SELECT * FROM photos ORDER BY sort_order ASC')
+    .all();
+  photosData = result.results as Photo[];
+} else {
+  // Fallback for plain `npm run dev` (no Wrangler binding)
+  const { default: json } = await import('../data/photos.json');
+  // Normalize JSON shape to match the DB column names
+  photosData = (json as any[]).map((p, i) => ({
+    id:             p.id,
+    public_id:      p.publicId,
+    cloudinary_url: null,
+    title:          p.title,
+    caption:        p.caption ?? '',
+    roll:           p.roll ?? '',
+    location:       p.location ?? '',
+    medium:         p.medium ?? 'film',
+    simulation:     p.simulation ?? null,
+    sort_order:     i,
+    is_featured:    p.isFeatured ? 1 : 0,
+  }));
+}
+
+const featuredPhoto = photosData.find((p) => p.is_featured === 1)!;
 ---
 
 <BaseLayout>
-  <Masthead heroPublicId={featuredPhoto.publicId} />
+  <Masthead heroPublicId={featuredPhoto.public_id} />
 
   <FeaturedPhoto
-    publicId={featuredPhoto.publicId}
-    title={featuredPhoto.title}
-    caption={featuredPhoto.caption}
-    roll={featuredPhoto.roll}
-    location={featuredPhoto.location}
+    photo={featuredPhoto}
   />
 
   <Gallery photos={photosData} />

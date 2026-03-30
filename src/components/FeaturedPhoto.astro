@@ -1,17 +1,14 @@
 ---
-import { cloudinaryUrl } from '../utils/cloudinary';
+import { cloudinaryFromRow } from '../utils/cloudinary';
+import type { Photo } from '../types/photo';
 
 interface Props {
-  publicId: string;
-  title: string;
-  caption: string;
-  roll: string;
-  location: string;
+  photo: Photo;
 }
-const { publicId, title, caption, roll, location } = Astro.props;
+const { photo } = Astro.props;
 
-const fullUrl  = cloudinaryUrl(publicId, 'f_auto,q_auto,w_1600');
-const thumbUrl = cloudinaryUrl(publicId, 'f_auto,q_auto,w_900');
+const fullUrl  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1600');
+const thumbUrl = cloudinaryFromRow(photo, 'f_auto,q_auto,w_900');
 ---
 
 <section id="featured">
@@ -29,10 +26,10 @@ const thumbUrl = cloudinaryUrl(publicId, 'f_auto,q_auto,w_900');
           <div class="featured-badge">Featured</div>
           <img
             src={thumbUrl}
-            alt={title}
+            alt={photo.title}
             class="lightbox-trigger"
             data-full={fullUrl}
-            data-caption={`${title} — ${location}`}
+            data-caption={`${photo.title} — ${photo.location}`}
             loading="eager"
             width="900"
             height="600"
@@ -42,14 +39,19 @@ const thumbUrl = cloudinaryUrl(publicId, 'f_auto,q_auto,w_900');
 
       <div class="col-lg-4 reveal">
         <div class="featured-meta">
-          <h3 class="featured-title">{title}</h3>
-          <p class="featured-caption">{caption}</p>
+          <h3 class="featured-title">{photo.title}</h3>
+          <p class="featured-caption">{photo.caption}</p>
           <p class="featured-detail">
-            <span>↗</span>{roll}
+            <span>↗</span>{photo.roll}
           </p>
           <p class="featured-detail">
-            <span>◎</span>{location}
+            <span>◎</span>{photo.location}
           </p>
+          {photo.simulation && (
+            <p class="featured-detail">
+              <span>⬡</span>{photo.simulation}
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -1,17 +1,25 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tuesday-portfolio",
-  "compatibility_date": "2025-09-27",
-  "observability": {
-    "enabled": true
-  },
-  "main": "dist/_worker.js/index.js",
-  "compatibility_flags": [
-    "global_fetch_strictly_public",
-    "nodejs_compat"
-  ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "dist"
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tuesday-portfolio",
+	"compatibility_date": "2025-09-27",
+	"observability": {
+		"enabled": true
+	},
+	"main": "dist/_worker.js/index.js",
+	"compatibility_flags": [
+		"global_fetch_strictly_public",
+		"nodejs_compat"
+	],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "dist"
+	},
+	"d1_databases": [
+		{
+			"binding": "tuesday_photos",
+			"database_name": "tuesday-photos",
+			"database_id": "b1d28fad-85e0-4d18-944c-eb042560f898",
+			"remote": true
+		}
+	]
 }

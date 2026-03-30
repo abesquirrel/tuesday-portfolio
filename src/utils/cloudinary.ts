@@ -10,6 +10,8 @@
  * In placeholder mode (no cloud name), returns a picsum URL instead.
  */
 
+import type { Photo } from '../types/photo';
+
 const CLOUD_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
 
 export function cloudinaryUrl(
@@ -30,4 +32,16 @@ export function cloudinaryThumb(publicId: string): string {
 
 export function cloudinaryHero(publicId: string): string {
   return cloudinaryUrl(publicId, 'f_auto,q_auto,w_1920,h_1080,c_fill,g_auto');
+}
+
+/**
+ * Returns the best available URL for a DB photo row.
+ * Prefers the pre-built `cloudinary_url` column if present,
+ * otherwise builds from `public_id` using the specified transforms.
+ */
+export function cloudinaryFromRow(
+  photo: Pick<Photo, 'public_id' | 'cloudinary_url'>,
+  transforms: string = 'f_auto,q_auto,w_1200',
+): string {
+  return photo.cloudinary_url ?? cloudinaryUrl(photo.public_id, transforms);
 }

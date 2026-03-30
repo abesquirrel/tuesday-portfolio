@@ -9,10 +9,12 @@
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.8",
     "@astrojs/cloudflare": "^11.2.0",
     "astro": "^4.8.0",
     "bootstrap": "^5.3.3",
-    "sass": "^1.77.0"
+    "sass": "^1.77.0",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18.0.0"

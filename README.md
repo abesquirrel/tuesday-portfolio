@@ -2,92 +2,99 @@
 
 Film photography portfolio — [tuesday.paulrojas.quest](https://tuesday.paulrojas.quest)
 
-Built with **Astro 4**, **Bootstrap 5**, **Cloudinary**, and deployed on **Cloudflare Pages**.
+Built with **Astro 4**, **Bootstrap 5**, **Cloudinary**, and **Cloudflare D1**.
 
 ---
 
-## Local development
+## Technical Architecture
 
+This site is built as a **Hybrid/SSR** application on Cloudflare Pages.
+- **Data Source**: Cloudflare D1 (SQLite-based edge database).
+- **Images**: Cloudinary (auto-format, auto-quality, responsive).
+- **Framework**: Astro 4 with the Cloudflare adapter.
+
+---
+
+## Local Development
+
+### 1. Prerequisites
+- [Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/) installed globally or via `npm`.
+- A Cloudinary account (optional, falls back to placeholders).
+
+### 2. Setup
 ```bash
 npm install
+```
+
+### 3. Database Initialization (Local)
+To populate your local D1 instance (stored in `.wrangler/`):
+```bash
+npx wrangler d1 execute tuesday-photos --local --file=./db/schema.sql
+npx wrangler d1 execute tuesday-photos --local --file=./db/seed.sql
+```
+
+### 4. Running the Dev Server
+```bash
+# Standard Astro dev (uses src/data/photos.json as a fallback)
 npm run dev
+
+# Wrangler dev (tests true D1 integration locally)
+npx wrangler pages dev
 ```
 
-Site runs at `http://localhost:4321`.
-
 ---
 
-## Adding photos
+## Production Setup (Cloudflare D1)
 
-All photo metadata lives in `src/data/photos.json`. Each entry:
+### 1. Create the Database
+```bash
+npx wrangler d1 create tuesday-photos
+```
+Copy the `database_id` from the output and paste it into `wrangler.toml` (or `wrangler.jsonc`).
 
-```json
-{
-  "id":         "unique-slug",
-  "publicId":   "portfolio/roll-01/frame-05",
-  "title":      "Corner Store, 6am",
-  "caption":    "Nobody was awake except the clerk and the neon.",
-  "roll":       "Roll 01",
-  "location":   "Brooklyn, NY",
-  "isFeatured": false
-}
+### 2. Initialize Production Schema
+```bash
+npx wrangler d1 execute tuesday-photos --remote --file=./db/schema.sql
 ```
 
-`publicId` is the path inside your Cloudinary account (no leading slash, no file extension).
-Only one entry should have `"isFeatured": true` — that drives the hero and featured section.
-
----
-
-## Cloudinary setup
-
-1. Create a free account at [cloudinary.com](https://cloudinary.com)
-2. Upload your photos into a folder structure like `portfolio/roll-01/`, `portfolio/grid/`, etc.
-3. Copy your **Cloud name** from the Cloudinary dashboard
-4. Add it to `.env`:
-
-```env
-PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name_here
+### 3. Seed Production Data
+```bash
+npx wrangler d1 execute tuesday-photos --remote --file=./db/seed.sql
 ```
 
-Without this, the site falls back to picsum.photos placeholders — perfect for development.
+---
+
+## Adding Photos
+
+Photos are managed in the `photos` table in D1. Each entry:
+- `id`: unique-slug
+- `public_id`: Cloudinary path (e.g., `portfolio/roll-01/frame-05`)
+- `title`: Image title
+- `caption`: Description
+- `location`: Where it was shot
+- `is_featured`: Set to `1` for the hero image.
+
+To add new photos, you can run a SQL `INSERT` via Wrangler or use the Cloudflare Dashboard.
 
 ---
 
-## Cloudflare Pages deployment
+## Cloudinary & Environment Variables
 
-1. Push this repo to GitHub
-2. Go to [Cloudflare Pages](https://pages.cloudflare.com) → Create a project → Connect GitHub
-3. Set build settings:
-   - **Build command:** `npm run build`
-   - **Build output directory:** `dist`
-4. Add environment variable:
-   - `PUBLIC_CLOUDINARY_CLOUD_NAME` = your Cloudinary cloud name
-5. Deploy
+Add these to your `.env` (local) and Cloudflare Pages (production):
+- `PUBLIC_CLOUDINARY_CLOUD_NAME`: Your Cloudinary cloud name.
 
-### Custom domain
-
-In Cloudflare Pages → Custom domains → Add `tuesday.paulrojas.quest`.
-Since your domain is already on Cloudflare, the DNS CNAME is added automatically.
+Without this, the site falls back to `picsum.photos` placeholders.
 
 ---
 
-## Updating contact links
-
-Edit `src/components/Contact.astro` — the `links` array at the top of the file.
-
-## Updating the About text
-
-Edit `src/components/About.astro` directly — the copy is in the component body.
-
----
-
-## Tech stack
+## Tech Stack
 
 | | |
 |---|---|
-| Framework | Astro 4 (static output) |
-| Styles | Bootstrap 5 + custom SCSS (warm darkroom theme) |
-| Images | Cloudinary (auto format, auto quality, responsive) |
+| Framework | Astro 4 (Hybrid/SSR) |
+| Database | Cloudflare D1 (SQLite) |
+| Styles | Bootstrap 5 + custom SCSS |
+| Images | Cloudinary |
 | Hosting | Cloudflare Pages |
 | Domain | `tuesday.paulrojas.quest` |
 | Camera | Nikkormat FTn |

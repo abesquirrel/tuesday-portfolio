@@ -12,7 +12,7 @@ export default defineConfig({
         scss: {
           quietDeps: true,
           // Silencing specific deprecations that are frequent in older Bootstrap/Sass combos
-          silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'mixed-decls', 'if-function']
+          silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'if-function']
         }
       }
     }

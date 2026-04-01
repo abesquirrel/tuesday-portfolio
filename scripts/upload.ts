@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import { v2 as cloudinary } from 'cloudinary';
 import { execSync } from 'child_process';
-import readline from 'readline';
-import path from 'path';
+import * as readline from 'readline';
+import * as path from 'path';
 
 /**
  * CLI Tool to upload photos to Cloudinary and insert them into Cloudflare D1.
@@ -11,10 +11,19 @@ import path from 'path';
  *   npx ts-node scripts/upload.ts path/to/photo.jpg
  */
 
+const cloud_name = process.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
+const api_key    = process.env.CLOUDINARY_API_KEY;
+const api_secret = process.env.CLOUDINARY_API_SECRET;
+
+if (!cloud_name || !api_key || !api_secret) {
+  console.error('❌ Error: Missing Cloudinary environment variables (PUBLIC_CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET).');
+  process.exit(1);
+}
+
 cloudinary.config({
-  cloud_name: process.env.PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name,
+  api_key,
+  api_secret,
 });
 
 const rl = readline.createInterface({

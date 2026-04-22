@@ -328,7 +328,7 @@ if (Astro.request.method === 'POST') {
         {loginError && <div style="color: #ff5555; font-size: 11px; margin-bottom: 10px;">{loginError}</div>}
         <label class="login-label">Password</label>
         <input class="login-input" type="password" name="password" autofocus placeholder="••••••••" />
-        <button class="login-btn" type="submit">Enter Darkroom →</button>
+        <button class="login-btn" type="submit" style="display:flex;align-items:center;justify-content:center;gap:6px">Enter Darkroom <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
       </div>
     </form>
   </div>
@@ -503,12 +503,15 @@ if (Astro.request.method === 'POST') {
             </div>
           </div>
 
-          <div style="margin-top:12px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)">
-            <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Portrait image</div>
-            <p style="font-size:11px;color:#999;line-height:1.7">
-              The About portrait is served from Cloudinary at public_id <code style="background:var(--rail);padding:1px 5px;border-radius:3px;color:var(--amber)">portfolio/about/portrait</code>.<br/>
-              To replace it: upload a new image to Cloudinary using the same public_id (it will overwrite), then the site will pick it up automatically on next page load.
-            </p>
+          <div class="frow">
+            <div class="fgroup">
+              <label class="flabel">Hero Image (Cloudinary public_id)</label>
+              <input class="finput" id="about-hero-image" type="text" placeholder="Leave blank to use Featured Photo">
+            </div>
+            <div class="fgroup">
+              <label class="flabel">About Portrait (Cloudinary public_id)</label>
+              <input class="finput" id="about-image" type="text" placeholder="portfolio/about/portrait">
+            </div>
           </div>
         </div>
 
@@ -769,7 +772,7 @@ if (Astro.request.method === 'POST') {
       <tr>
         <td style="color:var(--amber)">${label}</td>
         <td style="color:var(--muted)">${count} record${count!==1?'s':''}</td>
-        <td><button class="btn btn-ghost btn-xs" onclick="navTo('${panel}')">Edit →</button></td>
+        <td><button class="btn btn-ghost btn-xs" onclick="navTo('${panel}')">Edit <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button></td>
       </tr>
     `).join('');
   }
@@ -907,11 +910,15 @@ if (Astro.request.method === 'POST') {
     const shooting = s.about_currently_shooting || '';
     const developing = s.about_developing || '';
     const also = s.about_also_shooting || '';
+    const heroImage = s.hero_image_id || '';
+    const aboutImage = s.about_image_id || '';
 
     document.getElementById('about-bio').value       = bio;
     document.getElementById('about-shooting').value  = shooting;
     document.getElementById('about-developing').value = developing;
     document.getElementById('about-also').value      = also;
+    document.getElementById('about-hero-image').value = heroImage;
+    document.getElementById('about-image').value     = aboutImage;
     document.getElementById('prev-bio').textContent  = bio;
     updateGearPreview();
   }
@@ -932,6 +939,8 @@ if (Astro.request.method === 'POST') {
       about_currently_shooting:  document.getElementById('about-shooting').value,
       about_developing:          document.getElementById('about-developing').value,
       about_also_shooting:       document.getElementById('about-also').value,
+      hero_image_id:             document.getElementById('about-hero-image').value,
+      about_image_id:            document.getElementById('about-image').value,
     };
     for (const [key, value] of Object.entries(updates)) {
       state.settings[key] = value;

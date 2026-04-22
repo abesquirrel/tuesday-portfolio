@@ -20,10 +20,11 @@ const socialLinks: SocialLink[] = await getSocialLinks(db);
 const albums: Album[] = await getAlbums(db);
 
 const featuredPhoto = photosData.find((p) => p.is_featured === 1) || photosData[0];
+const heroImageId = settings.hero_image_id || featuredPhoto?.public_id || '';
 ---
 
 <BaseLayout>
-  <Masthead heroPublicId={featuredPhoto.public_id} />
+  <Masthead heroPublicId={heroImageId} />
 
   <FeaturedPhoto
     photo={featuredPhoto}

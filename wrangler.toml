@@ -13,4 +13,4 @@ database_id   = "b1d28fad-85e0-4d18-944c-eb042560f898"
 
 [vars]
 # For local wrangler pages dev tests, specify the Cloudinary name here as well
-PUBLIC_CLOUDINARY_CLOUD_NAME = "doithulgl"
+PUBLIC_CLOUDINARY_CLOUD_NAME = "clueless"

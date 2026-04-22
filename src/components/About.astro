@@ -2,12 +2,13 @@
 import { cloudinaryUrl } from '../utils/cloudinary';
 
 // Swap this public_id when you upload your portrait to Cloudinary
-const portraitUrl = cloudinaryUrl('portfolio/about/portrait', 'f_auto,q_auto,w_600,h_750,c_fill,g_face');
-
 interface Props {
   settings: Record<string, string>;
 }
 const { settings } = Astro.props;
+
+const portraitId = settings.about_image_id || 'portfolio/about/portrait';
+const portraitUrl = cloudinaryUrl(portraitId, 'f_auto,q_auto,w_600,h_750,c_fill,g_face');
 
 // Fallbacks for when settings aren't loaded (e.g. local dev without DB)
 const bio = settings.about_bio || "My name is Paul Rojas. I shoot film — mostly street, mostly in places where nobody's watching. The name of this site isn't a mystery: most of my best rolls happen on completely unremarkable days that I only remember because I had a camera.";

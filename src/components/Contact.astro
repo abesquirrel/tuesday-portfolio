@@ -7,12 +7,7 @@ interface Props {
 const { links } = Astro.props;
 
 // Fallbacks for local dev
-const displayLinks = links.length > 0 ? links : [
-  { label: 'Email',      url: 'mailto:paul@paulrojas.quest' },
-  { label: 'Instagram',  url: 'https://instagram.com/' },
-  { label: 'Flickr',     url: 'https://flickr.com/' },
-  { label: 'VSCO',       url: 'https://vsco.co/' },
-];
+const displayLinks = links;
 ---
 
 <section id="contact">

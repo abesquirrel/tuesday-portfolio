@@ -7,6 +7,7 @@ export const prerender = false;
 // Set ADMIN_SECRET as a Cloudflare Pages secret via dashboard
 const env = (Astro.locals as any).runtime?.env;
 const ADMIN_SECRET = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
+const CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
 
 const cookie = Astro.cookies.get('admin_session');
 const isAuthed = cookie?.value === ADMIN_SECRET;
@@ -46,6 +47,7 @@ if (Astro.request.method === 'POST') {
   <meta name="robots" content="noindex,nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <meta name="cf-cloud" content={CLOUD_NAME} />
   <style>
     /* ─── Design: editorial darkroom. Grain, deep blacks, amber safelight accents ─── */
     :root {

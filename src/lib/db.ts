@@ -41,6 +41,32 @@ export async function getPhotos(db?: any): Promise<Photo[]> {
     }
   }
 
+  // 2. Fallback to local JSON if D1 is empty OR has no photos
+  if (photos.length === 0) {
+    try {
+      const { default: json } = await import('../data/photos.json');
+      photos = (json as any[]).map((p, i) => ({
+        id:             p.id,
+        public_id:      p.publicId,
+        cloudinary_url: null,
+        title:          p.title,
+        caption:        p.caption ?? '',
+        roll:           p.roll ?? '',
+        location:       p.location ?? '',
+        medium:         p.medium ?? 'film',
+        simulation:     p.simulation ?? null,
+        camera:         p.camera ?? null,
+        lens:           p.lens ?? null,
+        film_stock:     p.filmStock ?? null,
+        album_id:       p.albumId ?? null,
+        sort_order:     i,
+        is_featured:    p.isFeatured ? 1 : 0,
+      }));
+    } catch (e) {
+      console.error('Local JSON fallback failed:', e);
+    }
+  }
+
   return photos;
 }
 

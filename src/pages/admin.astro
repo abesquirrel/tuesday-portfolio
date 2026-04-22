@@ -154,17 +154,16 @@ if (Astro.request.method === 'POST') {
 
     /* ─── Buttons ─── */
     .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 7px 14px; border: none; border-radius: var(--r);
-      font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
-      cursor: pointer; transition: all .15s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 8px 16px; border: none; border-radius: var(--r);
+      font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+      cursor: pointer; transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--amber); color: #0a0a0a; font-weight: 600;
     }
-    .btn-primary { background: var(--amber); color: #0a0a0a; font-weight: 500; }
-    .btn-primary:hover { background: var(--amber2); }
-    .btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
-    .btn-ghost:hover { border-color: var(--amber); color: var(--amber); }
-    .btn-danger { background: transparent; border: 1px solid transparent; color: var(--muted); }
-    .btn-danger:hover { border-color: var(--red); color: var(--red); }
+    .btn:hover { background: var(--amber2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,168,75,0.2); }
+    .btn:active { transform: translateY(0); }
+    .btn-danger { background: #ff4444; color: white; }
+    .btn-danger:hover { background: #cc3333; box-shadow: 0 4px 12px rgba(255,68,68,0.2); }
     .btn-sm { padding: 5px 10px; font-size: 10px; }
     .btn-xs { padding: 3px 8px; font-size: 9px; }
 
@@ -417,7 +416,7 @@ if (Astro.request.method === 'POST') {
         <div id="panel-photos" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Edit metadata, move between albums, toggle featured</div>
-            <button class="btn btn-primary" onclick="openModal('modal-photo', null)">+ Add Photo Record</button>
+            <button class="btn" onclick="openModal('modal-photo', null)">+ Add Photo Record</button>
           </div>
 
           <!-- filters -->
@@ -459,7 +458,7 @@ if (Astro.request.method === 'POST') {
         <div id="panel-albums" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Albums group photos in the gallery section</div>
-            <button class="btn btn-primary" onclick="openModal('modal-album', null)">+ New Album</button>
+            <button class="btn" onclick="openModal('modal-album', null)">+ New Album</button>
           </div>
           <div class="tbl-wrap">
             <table>
@@ -473,7 +472,7 @@ if (Astro.request.method === 'POST') {
         <div id="panel-about" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Bio and gear notes shown in the About section</div>
-            <button class="btn btn-primary" onclick="saveAbout()">Save Changes</button>
+            <button class="btn" onclick="saveAbout()">Save Changes</button>
           </div>
 
           <div class="about-preview">
@@ -519,7 +518,7 @@ if (Astro.request.method === 'POST') {
         <div id="panel-social" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Links shown in the Contact section</div>
-            <button class="btn btn-primary" onclick="openModal('modal-social', null)">+ Add Link</button>
+            <button class="btn" onclick="openModal('modal-social', null)">+ Add Link</button>
           </div>
           <div class="tbl-wrap">
             <table>
@@ -628,8 +627,8 @@ if (Astro.request.method === 'POST') {
         </div>
       </div>
       <div class="modal-foot">
-        <button class="btn btn-ghost" onclick="closeModal('modal-photo')">Cancel</button>
-        <button class="btn btn-primary" onclick="savePhoto()">Save Photo</button>
+        <button class="btn" onclick="closeModal('modal-photo')">Cancel</button>
+        <button class="btn" onclick="savePhoto()">Save Photo</button>
       </div>
     </div>
   </div>
@@ -664,8 +663,8 @@ if (Astro.request.method === 'POST') {
         </div>
       </div>
       <div class="modal-foot">
-        <button class="btn btn-ghost" onclick="closeModal('modal-album')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveAlbum()">Save Album</button>
+        <button class="btn" onclick="closeModal('modal-album')">Cancel</button>
+        <button class="btn" onclick="saveAlbum()">Save Album</button>
       </div>
     </div>
   </div>
@@ -695,8 +694,8 @@ if (Astro.request.method === 'POST') {
         </div>
       </div>
       <div class="modal-foot">
-        <button class="btn btn-ghost" onclick="closeModal('modal-social')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveSocial()">Save Link</button>
+        <button class="btn" onclick="closeModal('modal-social')">Cancel</button>
+        <button class="btn" onclick="saveSocial()">Save Link</button>
       </div>
     </div>
   </div>
@@ -772,7 +771,7 @@ if (Astro.request.method === 'POST') {
       <tr>
         <td style="color:var(--amber)">${label}</td>
         <td style="color:var(--muted)">${count} record${count!==1?'s':''}</td>
-        <td><button class="btn btn-primary btn-sm" onclick="navTo('${panel}')">Edit <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button></td>
+        <td><button class="btn btn-sm" onclick="navTo('${panel}')">Edit <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button></td>
       </tr>
     `).join('');
   }
@@ -818,8 +817,8 @@ if (Astro.request.method === 'POST') {
               </div>
             </div>
             <div class="card-foot">
-              <button class="btn btn-primary btn-xs" onclick="openModal('modal-photo','${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
-              ${!p.is_featured?`<button class="btn btn-ghost btn-xs" onclick="setFeatured('${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Feature</button>`:''}
+              <button class="btn btn-xs" onclick="openModal('modal-photo','${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
+              ${!p.is_featured?`<button class="btn btn-xs" onclick="setFeatured('${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Feature</button>`:''}
               <button class="btn btn-danger btn-xs" style="margin-left:auto" onclick="deletePhoto('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </div>
           </div>`;
@@ -860,7 +859,7 @@ if (Astro.request.method === 'POST') {
           <td>
             ${p.is_featured
               ? `<span style="font-size:10px;color:var(--muted)">Current</span>`
-              : `<button class="btn btn-primary btn-xs" onclick="setFeatured('${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Set Featured</button>`
+              : `<button class="btn btn-xs" onclick="setFeatured('${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Set Featured</button>`
             }
           </td>
         </tr>`).join('');
@@ -896,7 +895,7 @@ if (Astro.request.method === 'POST') {
             <td><span class="badge">${count}</span></td>
             <td style="color:var(--muted)">${a.sort_order}</td>
             <td>
-              <button class="btn btn-primary btn-xs" onclick="openModal('modal-album','${a.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
+              <button class="btn btn-xs" onclick="openModal('modal-album','${a.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
               <button class="btn btn-danger btn-xs" onclick="deleteAlbum('${a.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </td>
           </tr>`;
@@ -964,7 +963,7 @@ if (Astro.request.method === 'POST') {
           <td style="font-size:11px"><a href="${l.url}" target="_blank" style="color:var(--muted);word-break:break-all">${l.url}</a></td>
           <td style="color:var(--muted)">${l.sort_order}</td>
           <td>
-            <button class="btn btn-primary btn-xs" onclick="openModal('modal-social',${l.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
+            <button class="btn btn-xs" onclick="openModal('modal-social',${l.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
             <button class="btn btn-danger btn-xs" onclick="deleteSocial(${l.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
           </td>
         </tr>`).join('');

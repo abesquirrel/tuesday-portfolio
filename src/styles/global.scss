@@ -585,25 +585,46 @@ footer {
     }
   }
 
-  .lightbox-close {
+  .lightbox-controls {
     position: absolute;
     top: 1.5rem;
     right: 1.5rem;
-    background: none;
-    border: none;
-    color: $silver-dim;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    z-index: 30;
+  }
+
+  .lightbox-btn, .lightbox-close {
+    background: rgba($darkroom-black, 0.5);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: $silver-bright;
     font-family: 'Courier New', monospace;
     font-size: 0.65rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: color 0.2s, transform 0.2s;
-    z-index: 10;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
 
     &:hover { 
       color: $accent-amber;
-      transform: scale(1.1);
+      background: rgba($darkroom-black, 0.8);
+      border-color: $accent-amber;
     }
+  }
+
+  .lightbox-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font-size: 0.8rem;
   }
 
   .lightbox-nav {
@@ -626,15 +647,8 @@ footer {
       transform: translateY(-50%) scale(1.1);
     }
 
-    &.prev { left: -4rem; }
-    &.next { right: -4rem; }
-  }
-}
-
-@media (max-width: 1024px) {
-  .lightbox .lightbox-nav {
-    &.prev { left: -2rem; }
-    &.next { right: -2rem; }
+    &.prev { left: 1rem; }
+    &.next { right: 1rem; }
   }
 }
 

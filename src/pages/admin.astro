@@ -6,7 +6,7 @@ export const prerender = false;
 // Simple cookie-based session check
 // Set ADMIN_SECRET as a Cloudflare Pages secret via dashboard
 const env = (Astro.locals as any).runtime?.env;
-const ADMIN_SECRET = env?.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
+const ADMIN_SECRET = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
 
 const cookie = Astro.cookies.get('admin_session');
 const isAuthed = cookie?.value === ADMIN_SECRET;

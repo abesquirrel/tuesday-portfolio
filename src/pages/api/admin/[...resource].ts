@@ -47,7 +47,7 @@ function checkAuth(cookies: any, secret: string): boolean {
 export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
   const env      = (locals as any).runtime?.env;
   const db       = env?.DB;
-  const SECRET   = env?.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
+  const SECRET   = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
 
   if (!checkAuth(cookies, SECRET)) return unauthorized();
   if (!db) return json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);

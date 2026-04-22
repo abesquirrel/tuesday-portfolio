@@ -19,6 +19,8 @@ export function cloudinaryUrl(
   transforms: string = 'f_auto,q_auto,w_1200',
 ): string {
   if (!publicId) return '';
+  if (publicId.startsWith('http')) return publicId;
+  
   if (!CLOUD_NAME || CLOUD_NAME === 'your_cloud_name_here') {
     const seed = publicId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
     return `https://picsum.photos/seed/${seed}/1200/800`;

@@ -96,7 +96,9 @@ const {
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
       <button class="lightbox-close" id="lightboxClose">✕ &nbsp;Close</button>
       <div class="lightbox-content">
+        <button class="lightbox-nav prev" id="lightboxPrev" aria-label="Previous image">‹</button>
         <img id="lightboxImg" src="" alt="" />
+        <button class="lightbox-nav next" id="lightboxNext" aria-label="Next image">›</button>
         <div class="lightbox-info">
           <p id="lightboxTitle" class="lb-title"></p>
           <p id="lightboxMeta" class="lb-meta"></p>
@@ -160,19 +162,36 @@ const {
       const lightboxTitle = document.getElementById('lightboxTitle');
       const lightboxMeta  = document.getElementById('lightboxMeta');
       const lightboxClose = document.getElementById('lightboxClose');
+      const lightboxPrev  = document.getElementById('lightboxPrev');
+      const lightboxNext  = document.getElementById('lightboxNext');
 
-      document.querySelectorAll('.lightbox-trigger').forEach((el) => {
-        el.addEventListener('click', () => {
-          const src   = el.getAttribute('data-full') || (el as HTMLImageElement).src;
-          const title = el.getAttribute('alt') || '';
-          const meta  = el.getAttribute('data-meta') || '';
-          
-          if (lightboxImg) lightboxImg.src = src;
-          if (lightboxTitle) lightboxTitle.textContent = title;
-          if (lightboxMeta) lightboxMeta.textContent = meta;
-          
-          lightbox?.classList.add('open');
-          document.body.style.overflow = 'hidden';
+      let currentTriggers: HTMLElement[] = [];
+      let currentIndex = -1;
+
+      const updateLightbox = (index: number) => {
+        if (index < 0 || index >= currentTriggers.length) return;
+        currentIndex = index;
+        const el = currentTriggers[currentIndex];
+        const src   = el.getAttribute('data-full') || (el as HTMLImageElement).src;
+        const title = el.getAttribute('alt') || '';
+        const meta  = el.getAttribute('data-meta') || '';
+        
+        if (lightboxImg) lightboxImg.src = src;
+        if (lightboxTitle) lightboxTitle.textContent = title;
+        if (lightboxMeta) lightboxMeta.textContent = meta;
+      };
+
+      const openLightbox = (index: number, triggers: HTMLElement[]) => {
+        currentTriggers = triggers;
+        updateLightbox(index);
+        lightbox?.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      };
+
+      document.querySelectorAll('.gallery-grid').forEach(grid => {
+        const triggers = Array.from(grid.querySelectorAll('.lightbox-trigger')) as HTMLElement[];
+        triggers.forEach((el, idx) => {
+          el.addEventListener('click', () => openLightbox(idx, triggers));
         });
       });
 
@@ -184,12 +203,26 @@ const {
         }, 300);
       };
 
+      const navigate = (dir: number) => {
+        let newIndex = currentIndex + dir;
+        if (newIndex < 0) newIndex = currentTriggers.length - 1;
+        if (newIndex >= currentTriggers.length) newIndex = 0;
+        updateLightbox(newIndex);
+      };
+
       lightboxClose?.addEventListener('click', closeLightbox);
+      lightboxPrev?.addEventListener('click', (e) => { e.stopPropagation(); navigate(-1); });
+      lightboxNext?.addEventListener('click', (e) => { e.stopPropagation(); navigate(1); });
+
       lightbox?.addEventListener('click', (e) => {
         if (e.target === lightbox || (e.target as HTMLElement).classList.contains('lightbox-content')) closeLightbox();
       });
+
       document.addEventListener('keydown', (e) => {
+        if (!lightbox?.classList.contains('open')) return;
         if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') navigate(-1);
+        if (e.key === 'ArrowRight') navigate(1);
       });
     </script>
   </body>

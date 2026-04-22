@@ -569,6 +569,51 @@ footer {
       transform: scale(1.1);
     }
   }
+
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba($silver-bright, 0.4);
+    font-size: 3rem;
+    font-family: serif;
+    cursor: pointer;
+    padding: 20px;
+    transition: all 0.2s;
+    z-index: 5;
+    user-select: none;
+
+    &:hover {
+      color: $accent-amber;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    &.prev { left: -4rem; }
+    &.next { right: -4rem; }
+  }
+}
+
+@media (max-width: 1024px) {
+  .lightbox .lightbox-nav {
+    &.prev { left: -2rem; }
+    &.next { right: -2rem; }
+  }
+}
+
+@media (max-width: 768px) {
+  .lightbox {
+    padding: 1rem;
+    .lightbox-nav {
+      font-size: 2rem;
+      padding: 10px;
+      &.prev { left: -10px; }
+      &.next { right: -10px; }
+      background: rgba($darkroom-black, 0.4);
+      border-radius: 50%;
+    }
+  }
 }
 
 // ─── Animations ───────────────────────────────────────────────────────────────

@@ -154,18 +154,19 @@ if (Astro.request.method === 'POST') {
 
     /* ─── Buttons ─── */
     .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 8px 16px; border: none; border-radius: var(--r);
-      font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
-      cursor: pointer; transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
-      background: var(--amber); color: #0a0a0a; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 9px 18px; border: 1px solid transparent; border-radius: var(--r);
+      font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+      cursor: pointer; transition: all .2s ease;
+      background: var(--rail); color: var(--muted);
     }
-    .btn:hover { background: var(--amber2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,168,75,0.2); }
-    .btn:active { transform: translateY(0); }
-    .btn-danger { background: #ff4444; color: white; }
-    .btn-danger:hover { background: #cc3333; box-shadow: 0 4px 12px rgba(255,68,68,0.2); }
-    .btn-sm { padding: 5px 10px; font-size: 10px; }
-    .btn-xs { padding: 3px 8px; font-size: 9px; }
+    .btn:hover { background: var(--card); color: var(--text); border-color: var(--border2); }
+    .btn-primary { background: var(--amber); color: var(--ink); font-weight: 600; }
+    .btn-primary:hover { background: var(--amber2); color: var(--ink); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,168,75,0.15); }
+    .btn-danger { background: rgba(181, 57, 43, 0.1); border-color: rgba(181, 57, 43, 0.2); color: var(--red); }
+    .btn-danger:hover { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 4px 12px rgba(181,57,43,0.2); }
+    .btn-sm { padding: 6px 12px; font-size: 10px; }
+    .btn-xs { padding: 4px 10px; font-size: 9px; }
 
     /* ─── Forms ─── */
     .fgroup { margin-bottom: 16px; }
@@ -416,7 +417,7 @@ if (Astro.request.method === 'POST') {
         <div id="panel-photos" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Edit metadata, move between albums, toggle featured</div>
-            <button class="btn" onclick="openModal('modal-photo', null)">+ Add Photo Record</button>
+            <button class="btn btn-primary" onclick="openModal('modal-photo', null)">+ Add Photo Record</button>
           </div>
 
           <!-- filters -->
@@ -458,7 +459,7 @@ if (Astro.request.method === 'POST') {
         <div id="panel-albums" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Albums group photos in the gallery section</div>
-            <button class="btn" onclick="openModal('modal-album', null)">+ New Album</button>
+            <button class="btn btn-primary" onclick="openModal('modal-album', null)">+ New Album</button>
           </div>
           <div class="tbl-wrap">
             <table>
@@ -472,7 +473,7 @@ if (Astro.request.method === 'POST') {
         <div id="panel-about" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Bio and gear notes shown in the About section</div>
-            <button class="btn" onclick="saveAbout()">Save Changes</button>
+            <button class="btn btn-primary" onclick="saveAbout()">Save Changes</button>
           </div>
 
           <div class="about-preview">
@@ -518,7 +519,7 @@ if (Astro.request.method === 'POST') {
         <div id="panel-social" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Links shown in the Contact section</div>
-            <button class="btn" onclick="openModal('modal-social', null)">+ Add Link</button>
+            <button class="btn btn-primary" onclick="openModal('modal-social', null)">+ Add Link</button>
           </div>
           <div class="tbl-wrap">
             <table>
@@ -628,7 +629,7 @@ if (Astro.request.method === 'POST') {
       </div>
       <div class="modal-foot">
         <button class="btn" onclick="closeModal('modal-photo')">Cancel</button>
-        <button class="btn" onclick="savePhoto()">Save Photo</button>
+        <button class="btn btn-primary" onclick="savePhoto()">Save Photo</button>
       </div>
     </div>
   </div>
@@ -664,7 +665,7 @@ if (Astro.request.method === 'POST') {
       </div>
       <div class="modal-foot">
         <button class="btn" onclick="closeModal('modal-album')">Cancel</button>
-        <button class="btn" onclick="saveAlbum()">Save Album</button>
+        <button class="btn btn-primary" onclick="saveAlbum()">Save Album</button>
       </div>
     </div>
   </div>
@@ -695,7 +696,7 @@ if (Astro.request.method === 'POST') {
       </div>
       <div class="modal-foot">
         <button class="btn" onclick="closeModal('modal-social')">Cancel</button>
-        <button class="btn" onclick="saveSocial()">Save Link</button>
+        <button class="btn btn-primary" onclick="saveSocial()">Save Link</button>
       </div>
     </div>
   </div>

@@ -346,30 +346,30 @@ if (Astro.request.method === 'POST') {
       <nav class="sb-nav">
         <div class="sb-section">Content</div>
         <div class="sb-item active" data-panel="dashboard" onclick="nav(this)">
-          <span class="ic">◈</span><span>Overview</span>
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span><span>Overview</span>
         </div>
         <div class="sb-item" data-panel="photos" onclick="nav(this)">
-          <span class="ic">🎞</span><span>Photos</span>
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span><span>Photos</span>
         </div>
         <div class="sb-item" data-panel="albums" onclick="nav(this)">
-          <span class="ic">📂</span><span>Albums</span>
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span><span>Albums</span>
         </div>
         <div class="sb-item" data-panel="featured" onclick="nav(this)">
-          <span class="ic">★</span><span>Featured Photo</span>
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span><span>Featured Photo</span>
         </div>
         <div class="sb-section">Site</div>
         <div class="sb-item" data-panel="about" onclick="nav(this)">
-          <span class="ic">◉</span><span>About / Bio</span>
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span><span>About / Bio</span>
         </div>
         <div class="sb-item" data-panel="social" onclick="nav(this)">
-          <span class="ic">⬡</span><span>Social Links</span>
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></span><span>Social Links</span>
         </div>
       </nav>
       <div class="sb-footer">
-        <a href="/" target="_blank" class="sb-view-btn">↗ View Site</a>
+        <a href="/" target="_blank" class="sb-view-btn" style="display:flex;align-items:center;justify-content:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg> View Site</a>
         <form method="POST" style="margin:0">
           <input type="hidden" name="action" value="logout" />
-          <button type="submit" class="sb-view-btn" style="width:100%;cursor:pointer;background:none">⎋ Logout</button>
+          <button type="submit" class="sb-view-btn" style="width:100%;cursor:pointer;background:none;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout</button>
         </form>
       </div>
     </aside>
@@ -463,7 +463,7 @@ if (Astro.request.method === 'POST') {
           </div>
           <div class="tbl-wrap">
             <table>
-              <thead><tr><th>⠿</th><th>Title</th><th>Description</th><th>Photos</th><th>Order</th><th></th></tr></thead>
+              <thead><tr><th style="width: 30px"></th><th>Title</th><th>Description</th><th>Photos</th><th>Order</th><th></th></tr></thead>
               <tbody id="albums-table"></tbody>
             </table>
           </div>
@@ -520,7 +520,7 @@ if (Astro.request.method === 'POST') {
           </div>
           <div class="tbl-wrap">
             <table>
-              <thead><tr><th>⠿</th><th>Label</th><th>URL</th><th>Order</th><th></th></tr></thead>
+              <thead><tr><th style="width: 30px"></th><th>Label</th><th>URL</th><th>Order</th><th></th></tr></thead>
               <tbody id="social-table"></tbody>
             </table>
           </div>
@@ -537,7 +537,7 @@ if (Astro.request.method === 'POST') {
     <div class="modal">
       <div class="modal-head">
         <div class="modal-title" id="modal-photo-ttl">Add Photo Record</div>
-        <button class="modal-x" onclick="closeModal('modal-photo')">✕</button>
+        <button class="modal-x" onclick="closeModal('modal-photo')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="ph-id" />
@@ -636,7 +636,7 @@ if (Astro.request.method === 'POST') {
     <div class="modal">
       <div class="modal-head">
         <div class="modal-title" id="modal-album-ttl">New Album</div>
-        <button class="modal-x" onclick="closeModal('modal-album')">✕</button>
+        <button class="modal-x" onclick="closeModal('modal-album')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="al-id" />
@@ -672,7 +672,7 @@ if (Astro.request.method === 'POST') {
     <div class="modal">
       <div class="modal-head">
         <div class="modal-title" id="modal-social-ttl">Add Social Link</div>
-        <button class="modal-x" onclick="closeModal('modal-social')">✕</button>
+        <button class="modal-x" onclick="closeModal('modal-social')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="sl-id" />
@@ -804,7 +804,7 @@ if (Astro.request.method === 'POST') {
             <div class="card-thumb" onclick="openModal('modal-photo','${p.id}')">
               <img src="${thumbUrl(p.public_id)}" alt="${p.title}" loading="lazy"
                 onerror="this.style.display='none'">
-              <div class="card-thumb-ov">✎ Edit</div>
+              <div class="card-thumb-ov"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</div>
             </div>
             <div class="card-body">
               <div class="card-title">${p.title}${p.is_featured?` <span class="badge badge-feat">featured</span>`:''}</div>
@@ -815,9 +815,9 @@ if (Astro.request.method === 'POST') {
               </div>
             </div>
             <div class="card-foot">
-              <button class="btn btn-ghost btn-xs" onclick="openModal('modal-photo','${p.id}')">✎ Edit</button>
-              ${!p.is_featured?`<button class="btn btn-ghost btn-xs" onclick="setFeatured('${p.id}')">★ Feature</button>`:''}
-              <button class="btn btn-danger btn-xs" style="margin-left:auto" onclick="deletePhoto('${p.id}')">✕</button>
+              <button class="btn btn-ghost btn-xs" onclick="openModal('modal-photo','${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
+              ${!p.is_featured?`<button class="btn btn-ghost btn-xs" onclick="setFeatured('${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Feature</button>`:''}
+              <button class="btn btn-danger btn-xs" style="margin-left:auto" onclick="deletePhoto('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </div>
           </div>`;
         }).join('');
@@ -849,7 +849,7 @@ if (Astro.request.method === 'POST') {
       .sort((a,b) => a.sort_order - b.sort_order)
       .map(p => `
         <tr style="${p.is_featured ? 'background:rgba(212,168,75,.05)' : ''}">
-          <td style="width:40px">${p.is_featured ? '<span class="badge badge-feat">★</span>' : ''}</td>
+          <td style="width:40px">${p.is_featured ? '<span class="badge badge-feat"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span>' : ''}</td>
           <td style="font-family:var(--serif);color:var(--amber)">${p.title}</td>
           <td style="color:var(--muted)">${p.location||'—'}</td>
           <td style="color:var(--muted);font-size:11px">${p.camera||'—'}</td>
@@ -857,7 +857,7 @@ if (Astro.request.method === 'POST') {
           <td>
             ${p.is_featured
               ? `<span style="font-size:10px;color:var(--muted)">Current</span>`
-              : `<button class="btn btn-primary btn-xs" onclick="setFeatured('${p.id}')">★ Set Featured</button>`
+              : `<button class="btn btn-primary btn-xs" onclick="setFeatured('${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Set Featured</button>`
             }
           </td>
         </tr>`).join('');
@@ -887,14 +887,14 @@ if (Astro.request.method === 'POST') {
         const count = state.photos.filter(p => p.album_id === a.id).length;
         return `
           <tr>
-            <td class="drag-handle">⠿</td>
+            <td class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></td>
             <td style="color:var(--amber)">${a.title}</td>
             <td style="color:var(--muted);font-size:11px;max-width:240px">${a.description||'—'}</td>
             <td><span class="badge">${count}</span></td>
             <td style="color:var(--muted)">${a.sort_order}</td>
             <td>
-              <button class="btn btn-ghost btn-xs" onclick="openModal('modal-album','${a.id}')">✎</button>
-              <button class="btn btn-danger btn-xs" onclick="deleteAlbum('${a.id}')">✕</button>
+              <button class="btn btn-ghost btn-xs" onclick="openModal('modal-album','${a.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button>
+              <button class="btn btn-danger btn-xs" onclick="deleteAlbum('${a.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </td>
           </tr>`;
       }).join('');
@@ -950,13 +950,13 @@ if (Astro.request.method === 'POST') {
       .sort((a,b) => a.sort_order - b.sort_order)
       .map(l => `
         <tr>
-          <td class="drag-handle">⠿</td>
+          <td class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></td>
           <td style="color:var(--amber)">${l.label}</td>
           <td style="font-size:11px"><a href="${l.url}" target="_blank" style="color:var(--muted);word-break:break-all">${l.url}</a></td>
           <td style="color:var(--muted)">${l.sort_order}</td>
           <td>
-            <button class="btn btn-ghost btn-xs" onclick="openModal('modal-social',${l.id})">✎</button>
-            <button class="btn btn-danger btn-xs" onclick="deleteSocial(${l.id})">✕</button>
+            <button class="btn btn-ghost btn-xs" onclick="openModal('modal-social',${l.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button>
+            <button class="btn btn-danger btn-xs" onclick="deleteSocial(${l.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
           </td>
         </tr>`).join('');
   }

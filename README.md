@@ -2,11 +2,11 @@
 
 Film photography portfolio — [tuesday.paulrojas.quest](https://tuesday.paulrojas.quest)
 
-Built with **Astro 4**, **Bootstrap 5**, **Cloudinary**, and **Cloudflare D1**.
+Built with **Astro 4**, **Bootstrap 5**, **Cloudinary**, and **Cloudflare D1**. Fits entirely within the Cloudflare **free tier**.
 
 ---
 
-## Technical Architecture
+## 🏗 Technical Architecture
 
 This site is built as a **Hybrid/SSR** application on Cloudflare Pages.
 - **Data Source**: Cloudflare D1 (SQLite-based edge database).
@@ -16,11 +16,52 @@ This site is built as a **Hybrid/SSR** application on Cloudflare Pages.
 
 ---
 
-## Local Development
+## 🛠 Admin Panel (The CMS)
+
+The admin panel provides a professional interface to manage your portfolio metadata and site settings without touching code.
+
+### What it manages:
+| Section | Action |
+|---|---|
+| **Photos** | Edit metadata, move between albums, toggle "Featured" status. |
+| **Albums** | Create, rename, reorder, or delete albums. |
+| **Featured Photo** | One-click promote any photo to the hero section. |
+| **About / Bio** | Edit bio paragraph, gear notes, and **About Portrait ID**. |
+| **Site Images** | Explicitly set **Hero Image ID** and **About Image ID** via Cloudinary IDs. |
+| **Social Links** | Manage contact links in the footer. |
+
+### Accessing the Admin:
+1. URL: `https://your-domain.com/admin`
+2. Password: Set via the `ADMIN_SECRET` environment variable.
+
+---
+
+## 🚀 Photo Workflow
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  New Photo Workflow                                     │
+│                                                         │
+│  1. npm run upload photo.jpg                           │
+│     ↓ Prompts for metadata                             │
+│     ↓ Uploads to Cloudinary → gets public_id           │
+│     ↓ Inserts row into D1 photos table                 │
+│                                                         │
+│  2. /admin → Photos panel                              │
+│     ↓ See the new photo card instantly                 │
+│     ↓ Refine metadata or promote to "Featured"         │
+│                                                         │
+│  3. Changes are LIVE immediately                       │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 💻 Local Development
 
 ### 1. Prerequisites
-- [Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/) installed globally or via `npm`.
-- A Cloudinary account (optional, falls back to placeholders).
+- [Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/) installed.
+- A Cloudinary account.
 
 ### 2. Setup
 ```bash
@@ -28,7 +69,6 @@ npm install
 ```
 
 ### 3. Database Initialization (Local)
-To populate your local D1 instance (stored in `.wrangler/`):
 ```bash
 npx wrangler d1 execute tuesday-photos --local --file=./db/schema.sql
 npx wrangler d1 execute tuesday-photos --local --file=./db/seed.sql
@@ -36,92 +76,57 @@ npx wrangler d1 execute tuesday-photos --local --file=./db/seed.sql
 
 ### 4. Running the Dev Server
 ```bash
-# Standard Astro dev (uses src/data/photos.json as a fallback)
-npm run dev
-
 # Wrangler dev (tests true D1 integration locally)
-npx wrangler pages dev
+npx wrangler pages dev -- npx astro dev
 ```
 
 ---
 
-## Production Setup (Cloudflare D1)
+## 🌐 Production Setup (Cloudflare)
 
-### 1. Create the Database
+### 1. Database Creation
 ```bash
 npx wrangler d1 create tuesday-photos
 ```
-Copy the `database_id` from the output and paste it into `wrangler.toml` (or `wrangler.jsonc`).
+Copy the `database_id` into `wrangler.toml`.
 
-### 2. Initialize Production Schema
+### 2. Schema & Seed
 ```bash
 npx wrangler d1 execute tuesday-photos --remote --file=./db/schema.sql
-```
-
-### 3. Seed Production Data
-```bash
 npx wrangler d1 execute tuesday-photos --remote --file=./db/seed.sql
 ```
 
+### 3. Environment Variables
+Add these in `Cloudflare Dashboard → Pages → Settings → Environment Variables`:
+- `ADMIN_SECRET`: Your admin password.
+- `PUBLIC_CLOUDINARY_CLOUD_NAME`: Your Cloudinary cloud name.
+- `CLOUDINARY_API_KEY`: Required for CLI upload.
+- `CLOUDINARY_API_SECRET`: Required for CLI upload.
+
 ---
 
-## Adding & Managing Photos
-
-### 1. The CLI Upload Tool (Recommended)
-The project includes a specialized script to handle Cloudinary uploads, local optimization, and D1 record insertion in one step.
-
+## 🔧 CLI Upload Tool Reference
+The project includes a specialized script to handle optimization and database sync:
 ```bash
-# Upload a single image
+# Single image
 npm run upload -- path/to/your/photo.jpg
 
-# Bulk upload an entire folder
+# Bulk directory
 npm run upload -- path/to/album_folder/
 ```
 
-The script features:
-- **Bulk Upload**: Pass directories or multiple files at once.
-- **Local Optimization**: Auto-converts to **WebP** and ensures files are **< 1MB**.
-- **Batch Metadata**: Set an Album, Location, and Camera once for a whole batch.
-- **Individual Metadata**: Custom **Title** and **Is Featured?** toggles per image.
-- **Database Sync**: Processes all uploads and executes a single SQL update for your local D1.
+---
 
-### 2. Manual SQL
-Alternatively, you can run a SQL `INSERT` via Wrangler:
-- `id`: unique-slug
-- `public_id`: Cloudinary path (e.g., `portfolio/roll-01/frame-05`)
-- `album_id`: Links to a record in the `albums` table.
-- `is_featured`: Set to `1` for the hero image.
+## 🔒 Security
+- **Admin Privacy:** The `/admin` route is hidden from search engines (`robots: noindex`).
+- **Secure Sessions:** Cookie-based auth with `httpOnly`, `secure`, and `sameSite: strict`.
+- **Extra Layer:** We recommend adding **Cloudflare Access** (Zero Trust) in front of `/admin` for SSO protection.
 
 ---
 
-## Album Management
+## 📊 Free Tier Usage Estimate
+- **Workers/Pages:** ~100k requests/day (Free)
+- **D1 Database:** 25M row reads/day (Free)
+- **Cloudinary:** 25 Credits/month (Free)
 
-Photos are automatically grouped by album in the Gallery.
-- **Create an Album**: Add a row to the `albums` table via Wrangler or the Cloudflare Dashboard.
-- **Empty Albums**: Albums with no photos are automatically hidden from the UI.
-- **Uncategorized**: Photos without an `album_id` appear in the "Other Moments" section.
-
----
-
-## Cloudinary & Environment Variables
-
-Add these to your `.env` (local) and Cloudflare Pages (production):
-- `PUBLIC_CLOUDINARY_CLOUD_NAME`: Your Cloudinary cloud name.
-- `CLOUDINARY_API_KEY`: Required for the upload script.
-- `CLOUDINARY_API_SECRET`: Required for the upload script.
-
-Without `PUBLIC_CLOUDINARY_CLOUD_NAME`, the site falls back to `picsum.photos` placeholders.
-
----
-
-## Tech Stack
-
-| | |
-|---|---|
-| Framework | Astro 4 (Hybrid/SSR) |
-| Database | Cloudflare D1 (SQLite) |
-| Styles | Bootstrap 5 + custom SCSS |
-| Images | Cloudinary |
-| Hosting | Cloudflare Pages |
-| Domain | `tuesday.paulrojas.quest` |
-| Camera | Nikkormat FTn |
+A personal portfolio will comfortably remain within these free limits forever.

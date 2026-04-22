@@ -384,7 +384,10 @@ if (Astro.request.method === 'POST') {
       <header class="topbar">
         <div class="topbar-title" id="topbar-title">Overview</div>
         <div class="topbar-right">
-          <span style="font-size:10px;color:var(--muted)">D1 · Cloudinary</span>
+          <span style="font-size:9px; letter-spacing:0.1em; padding:2px 8px; border-radius:10px; background:rgba(212,168,75,0.1); color:var(--amber); border:1px solid rgba(212,168,75,0.2);">
+            Cloud: {CLOUD_NAME || 'Not Set'}
+          </span>
+          <span style="font-size:10px;color:var(--muted); margin-left:10px;">D1 · Cloudinary</span>
         </div>
       </header>
 

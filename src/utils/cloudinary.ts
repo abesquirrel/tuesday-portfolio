@@ -14,7 +14,10 @@ import type { Photo } from '../types/photo';
 
 const CLOUD_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
 
-export function cloudinaryUrl(publicId: string, transforms: string): string {
+export function cloudinaryUrl(
+  publicId: string,
+  transforms: string = 'f_auto,q_auto,w_1200',
+): string {
   if (!publicId) return '';
   if (!CLOUD_NAME || CLOUD_NAME === 'your_cloud_name_here') {
     const seed = publicId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);

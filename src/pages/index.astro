@@ -13,7 +13,8 @@ import type { Photo, SocialLink, Album } from '../types/photo';
 // Server-rendered so D1 bindings are available at request time
 export const prerender = false;
 
-const db = (Astro.locals as any).runtime?.env?.DB;
+const env = (Astro.locals as any).runtime?.env;
+const db  = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
 const photosData: Photo[] = await getPhotos(db);
 const settings: Record<string, string> = await getSettings(db);
 const socialLinks: SocialLink[] = await getSocialLinks(db);

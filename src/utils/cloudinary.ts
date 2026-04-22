@@ -14,16 +14,13 @@ import type { Photo } from '../types/photo';
 
 const CLOUD_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
 
-export function cloudinaryUrl(
-  publicId: string,
-  transforms: string = 'f_auto,q_auto,w_1200',
-): string {
+export function cloudinaryUrl(publicId: string, transforms: string): string {
+  if (!publicId) return '';
   if (!CLOUD_NAME || CLOUD_NAME === 'your_cloud_name_here') {
-    // Placeholder: derive a stable seed from the publicId string
     const seed = publicId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
     return `https://picsum.photos/seed/${seed}/1200/800`;
   }
-  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${transforms}/${publicId}`;
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${transforms}/${publicId.replace(/^\//, '')}`;
 }
 
 export function cloudinaryThumb(publicId: string): string {

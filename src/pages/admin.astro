@@ -62,8 +62,9 @@ if (Astro.request.method === 'POST') {
       --text:     #e2ddd5;
       --muted:    #7a7570;
       --faint:    #3a3530;
-      --r: 24px;
-      --r-sm: 8px;
+      --r: 8px;
+      --r-btn: 30px;
+      --r-sm: 4px;
       --mono: 'IBM Plex Mono', monospace;
       --serif: 'Playfair Display', serif;
     }
@@ -156,7 +157,7 @@ if (Astro.request.method === 'POST') {
     /* ─── Buttons ─── */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 10px 22px; border: 1px solid transparent; border-radius: var(--r);
+      padding: 10px 22px; border: 1px solid transparent; border-radius: var(--r-btn);
       font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
       cursor: pointer; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
       background: var(--card); color: var(--text);

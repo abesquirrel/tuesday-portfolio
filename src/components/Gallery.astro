@@ -49,7 +49,7 @@ const uncategorizedPhotos = getAlbumPhotos(null);
                     alt={photo.title}
                     class="lightbox-trigger"
                     data-full={full}
-                    data-caption={`${photo.title} — ${photo.location}${photo.camera ? ` | ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}`}
+                    data-meta={`${photo.location}${photo.camera ? ` · ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}${photo.roll ? ` · ${photo.roll}` : ''}`}
                     loading="lazy"
                     decoding="async"
                   />
@@ -89,7 +89,7 @@ const uncategorizedPhotos = getAlbumPhotos(null);
                     alt={photo.title}
                     class="lightbox-trigger"
                     data-full={full}
-                    data-caption={`${photo.title} — ${photo.location}${photo.camera ? ` | ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}`}
+                    data-meta={`${photo.location}${photo.camera ? ` · ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}${photo.roll ? ` · ${photo.roll}` : ''}`}
                     loading="lazy"
                     decoding="async"
                   />

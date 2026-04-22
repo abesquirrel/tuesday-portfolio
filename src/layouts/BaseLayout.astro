@@ -95,8 +95,13 @@ const {
     <!-- ── Lightbox container ────────────────────────────────────────────── -->
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
       <button class="lightbox-close" id="lightboxClose">✕ &nbsp;Close</button>
-      <img id="lightboxImg" src="" alt="" />
-      <p class="lightbox-caption" id="lightboxCaption"></p>
+      <div class="lightbox-content">
+        <img id="lightboxImg" src="" alt="" />
+        <div class="lightbox-info">
+          <p id="lightboxTitle" class="lb-title"></p>
+          <p id="lightboxMeta" class="lb-meta"></p>
+        </div>
+      </div>
     </div>
 
     <!-- ── Bootstrap JS ──────────────────────────────────────────────────── -->
@@ -150,17 +155,22 @@ const {
 
     <!-- ── Lightbox ──────────────────────────────────────────────────────── -->
     <script>
-      const lightbox     = document.getElementById('lightbox');
-      const lightboxImg  = document.getElementById('lightboxImg') as HTMLImageElement;
-      const lightboxCap  = document.getElementById('lightboxCaption');
+      const lightbox      = document.getElementById('lightbox');
+      const lightboxImg   = document.getElementById('lightboxImg') as HTMLImageElement;
+      const lightboxTitle = document.getElementById('lightboxTitle');
+      const lightboxMeta  = document.getElementById('lightboxMeta');
       const lightboxClose = document.getElementById('lightboxClose');
 
       document.querySelectorAll('.lightbox-trigger').forEach((el) => {
         el.addEventListener('click', () => {
-          const src = el.getAttribute('data-full') || (el as HTMLImageElement).src;
-          const cap = el.getAttribute('data-caption') || '';
+          const src   = el.getAttribute('data-full') || (el as HTMLImageElement).src;
+          const title = el.getAttribute('alt') || '';
+          const meta  = el.getAttribute('data-meta') || '';
+          
           if (lightboxImg) lightboxImg.src = src;
-          if (lightboxCap) lightboxCap.textContent = cap;
+          if (lightboxTitle) lightboxTitle.textContent = title;
+          if (lightboxMeta) lightboxMeta.textContent = meta;
+          
           lightbox?.classList.add('open');
           document.body.style.overflow = 'hidden';
         });
@@ -169,12 +179,14 @@ const {
       const closeLightbox = () => {
         lightbox?.classList.remove('open');
         document.body.style.overflow = '';
-        if (lightboxImg) lightboxImg.src = '';
+        setTimeout(() => {
+          if (lightboxImg) lightboxImg.src = '';
+        }, 300);
       };
 
       lightboxClose?.addEventListener('click', closeLightbox);
       lightbox?.addEventListener('click', (e) => {
-        if (e.target === lightbox) closeLightbox();
+        if (e.target === lightbox || (e.target as HTMLElement).classList.contains('lightbox-content')) closeLightbox();
       });
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeLightbox();

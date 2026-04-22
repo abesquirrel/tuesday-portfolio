@@ -495,24 +495,58 @@ footer {
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: rgba($darkroom-black, 0.97);
+  background: rgba($darkroom-black, 0.98);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 2rem;
 
   &.open {
     opacity: 1;
     pointer-events: all;
   }
 
+  .lightbox-content {
+    position: relative;
+    max-width: 95vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
   img {
-    max-width: 92vw;
-    max-height: 90svh;
+    max-width: 100%;
+    max-height: 80vh;
     object-fit: contain;
-    filter: grayscale(5%) contrast(1.05);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba($darkroom-border, 0.3);
+  }
+
+  .lightbox-info {
+    text-align: center;
+    animation: fadeUp 0.6s ease both 0.2s;
+    
+    .lb-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-style: italic;
+      color: $silver-bright;
+      margin-bottom: 0.5rem;
+    }
+    
+    .lb-meta {
+      font-family: 'Courier New', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: $accent-amber;
+      opacity: 0.8;
+    }
   }
 
   .lightbox-close {
@@ -527,21 +561,13 @@ footer {
     letter-spacing: 0.2em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: color 0.2s, transform 0.2s;
+    z-index: 10;
 
-    &:hover { color: $accent-amber; }
-  }
-
-  .lightbox-caption {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    color: rgba($silver-bright, 0.5);
-    font-size: 0.8rem;
-    font-style: italic;
-    white-space: nowrap;
+    &:hover { 
+      color: $accent-amber;
+      transform: scale(1.1);
+    }
   }
 }
 

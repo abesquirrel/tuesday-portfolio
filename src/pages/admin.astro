@@ -1,0 +1,1189 @@
+---
+// src/pages/admin.astro
+// ─── Server-side: auth guard ───────────────────────────────────────────────
+export const prerender = false;
+
+// Simple cookie-based session check
+// Set ADMIN_SECRET as a Cloudflare Pages secret via dashboard
+const env = (Astro.locals as any).runtime?.env;
+const ADMIN_SECRET = env?.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
+
+const cookie = Astro.cookies.get('admin_session');
+const isAuthed = cookie?.value === ADMIN_SECRET;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = form.get('action');
+
+  // ── Login ──────────────────────────────────────────────────────────────
+  if (action === 'login') {
+    const pw = form.get('password');
+    if (pw === ADMIN_SECRET) {
+      Astro.cookies.set('admin_session', ADMIN_SECRET, {
+        httpOnly: true, secure: true, sameSite: 'strict', path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      return Astro.redirect('/admin');
+    }
+  }
+
+  // ── Logout ─────────────────────────────────────────────────────────────
+  if (action === 'logout') {
+    Astro.cookies.delete('admin_session', { path: '/' });
+    return Astro.redirect('/admin');
+  }
+}
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Tuesday Portfolio</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Design: editorial darkroom. Grain, deep blacks, amber safelight accents ─── */
+    :root {
+      --ink:      #0a0a0a;
+      --paper:    #111111;
+      --card:     #181818;
+      --rail:     #1f1f1f;
+      --border:   #272727;
+      --border2:  #333;
+      --amber:    #d4a84b;
+      --amber2:   #b8902f;
+      --red:      #b5392b;
+      --green:    #3a7d52;
+      --text:     #e2ddd5;
+      --muted:    #7a7570;
+      --faint:    #3a3530;
+      --r: 6px;
+      --mono: 'IBM Plex Mono', monospace;
+      --serif: 'Playfair Display', serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 13px; }
+    body { background: var(--ink); color: var(--text); font-family: var(--mono); min-height: 100vh; }
+
+    /* ─── Login screen ─── */
+    .login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--ink);
+      /* grain overlay */
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+    .login-box {
+      width: 340px;
+      padding: 40px;
+      border: 1px solid var(--border2);
+      background: var(--paper);
+    }
+    .login-logo { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--amber); margin-bottom: 6px; }
+    .login-sub { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
+    .login-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
+    .login-input {
+      width: 100%; padding: 10px 12px;
+      background: var(--card); border: 1px solid var(--border2);
+      color: var(--text); font-family: var(--mono); font-size: 13px;
+      outline: none; transition: border-color .2s;
+      border-radius: var(--r);
+    }
+    .login-input:focus { border-color: var(--amber); }
+    .login-btn {
+      width: 100%; margin-top: 16px; padding: 11px;
+      background: var(--amber); border: none; color: #0a0a0a;
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+      border-radius: var(--r); transition: background .15s;
+    }
+    .login-btn:hover { background: var(--amber2); }
+
+    /* ─── Layout ─── */
+    .shell { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 210px; min-height: 100vh; background: var(--paper);
+      border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; bottom: 0;
+      display: flex; flex-direction: column; z-index: 20;
+    }
+    .sb-brand { padding: 24px 20px 18px; border-bottom: 1px solid var(--border); }
+    .sb-brand-title { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--amber); }
+    .sb-brand-sub { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
+    .sb-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
+    .sb-section { padding: 10px 18px 4px; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+    .sb-item {
+      display: flex; align-items: center; gap: 9px; padding: 9px 18px;
+      cursor: pointer; color: var(--muted); font-size: 12px;
+      border-left: 2px solid transparent; transition: all .15s;
+    }
+    .sb-item:hover { color: var(--text); background: rgba(255,255,255,.03); }
+    .sb-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(212,168,75,.05); }
+    .sb-item .ic { width: 16px; text-align: center; font-size: 13px; }
+    .sb-footer { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+    .sb-view-btn {
+      display: block; padding: 7px 10px; text-align: center;
+      border: 1px solid var(--border2); color: var(--muted);
+      font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+      text-decoration: none; border-radius: var(--r); transition: all .2s;
+    }
+    .sb-view-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+    .main { margin-left: 210px; flex: 1; display: flex; flex-direction: column; }
+    .topbar {
+      padding: 14px 28px; border-bottom: 1px solid var(--border);
+      background: var(--paper); position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar-title { font-family: var(--serif); font-size: 18px; color: var(--amber); font-style: italic; }
+    .topbar-right { display: flex; gap: 8px; align-items: center; }
+
+    .content { padding: 28px; flex: 1; }
+
+    /* ─── Panels ─── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border: none; border-radius: var(--r);
+      font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+      cursor: pointer; transition: all .15s;
+    }
+    .btn-primary { background: var(--amber); color: #0a0a0a; font-weight: 500; }
+    .btn-primary:hover { background: var(--amber2); }
+    .btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
+    .btn-ghost:hover { border-color: var(--amber); color: var(--amber); }
+    .btn-danger { background: transparent; border: 1px solid transparent; color: var(--muted); }
+    .btn-danger:hover { border-color: var(--red); color: var(--red); }
+    .btn-sm { padding: 5px 10px; font-size: 10px; }
+    .btn-xs { padding: 3px 8px; font-size: 9px; }
+
+    /* ─── Forms ─── */
+    .fgroup { margin-bottom: 16px; }
+    .flabel { display: block; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+    .finput, .ftextarea, .fselect {
+      width: 100%; padding: 8px 11px;
+      background: var(--card); border: 1px solid var(--border2);
+      color: var(--text); font-family: var(--mono); font-size: 12px;
+      border-radius: var(--r); outline: none; transition: border-color .2s;
+    }
+    .finput:focus, .ftextarea:focus, .fselect:focus { border-color: var(--amber); }
+    .ftextarea { resize: vertical; min-height: 72px; }
+    .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .frow3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .hint { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+    /* ─── Cards ─── */
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-top: 18px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden; transition: border-color .2s;
+    }
+    .card:hover { border-color: var(--border2); }
+    .card-thumb {
+      width: 100%; height: 155px; background: var(--rail);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden; cursor: pointer;
+    }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .card-thumb-ov {
+      position: absolute; inset: 0; background: rgba(0,0,0,.55);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .2s; font-size: 11px; color: #fff; letter-spacing: .1em;
+    }
+    .card-thumb:hover .card-thumb-ov { opacity: 1; }
+    .card-body { padding: 12px 14px; }
+    .card-title { font-family: var(--serif); font-size: 14px; color: var(--amber); margin-bottom: 2px; }
+    .card-meta { font-size: 10px; color: var(--muted); line-height: 1.5; }
+    .card-foot { padding: 8px 14px; border-top: 1px solid var(--border); background: var(--rail); display: flex; gap: 6px; align-items: center; }
+
+    /* ─── Table ─── */
+    .tbl-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-top: 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 9px 14px; text-align: left; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--rail); }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.015); }
+
+    /* ─── Badge ─── */
+    .badge {
+      display: inline-block; padding: 2px 7px; border-radius: 20px;
+      font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+      background: rgba(212,168,75,.1); color: var(--amber2);
+      border: 1px solid rgba(212,168,75,.2);
+    }
+    .badge-film { background: rgba(90,60,30,.3); color: #c8a06a; border-color: rgba(200,160,106,.2); }
+    .badge-digital { background: rgba(30,50,80,.3); color: #7ab0d4; border-color: rgba(122,176,212,.2); }
+    .badge-feat { background: rgba(212,168,75,.15); color: var(--amber); border-color: rgba(212,168,75,.3); }
+
+    /* ─── Stats ─── */
+    .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 24px; }
+    .stat { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 18px; }
+    .stat-lbl { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+    .stat-val { font-family: var(--serif); font-size: 26px; color: var(--amber); }
+
+    /* ─── Modal ─── */
+    .modal-bg {
+      position: fixed; inset: 0; background: rgba(0,0,0,.8);
+      z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: var(--paper); border: 1px solid var(--border2);
+      border-radius: var(--r); width: 100%; max-width: 540px;
+      max-height: 92vh; overflow-y: auto; position: relative;
+    }
+    .modal-head {
+      padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; background: var(--paper); z-index: 1;
+    }
+    .modal-title { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--amber); }
+    .modal-x { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 4px; }
+    .modal-x:hover { color: var(--text); }
+    .modal-body { padding: 20px 22px; }
+    .modal-foot { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; position: sticky; bottom: 0; background: var(--paper); }
+
+    /* ─── Section header ─── */
+    .sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .sec-sub { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+
+    /* ─── Photo preview in form ─── */
+    .cloudinary-id-preview {
+      margin-top: 8px; padding: 8px 10px; background: var(--rail);
+      border: 1px solid var(--border); border-radius: var(--r);
+      font-size: 11px; color: var(--muted);
+    }
+    .cloudinary-id-preview span { color: var(--amber); }
+
+    /* ─── About editor ─── */
+    .about-preview {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px; margin-bottom: 20px;
+      position: relative;
+    }
+    .about-preview::before { content: 'LIVE PREVIEW'; position: absolute; top: 8px; right: 12px; font-size: 8px; letter-spacing: .15em; color: var(--faint); }
+    .about-preview-bio { font-family: var(--serif); font-size: 13px; line-height: 1.7; color: #ccc; margin-bottom: 12px; }
+    .about-preview-gear { font-size: 11px; color: var(--muted); line-height: 1.8; }
+    .about-preview-gear strong { color: var(--amber2); }
+
+    /* ─── Sort handle ─── */
+    .drag-handle { cursor: grab; color: var(--faint); font-size: 14px; padding: 0 6px; }
+    .drag-handle:active { cursor: grabbing; }
+
+    /* ─── Toast ─── */
+    .toast {
+      position: fixed; bottom: 20px; right: 20px;
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 3px solid var(--green); border-radius: var(--r);
+      padding: 10px 14px; font-size: 11px; z-index: 999;
+      transform: translateY(80px); opacity: 0; transition: all .3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.err { border-left-color: var(--red); }
+
+    /* ─── Inline edit for settings ─── */
+    .setting-row {
+      display: grid; grid-template-columns: 180px 1fr auto; gap: 10px;
+      align-items: start; padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .setting-key { font-size: 10px; color: var(--muted); letter-spacing: .08em; padding-top: 8px; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 54px; }
+      .sb-brand-title, .sb-brand-sub, .sb-item span, .sb-section, .sb-footer { display: none; }
+      .sb-item { justify-content: center; padding: 10px; }
+      .main { margin-left: 54px; }
+      .frow, .frow3 { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+{!isAuthed ? (
+  <!-- ═══ LOGIN ═══ -->
+  <div class="login-wrap">
+    <form method="POST">
+      <input type="hidden" name="action" value="login" />
+      <div class="login-box">
+        <div class="login-logo">I think it was Tuesday</div>
+        <div class="login-sub">Admin Panel</div>
+        <label class="login-label">Password</label>
+        <input class="login-input" type="password" name="password" autofocus placeholder="••••••••" />
+        <button class="login-btn" type="submit">Enter Darkroom →</button>
+      </div>
+    </form>
+  </div>
+) : (
+  <!-- ═══ ADMIN SHELL ═══ -->
+  <>
+  <div class="shell">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="sb-brand">
+        <div class="sb-brand-title">Tuesday</div>
+        <div class="sb-brand-sub">Darkroom Admin</div>
+      </div>
+      <nav class="sb-nav">
+        <div class="sb-section">Content</div>
+        <div class="sb-item active" data-panel="dashboard" onclick="nav(this)">
+          <span class="ic">◈</span><span>Overview</span>
+        </div>
+        <div class="sb-item" data-panel="photos" onclick="nav(this)">
+          <span class="ic">🎞</span><span>Photos</span>
+        </div>
+        <div class="sb-item" data-panel="albums" onclick="nav(this)">
+          <span class="ic">📂</span><span>Albums</span>
+        </div>
+        <div class="sb-item" data-panel="featured" onclick="nav(this)">
+          <span class="ic">★</span><span>Featured Photo</span>
+        </div>
+        <div class="sb-section">Site</div>
+        <div class="sb-item" data-panel="about" onclick="nav(this)">
+          <span class="ic">◉</span><span>About / Bio</span>
+        </div>
+        <div class="sb-item" data-panel="social" onclick="nav(this)">
+          <span class="ic">⬡</span><span>Social Links</span>
+        </div>
+      </nav>
+      <div class="sb-footer">
+        <a href="/" target="_blank" class="sb-view-btn">↗ View Site</a>
+        <form method="POST" style="margin:0">
+          <input type="hidden" name="action" value="logout" />
+          <button type="submit" class="sb-view-btn" style="width:100%;cursor:pointer;background:none">⎋ Logout</button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- ── Main ── -->
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-title" id="topbar-title">Overview</div>
+        <div class="topbar-right">
+          <span style="font-size:10px;color:var(--muted)">D1 · Cloudinary</span>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- ── DASHBOARD ── -->
+        <div id="panel-dashboard" class="panel active">
+          <div class="stats" id="dash-stats">
+            <div class="stat"><div class="stat-lbl">Total Photos</div><div class="stat-val" id="s-photos">—</div></div>
+            <div class="stat"><div class="stat-lbl">Featured</div><div class="stat-val" id="s-featured">—</div></div>
+            <div class="stat"><div class="stat-lbl">Albums</div><div class="stat-val" id="s-albums">—</div></div>
+            <div class="stat"><div class="stat-lbl">Social Links</div><div class="stat-val" id="s-social">—</div></div>
+          </div>
+
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Section</th><th>Records</th><th>Action</th></tr></thead>
+              <tbody id="dash-rows">
+                <tr><td colspan="3" style="text-align:center;padding:20px;color:var(--muted)">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-top:20px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)">
+            <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">How to add photos</div>
+            <p style="font-size:11px;color:#999;line-height:1.7">
+              Photos are stored in <span style="color:var(--amber)">Cloudinary</span> and referenced in <span style="color:var(--amber)">D1</span> by their <code style="background:var(--rail);padding:1px 5px;border-radius:3px">public_id</code>.<br/>
+              Use the <strong>Upload CLI</strong> to add new photos: <code style="background:var(--rail);padding:2px 6px;border-radius:3px;color:var(--amber)">npm run upload path/to/photo.jpg</code><br/>
+              Then manage metadata, featured status, and album assignment here.
+            </p>
+          </div>
+        </div>
+
+        <!-- ── PHOTOS ── -->
+        <div id="panel-photos" class="panel">
+          <div class="sec-hdr">
+            <div class="sec-sub">Edit metadata, move between albums, toggle featured</div>
+            <button class="btn btn-primary" onclick="openModal('modal-photo', null)">+ Add Photo Record</button>
+          </div>
+
+          <!-- filters -->
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+            <select class="fselect" id="filter-album" style="width:auto;min-width:160px" onchange="renderPhotos()">
+              <option value="">All Albums</option>
+            </select>
+            <select class="fselect" id="filter-medium" style="width:auto" onchange="renderPhotos()">
+              <option value="">All Media</option>
+              <option value="film">Film</option>
+              <option value="digital">Digital</option>
+            </select>
+            <select class="fselect" id="filter-featured" style="width:auto" onchange="renderPhotos()">
+              <option value="">All</option>
+              <option value="1">Featured only</option>
+              <option value="0">Grid only</option>
+            </select>
+          </div>
+
+          <div class="cards" id="photos-grid"></div>
+        </div>
+
+        <!-- ── FEATURED ── -->
+        <div id="panel-featured" class="panel">
+          <div class="sec-sub" style="margin-bottom:16px">
+            The featured photo appears in the hero strip and the "Featured Image" section.<br/>
+            Only one photo can be featured — setting a new one will un-feature the current one.
+          </div>
+          <div id="featured-current" style="margin-bottom:20px"></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th></th><th>Title</th><th>Location</th><th>Camera</th><th>Film</th><th></th></tr></thead>
+              <tbody id="featured-table"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── ALBUMS ── -->
+        <div id="panel-albums" class="panel">
+          <div class="sec-hdr">
+            <div class="sec-sub">Albums group photos in the gallery section</div>
+            <button class="btn btn-primary" onclick="openModal('modal-album', null)">+ New Album</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>⠿</th><th>Title</th><th>Description</th><th>Photos</th><th>Order</th><th></th></tr></thead>
+              <tbody id="albums-table"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── ABOUT ── -->
+        <div id="panel-about" class="panel">
+          <div class="sec-hdr">
+            <div class="sec-sub">Bio and gear notes shown in the About section</div>
+            <button class="btn btn-primary" onclick="saveAbout()">Save Changes</button>
+          </div>
+
+          <div class="about-preview">
+            <div class="about-preview-bio" id="prev-bio">Loading…</div>
+            <div class="about-preview-gear" id="prev-gear"></div>
+          </div>
+
+          <div class="fgroup">
+            <label class="flabel">Bio paragraph</label>
+            <textarea class="ftextarea" id="about-bio" rows="5"
+              oninput="document.getElementById('prev-bio').textContent=this.value"></textarea>
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Currently Shooting</label>
+            <input class="finput" id="about-shooting" type="text"
+              oninput="updateGearPreview()">
+            <div class="hint">e.g. Nikkormat FT2 · Nikon 50mm f/1.4 AI · Kodak Color 200</div>
+          </div>
+          <div class="frow">
+            <div class="fgroup">
+              <label class="flabel">Developing</label>
+              <input class="finput" id="about-developing" type="text" oninput="updateGearPreview()">
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Also Shooting (digital)</label>
+              <input class="finput" id="about-also" type="text" oninput="updateGearPreview()">
+            </div>
+          </div>
+
+          <div style="margin-top:12px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)">
+            <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Portrait image</div>
+            <p style="font-size:11px;color:#999;line-height:1.7">
+              The About portrait is served from Cloudinary at public_id <code style="background:var(--rail);padding:1px 5px;border-radius:3px;color:var(--amber)">portfolio/about/portrait</code>.<br/>
+              To replace it: upload a new image to Cloudinary using the same public_id (it will overwrite), then the site will pick it up automatically on next page load.
+            </p>
+          </div>
+        </div>
+
+        <!-- ── SOCIAL ── -->
+        <div id="panel-social" class="panel">
+          <div class="sec-hdr">
+            <div class="sec-sub">Links shown in the Contact section</div>
+            <button class="btn btn-primary" onclick="openModal('modal-social', null)">+ Add Link</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>⠿</th><th>Label</th><th>URL</th><th>Order</th><th></th></tr></thead>
+              <tbody id="social-table"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /content -->
+    </div><!-- /main -->
+  </div><!-- /shell -->
+
+  <!-- ═══ MODALS ═══ -->
+
+  <!-- Photo modal -->
+  <div class="modal-bg" id="modal-photo">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title" id="modal-photo-ttl">Add Photo Record</div>
+        <button class="modal-x" onclick="closeModal('modal-photo')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="ph-id" />
+
+        <div class="fgroup">
+          <label class="flabel">Cloudinary public_id *</label>
+          <input class="finput" id="ph-public_id" type="text" placeholder="portfolio/grid/my-photo"
+            oninput="updateCloudPreview()">
+          <div class="cloudinary-id-preview">
+            Preview URL: <span id="ph-url-preview">—</span>
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Title *</label>
+            <input class="finput" id="ph-title" type="text" placeholder="Corner Store, 6am">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Location</label>
+            <input class="finput" id="ph-location" type="text" placeholder="Brooklyn, NY">
+          </div>
+        </div>
+
+        <div class="fgroup">
+          <label class="flabel">Caption</label>
+          <textarea class="ftextarea" id="ph-caption" rows="2" placeholder="Nobody was awake except the clerk and the neon."></textarea>
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Roll / Date</label>
+            <input class="finput" id="ph-roll" type="text" placeholder="Roll 01">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Album</label>
+            <select class="fselect" id="ph-album_id">
+              <option value="">— Uncategorised —</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Medium</label>
+            <select class="fselect" id="ph-medium" onchange="toggleSimField()">
+              <option value="film">Film</option>
+              <option value="digital">Digital</option>
+            </select>
+          </div>
+          <div class="fgroup" id="sim-field">
+            <label class="flabel">Fujifilm Simulation</label>
+            <input class="finput" id="ph-simulation" type="text" placeholder="Classic Chrome">
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Camera</label>
+            <input class="finput" id="ph-camera" type="text" placeholder="Nikkormat FT2">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Lens</label>
+            <input class="finput" id="ph-lens" type="text" placeholder="Nikon 50mm f/1.4">
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Film Stock</label>
+            <input class="finput" id="ph-film_stock" type="text" placeholder="Kodak Color 200">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Sort Order</label>
+            <input class="finput" id="ph-sort_order" type="number" value="99">
+          </div>
+        </div>
+
+        <div class="fgroup">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="ph-is_featured" style="accent-color:var(--amber);width:14px;height:14px">
+            <span style="font-size:11px;color:var(--muted)">Set as Featured Photo</span>
+          </label>
+          <div class="hint">This will un-feature any currently featured photo.</div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeModal('modal-photo')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePhoto()">Save Photo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Album modal -->
+  <div class="modal-bg" id="modal-album">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title" id="modal-album-ttl">New Album</div>
+        <button class="modal-x" onclick="closeModal('modal-album')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="al-id" />
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Album ID (slug) *</label>
+            <input class="finput" id="al-id-val" type="text" placeholder="brooklyn">
+            <div class="hint">Lowercase, no spaces. Used as DB key.</div>
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Title *</label>
+            <input class="finput" id="al-title" type="text" placeholder="Brooklyn Streets">
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Description</label>
+          <textarea class="ftextarea" id="al-description" rows="2" placeholder="Morning light and neon signs in the borough."></textarea>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Sort Order</label>
+          <input class="finput" id="al-sort_order" type="number" value="0" style="width:100px">
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeModal('modal-album')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveAlbum()">Save Album</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social modal -->
+  <div class="modal-bg" id="modal-social">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title" id="modal-social-ttl">Add Social Link</div>
+        <button class="modal-x" onclick="closeModal('modal-social')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="sl-id" />
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Label *</label>
+            <input class="finput" id="sl-label" type="text" placeholder="Instagram">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Sort Order</label>
+            <input class="finput" id="sl-sort_order" type="number" value="0" style="width:100px">
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">URL *</label>
+          <input class="finput" id="sl-url" type="url" placeholder="https://instagram.com/yourhandle">
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeModal('modal-social')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSocial()">Save Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+  // @ts-nocheck
+  // ─── State ──────────────────────────────────────────────────────────────
+  const API = '/api/admin';
+  let state = { photos: [], albums: [], settings: {}, social: [] };
+
+  // ─── Bootstrap: load all data ─────────────────────────────────────────
+  async function boot() {
+    try {
+      const [photos, albums, settings, social] = await Promise.all([
+        apiFetch('photos'), apiFetch('albums'),
+        apiFetch('settings'), apiFetch('social')
+      ]);
+      state.photos   = photos   || [];
+      state.albums   = albums   || [];
+      state.settings = settings || {};
+      state.social   = social   || [];
+    } catch(e) {
+      toast('Could not load data from D1. Check API route.', true);
+      console.error(e);
+    }
+    renderDashboard();
+    populateAlbumSelects();
+  }
+
+  async function apiFetch(resource, opts = {}) {
+    const res = await fetch(`${API}/${resource}`, opts);
+    if (!res.ok) throw new Error(`${resource}: ${res.status}`);
+    return res.json();
+  }
+
+  // ─── Nav ─────────────────────────────────────────────────────────────
+  const panelTitles = {
+    dashboard: 'Overview', photos: 'Photos', albums: 'Albums',
+    featured: 'Featured Photo', about: 'About / Bio', social: 'Social Links'
+  };
+  function nav(el) {
+    const p = el.dataset.panel;
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.sb-item').forEach(x => x.classList.remove('active'));
+    document.getElementById('panel-'+p).classList.add('active');
+    el.classList.add('active');
+    document.getElementById('topbar-title').textContent = panelTitles[p];
+    switch(p) {
+      case 'dashboard': renderDashboard(); break;
+      case 'photos':    renderPhotos(); break;
+      case 'albums':    renderAlbums(); break;
+      case 'featured':  renderFeatured(); break;
+      case 'about':     renderAbout(); break;
+      case 'social':    renderSocial(); break;
+    }
+  }
+
+  // ─── Dashboard ────────────────────────────────────────────────────────
+  function renderDashboard() {
+    document.getElementById('s-photos').textContent   = state.photos.length;
+    document.getElementById('s-featured').textContent = state.photos.filter(p => p.is_featured).length;
+    document.getElementById('s-albums').textContent   = state.albums.length;
+    document.getElementById('s-social').textContent   = state.social.length;
+    document.getElementById('dash-rows').innerHTML = [
+      ['Photos',       state.photos.length,   'photos'],
+      ['Albums',       state.albums.length,   'albums'],
+      ['About / Bio',  '4 settings',          'about'],
+      ['Social Links', state.social.length,   'social'],
+    ].map(([label, count, panel]) => `
+      <tr>
+        <td style="color:var(--amber)">${label}</td>
+        <td style="color:var(--muted)">${count} record${count!==1?'s':''}</td>
+        <td><button class="btn btn-ghost btn-xs" onclick="navTo('${panel}')">Edit →</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function navTo(panel) {
+    const el = document.querySelector(`[data-panel="${panel}"]`);
+    if(el) nav(el);
+  }
+
+  // ─── Photos ───────────────────────────────────────────────────────────
+  function renderPhotos() {
+    const albumFilter   = document.getElementById('filter-album')?.value || '';
+    const mediumFilter  = document.getElementById('filter-medium')?.value || '';
+    const featuredFilter = document.getElementById('filter-featured')?.value || '';
+
+    let list = [...state.photos].sort((a,b) => a.sort_order - b.sort_order);
+    if (albumFilter)    list = list.filter(p => p.album_id === albumFilter);
+    if (mediumFilter)   list = list.filter(p => p.medium === mediumFilter);
+    if (featuredFilter !== '') list = list.filter(p => String(p.is_featured) === featuredFilter);
+
+    const CLOUD = window._cloudName || '';
+    const thumbUrl = (pid) => CLOUD
+      ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400,h_260,c_fill/${pid}`
+      : `https://picsum.photos/seed/${pid.length*7}/400/260`;
+
+    document.getElementById('photos-grid').innerHTML = list.length === 0
+      ? `<p style="color:var(--muted);margin-top:16px;grid-column:1/-1">No photos match the current filter.</p>`
+      : list.map(p => {
+          const album = state.albums.find(a => a.id === p.album_id);
+          return `
+          <div class="card" id="photo-card-${p.id}">
+            <div class="card-thumb" onclick="openModal('modal-photo','${p.id}')">
+              <img src="${thumbUrl(p.public_id)}" alt="${p.title}" loading="lazy"
+                onerror="this.style.display='none'">
+              <div class="card-thumb-ov">✎ Edit</div>
+            </div>
+            <div class="card-body">
+              <div class="card-title">${p.title}${p.is_featured?` <span class="badge badge-feat">featured</span>`:''}</div>
+              <div class="card-meta">
+                ${p.location || '—'} &nbsp;·&nbsp; ${p.roll || '—'}<br>
+                <span class="badge badge-${p.medium}">${p.medium}</span>
+                ${album?`<span class="badge">${album.title}</span>`:''}
+              </div>
+            </div>
+            <div class="card-foot">
+              <button class="btn btn-ghost btn-xs" onclick="openModal('modal-photo','${p.id}')">✎ Edit</button>
+              ${!p.is_featured?`<button class="btn btn-ghost btn-xs" onclick="setFeatured('${p.id}')">★ Feature</button>`:''}
+              <button class="btn btn-danger btn-xs" style="margin-left:auto" onclick="deletePhoto('${p.id}')">✕</button>
+            </div>
+          </div>`;
+        }).join('');
+  }
+
+  // ─── Featured ─────────────────────────────────────────────────────────
+  function renderFeatured() {
+    const featured = state.photos.find(p => p.is_featured);
+    const CLOUD = window._cloudName || '';
+    const thumbUrl = (pid) => CLOUD
+      ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_600,h_360,c_fill/${pid}`
+      : `https://picsum.photos/seed/${pid.length*7}/600/360`;
+
+    if (featured) {
+      document.getElementById('featured-current').innerHTML = `
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:16px;background:var(--card);border:1px solid var(--amber2);border-radius:var(--r)">
+          <img src="${thumbUrl(featured.public_id)}" style="width:180px;height:110px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">
+          <div>
+            <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber2);margin-bottom:4px">Currently Featured</div>
+            <div style="font-family:var(--serif);font-style:italic;font-size:18px;color:var(--amber)">${featured.title}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">${featured.location} · ${featured.camera||''} ${featured.film_stock?'· '+featured.film_stock:''}</div>
+          </div>
+        </div>`;
+    } else {
+      document.getElementById('featured-current').innerHTML = `<p style="color:var(--muted);font-size:11px">No photo is currently featured.</p>`;
+    }
+
+    document.getElementById('featured-table').innerHTML = state.photos
+      .sort((a,b) => a.sort_order - b.sort_order)
+      .map(p => `
+        <tr style="${p.is_featured ? 'background:rgba(212,168,75,.05)' : ''}">
+          <td style="width:40px">${p.is_featured ? '<span class="badge badge-feat">★</span>' : ''}</td>
+          <td style="font-family:var(--serif);color:var(--amber)">${p.title}</td>
+          <td style="color:var(--muted)">${p.location||'—'}</td>
+          <td style="color:var(--muted);font-size:11px">${p.camera||'—'}</td>
+          <td><span class="badge badge-${p.medium}">${p.medium}${p.film_stock?' · '+p.film_stock:''}</span></td>
+          <td>
+            ${p.is_featured
+              ? `<span style="font-size:10px;color:var(--muted)">Current</span>`
+              : `<button class="btn btn-primary btn-xs" onclick="setFeatured('${p.id}')">★ Set Featured</button>`
+            }
+          </td>
+        </tr>`).join('');
+  }
+
+  async function setFeatured(id) {
+    // Un-feature all, then feature this one
+    for (const p of state.photos) p.is_featured = 0;
+    const target = state.photos.find(p => p.id === id);
+    if (!target) return;
+    target.is_featured = 1;
+    await apiFetch('photos/feature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    toast(`"${target.title}" is now the featured photo.`);
+    renderPhotos();
+    renderFeatured();
+  }
+
+  // ─── Albums ───────────────────────────────────────────────────────────
+  function renderAlbums() {
+    document.getElementById('albums-table').innerHTML = state.albums
+      .sort((a,b) => a.sort_order - b.sort_order)
+      .map(a => {
+        const count = state.photos.filter(p => p.album_id === a.id).length;
+        return `
+          <tr>
+            <td class="drag-handle">⠿</td>
+            <td style="color:var(--amber)">${a.title}</td>
+            <td style="color:var(--muted);font-size:11px;max-width:240px">${a.description||'—'}</td>
+            <td><span class="badge">${count}</span></td>
+            <td style="color:var(--muted)">${a.sort_order}</td>
+            <td>
+              <button class="btn btn-ghost btn-xs" onclick="openModal('modal-album','${a.id}')">✎</button>
+              <button class="btn btn-danger btn-xs" onclick="deleteAlbum('${a.id}')">✕</button>
+            </td>
+          </tr>`;
+      }).join('');
+  }
+
+  // ─── About ────────────────────────────────────────────────────────────
+  function renderAbout() {
+    const s = state.settings;
+    const bio = s.about_bio || '';
+    const shooting = s.about_currently_shooting || '';
+    const developing = s.about_developing || '';
+    const also = s.about_also_shooting || '';
+
+    document.getElementById('about-bio').value       = bio;
+    document.getElementById('about-shooting').value  = shooting;
+    document.getElementById('about-developing').value = developing;
+    document.getElementById('about-also').value      = also;
+    document.getElementById('prev-bio').textContent  = bio;
+    updateGearPreview();
+  }
+
+  function updateGearPreview() {
+    const s = document.getElementById('about-shooting').value;
+    const d = document.getElementById('about-developing').value;
+    const a = document.getElementById('about-also').value;
+    document.getElementById('prev-gear').innerHTML =
+      (s ? `<strong>Currently shooting:</strong> ${s}<br>` : '') +
+      (d ? `<strong>Developing:</strong> ${d}<br>` : '') +
+      (a ? `<strong>Also shooting:</strong> ${a}` : '');
+  }
+
+  async function saveAbout() {
+    const updates = {
+      about_bio:                 document.getElementById('about-bio').value,
+      about_currently_shooting:  document.getElementById('about-shooting').value,
+      about_developing:          document.getElementById('about-developing').value,
+      about_also_shooting:       document.getElementById('about-also').value,
+    };
+    for (const [key, value] of Object.entries(updates)) {
+      state.settings[key] = value;
+    }
+    await apiFetch('settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    toast('About section saved!');
+  }
+
+  // ─── Social ───────────────────────────────────────────────────────────
+  function renderSocial() {
+    document.getElementById('social-table').innerHTML = state.social
+      .sort((a,b) => a.sort_order - b.sort_order)
+      .map(l => `
+        <tr>
+          <td class="drag-handle">⠿</td>
+          <td style="color:var(--amber)">${l.label}</td>
+          <td style="font-size:11px"><a href="${l.url}" target="_blank" style="color:var(--muted);word-break:break-all">${l.url}</a></td>
+          <td style="color:var(--muted)">${l.sort_order}</td>
+          <td>
+            <button class="btn btn-ghost btn-xs" onclick="openModal('modal-social',${l.id})">✎</button>
+            <button class="btn btn-danger btn-xs" onclick="deleteSocial(${l.id})">✕</button>
+          </td>
+        </tr>`).join('');
+  }
+
+  // ─── Populate album dropdowns ─────────────────────────────────────────
+  function populateAlbumSelects() {
+    const opts = state.albums.map(a => `<option value="${a.id}">${a.title}</option>`).join('');
+    const optsFull = `<option value="">— Uncategorised —</option>${opts}`;
+    const filterOpts = `<option value="">All Albums</option>${opts}`;
+    document.getElementById('ph-album_id').innerHTML = optsFull;
+    document.getElementById('filter-album').innerHTML = filterOpts;
+  }
+
+  // ─── Modals ───────────────────────────────────────────────────────────
+  function openModal(modalId, editId) {
+    if (modalId === 'modal-photo') {
+      const p = editId ? state.photos.find(x => x.id === editId) : null;
+      document.getElementById('modal-photo-ttl').textContent = p ? 'Edit Photo' : 'Add Photo Record';
+      document.getElementById('ph-id').value        = p?.id || '';
+      document.getElementById('ph-public_id').value = p?.public_id || '';
+      document.getElementById('ph-title').value     = p?.title || '';
+      document.getElementById('ph-location').value  = p?.location || '';
+      document.getElementById('ph-caption').value   = p?.caption || '';
+      document.getElementById('ph-roll').value      = p?.roll || '';
+      document.getElementById('ph-album_id').value  = p?.album_id || '';
+      document.getElementById('ph-medium').value    = p?.medium || 'film';
+      document.getElementById('ph-simulation').value = p?.simulation || '';
+      document.getElementById('ph-camera').value    = p?.camera || '';
+      document.getElementById('ph-lens').value      = p?.lens || '';
+      document.getElementById('ph-film_stock').value = p?.film_stock || '';
+      document.getElementById('ph-sort_order').value = p?.sort_order ?? 99;
+      document.getElementById('ph-is_featured').checked = !!p?.is_featured;
+      toggleSimField();
+      updateCloudPreview();
+    }
+    if (modalId === 'modal-album') {
+      const a = editId ? state.albums.find(x => x.id === editId) : null;
+      document.getElementById('modal-album-ttl').textContent = a ? 'Edit Album' : 'New Album';
+      document.getElementById('al-id').value          = a?.id || '';
+      document.getElementById('al-id-val').value      = a?.id || '';
+      document.getElementById('al-id-val').disabled   = !!a; // can't change PK
+      document.getElementById('al-title').value       = a?.title || '';
+      document.getElementById('al-description').value = a?.description || '';
+      document.getElementById('al-sort_order').value  = a?.sort_order ?? 0;
+    }
+    if (modalId === 'modal-social') {
+      const l = (editId && typeof editId === 'number') ? state.social.find(x => x.id === editId) : null;
+      document.getElementById('modal-social-ttl').textContent = l ? 'Edit Link' : 'Add Social Link';
+      document.getElementById('sl-id').value         = l?.id || '';
+      document.getElementById('sl-label').value      = l?.label || '';
+      document.getElementById('sl-url').value        = l?.url || '';
+      document.getElementById('sl-sort_order').value = l?.sort_order ?? state.social.length;
+    }
+    document.getElementById(modalId).classList.add('open');
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+
+  function toggleSimField() {
+    const isDigital = document.getElementById('ph-medium').value === 'digital';
+    document.getElementById('sim-field').style.opacity = isDigital ? '1' : '0.3';
+  }
+
+  function updateCloudPreview() {
+    const pid = document.getElementById('ph-public_id').value.trim();
+    const cn = window._cloudName || '';
+    const preview = document.getElementById('ph-url-preview');
+    if (!pid) { preview.textContent = '—'; return; }
+    preview.textContent = cn
+      ? `res.cloudinary.com/${cn}/image/upload/…/${pid}`
+      : `(no CLOUD_NAME set) picsum seed: ${pid.length * 7}`;
+  }
+
+  // ─── Save: Photo ───────────────────────────────────────────────────────
+  async function savePhoto() {
+    const pid = document.getElementById('ph-public_id').value.trim();
+    const title = document.getElementById('ph-title').value.trim();
+    if (!pid || !title) { toast('public_id and title are required', true); return; }
+
+    const editId = document.getElementById('ph-id').value;
+    const isFeatured = document.getElementById('ph-is_featured').checked ? 1 : 0;
+
+    const payload = {
+      id:          editId || title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
+      public_id:   pid,
+      title,
+      location:    document.getElementById('ph-location').value,
+      caption:     document.getElementById('ph-caption').value,
+      roll:        document.getElementById('ph-roll').value,
+      album_id:    document.getElementById('ph-album_id').value || null,
+      medium:      document.getElementById('ph-medium').value,
+      simulation:  document.getElementById('ph-simulation').value || null,
+      camera:      document.getElementById('ph-camera').value || null,
+      lens:        document.getElementById('ph-lens').value || null,
+      film_stock:  document.getElementById('ph-film_stock').value || null,
+      sort_order:  parseInt(document.getElementById('ph-sort_order').value) || 99,
+      is_featured: isFeatured,
+      cloudinary_url: null,
+    };
+
+    if (isFeatured) state.photos.forEach(p => p.is_featured = 0);
+
+    if (editId) {
+      const idx = state.photos.findIndex(p => p.id === editId);
+      if (idx >= 0) state.photos[idx] = { ...state.photos[idx], ...payload };
+      await apiFetch(`photos/${editId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      state.photos.push(payload);
+      await apiFetch('photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    closeModal('modal-photo');
+    renderPhotos();
+    toast(editId ? 'Photo updated!' : 'Photo added!');
+  }
+
+  async function deletePhoto(id) {
+    if (!confirm('Delete this photo record? (Cloudinary asset is NOT deleted)')) return;
+    state.photos = state.photos.filter(p => p.id !== id);
+    await apiFetch(`photos/${id}`, { method: 'DELETE' });
+    renderPhotos();
+    toast('Photo deleted.');
+  }
+
+  // ─── Save: Album ───────────────────────────────────────────────────────
+  async function saveAlbum() {
+    const editId = document.getElementById('al-id').value;
+    const id     = document.getElementById('al-id-val').value.trim();
+    const title  = document.getElementById('al-title').value.trim();
+    if (!id || !title) { toast('ID and title are required', true); return; }
+
+    const payload = {
+      id, title,
+      description: document.getElementById('al-description').value,
+      sort_order:  parseInt(document.getElementById('al-sort_order').value) || 0,
+    };
+
+    if (editId) {
+      const idx = state.albums.findIndex(a => a.id === editId);
+      if (idx >= 0) state.albums[idx] = payload;
+      await apiFetch(`albums/${editId}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+    } else {
+      state.albums.push(payload);
+      await apiFetch('albums', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+    }
+
+    closeModal('modal-album');
+    populateAlbumSelects();
+    renderAlbums();
+    toast('Album saved!');
+  }
+
+  async function deleteAlbum(id) {
+    const count = state.photos.filter(p => p.album_id === id).length;
+    if (!confirm(`Delete album? ${count > 0 ? count+' photos will become uncategorised.' : ''}`)) return;
+    state.albums = state.albums.filter(a => a.id !== id);
+    state.photos.forEach(p => { if(p.album_id === id) p.album_id = null; });
+    await apiFetch(`albums/${id}`, { method: 'DELETE' });
+    populateAlbumSelects();
+    renderAlbums();
+    toast('Album deleted.');
+  }
+
+  // ─── Save: Social ─────────────────────────────────────────────────────
+  async function saveSocial() {
+    const editId = document.getElementById('sl-id').value;
+    const label  = document.getElementById('sl-label').value.trim();
+    const url    = document.getElementById('sl-url').value.trim();
+    if (!label || !url) { toast('Label and URL are required', true); return; }
+
+    const payload = {
+      label, url,
+      sort_order: parseInt(document.getElementById('sl-sort_order').value) || 0
+    };
+
+    if (editId) {
+      const id = parseInt(editId);
+      const idx = state.social.findIndex(l => l.id === id);
+      if (idx >= 0) state.social[idx] = { ...state.social[idx], ...payload };
+      await apiFetch(`social/${editId}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+    } else {
+      const res = await apiFetch('social', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      state.social.push({ ...payload, id: res.id });
+    }
+
+    closeModal('modal-social');
+    renderSocial();
+    toast('Social link saved!');
+  }
+
+  async function deleteSocial(id) {
+    if (!confirm('Delete this social link?')) return;
+    state.social = state.social.filter(l => l.id !== id);
+    await apiFetch(`social/${id}`, { method: 'DELETE' });
+    renderSocial();
+    toast('Link deleted.');
+  }
+
+  // ─── Toast ────────────────────────────────────────────────────────────
+  function toast(msg, isErr = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast' + (isErr ? ' err' : '') + ' show';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  // ─── Boot ─────────────────────────────────────────────────────────────
+  // Inject Cloudinary cloud name from server (set via meta tag)
+  window._cloudName = document.querySelector('meta[name="cf-cloud"]')?.content || '';
+  boot();
+  </script>
+  </>
+)}
+
+</body>
+</html>

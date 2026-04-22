@@ -97,7 +97,10 @@ const {
       <button class="lightbox-close" id="lightboxClose">✕ &nbsp;Close</button>
       <div class="lightbox-content">
         <button class="lightbox-nav prev" id="lightboxPrev" aria-label="Previous image">‹</button>
-        <img id="lightboxImg" src="" alt="" />
+        <div class="lightbox-image-wrap">
+          <img id="lightboxImg" src="" alt="" />
+          <div id="lightboxLoader" class="lightbox-loader"></div>
+        </div>
         <button class="lightbox-nav next" id="lightboxNext" aria-label="Next image">›</button>
         <div class="lightbox-info">
           <p id="lightboxTitle" class="lb-title"></p>
@@ -161,6 +164,7 @@ const {
       const lightboxImg   = document.getElementById('lightboxImg') as HTMLImageElement;
       const lightboxTitle = document.getElementById('lightboxTitle');
       const lightboxMeta  = document.getElementById('lightboxMeta');
+      const lightboxLoader = document.getElementById('lightboxLoader');
       const lightboxClose = document.getElementById('lightboxClose');
       const lightboxPrev  = document.getElementById('lightboxPrev');
       const lightboxNext  = document.getElementById('lightboxNext');
@@ -176,7 +180,11 @@ const {
         const title = el.getAttribute('alt') || '';
         const meta  = el.getAttribute('data-meta') || '';
         
-        if (lightboxImg) lightboxImg.src = src;
+        if (lightboxImg) {
+          lightboxLoader?.classList.add('active');
+          lightboxImg.src = src;
+          lightboxImg.onload = () => lightboxLoader?.classList.remove('active');
+        }
         if (lightboxTitle) lightboxTitle.textContent = title;
         if (lightboxMeta) lightboxMeta.textContent = meta;
       };
@@ -188,12 +196,31 @@ const {
         document.body.style.overflow = 'hidden';
       };
 
-      document.querySelectorAll('.gallery-grid').forEach(grid => {
-        const triggers = Array.from(grid.querySelectorAll('.lightbox-trigger')) as HTMLElement[];
-        triggers.forEach((el, idx) => {
-          el.addEventListener('click', () => openLightbox(idx, triggers));
+      // Initialize all lightbox triggers on the page
+      const initLightbox = () => {
+        const allTriggers = Array.from(document.querySelectorAll('.lightbox-trigger')) as HTMLElement[];
+        
+        allTriggers.forEach((el) => {
+          el.addEventListener('click', () => {
+            // Find which group this trigger belongs to (e.g. the same album grid)
+            const parentGrid = el.closest('.gallery-grid');
+            let groupTriggers: HTMLElement[] = [];
+            
+            if (parentGrid) {
+              // If in a grid, the carousel is just that grid's photos
+              groupTriggers = Array.from(parentGrid.querySelectorAll('.lightbox-trigger')) as HTMLElement[];
+            } else {
+              // If not in a grid (like the Featured Image), it's a single-image carousel (or we could make it all featured ones)
+              groupTriggers = [el];
+            }
+            
+            const idx = groupTriggers.indexOf(el);
+            openLightbox(idx, groupTriggers);
+          });
         });
-      });
+      };
+
+      initLightbox();
 
       const closeLightbox = () => {
         lightbox?.classList.remove('open');

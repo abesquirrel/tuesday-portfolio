@@ -502,7 +502,7 @@ footer {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 2rem;
+  padding: 0;
 
   &.open {
     opacity: 1;
@@ -511,25 +511,61 @@ footer {
 
   .lightbox-content {
     position: relative;
-    max-width: 95vw;
-    max-height: 90vh;
+    width: 100vw;
+    height: 100vh;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
+    justify-content: center;
+  }
+
+  .lightbox-image-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 95vw;
+    height: 90vh;
   }
 
   img {
     max-width: 100%;
-    max-height: 80vh;
+    max-height: 100%;
     object-fit: contain;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    border: 1px solid rgba($darkroom-border, 0.3);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+    border: 1px solid rgba($darkroom-border, 0.2);
+    animation: zoomIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .lightbox-loader {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border: 2px solid rgba($accent-amber, 0.1);
+    border-top-color: $accent-amber;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s;
+    &.active {
+      opacity: 1;
+      animation: spin 0.8s linear infinite;
+    }
   }
 
   .lightbox-info {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
     text-align: center;
-    animation: fadeUp 0.6s ease both 0.2s;
+    background: rgba($darkroom-black, 0.7);
+    backdrop-filter: blur(8px);
+    padding: 1rem 2rem;
+    border-radius: 40px;
+    border: 1px solid rgba(255,255,255,0.05);
+    pointer-events: none;
+    z-index: 20;
+    width: fit-content;
+    max-width: 80vw;
     
     .lb-title {
       font-family: 'Playfair Display', serif;
@@ -620,6 +656,15 @@ footer {
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes scrollBob {

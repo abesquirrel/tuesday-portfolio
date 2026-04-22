@@ -324,6 +324,7 @@ if (Astro.request.method === 'POST') {
       <div class="login-box">
         <div class="login-logo">I think it was Tuesday</div>
         <div class="login-sub">Admin Panel</div>
+        <div style="font-size: 10px; color: gray;">DEBUG: Expected secret is {ADMIN_SECRET}</div>
         {loginError && <div style="color: #ff5555; font-size: 11px; margin-bottom: 10px;">{loginError}</div>}
         <label class="login-label">Password</label>
         <input class="login-input" type="password" name="password" autofocus placeholder="••••••••" />

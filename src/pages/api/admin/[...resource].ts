@@ -46,7 +46,7 @@ function checkAuth(cookies: any, secret: string): boolean {
 // ─── Main handler ──────────────────────────────────────────────────────────
 export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
   const env      = (locals as any).runtime?.env;
-  const db       = env?.DB;
+  const db       = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
   const SECRET   = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
 
   if (!checkAuth(cookies, SECRET)) return unauthorized();

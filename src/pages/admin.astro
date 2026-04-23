@@ -26,8 +26,8 @@ if (!CLOUD_NAME && db) {
   }
 }
 
-// Last resort fallback for local dev if everything else fails
-if (!CLOUD_NAME && import.meta.env.DEV) {
+// Global fallback if everything else fails
+if (!CLOUD_NAME) {
   CLOUD_NAME = 'clueless';
 }
 
@@ -1152,9 +1152,7 @@ if (Astro.request.method === 'POST') {
     const cn = window._cloudName || '';
     const preview = document.getElementById('ph-url-preview');
     if (!pid) { preview.textContent = '—'; return; }
-    preview.textContent = cn
-      ? `res.cloudinary.com/${cn}/image/upload/…/${pid}`
-      : `(CLOUD_NAME missing) picsum seed: ${pid.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)}`;
+    preview.textContent = `res.cloudinary.com/${cn || 'clueless'}/image/upload/…/${pid}`;
   }
 
   // ─── Save: Photo ───────────────────────────────────────────────────────
@@ -1315,11 +1313,9 @@ if (Astro.request.method === 'POST') {
   function resolveCloudName() {
     if (!window._cloudName && state.settings.PUBLIC_CLOUDINARY_CLOUD_NAME) {
       window._cloudName = state.settings.PUBLIC_CLOUDINARY_CLOUD_NAME;
-      console.log('Cloud Name resolved from DB settings:', window._cloudName);
-    } else if (window._cloudName) {
-      console.log('Cloud Name resolved from Environment:', window._cloudName);
-    } else {
-      console.warn('Cloud Name missing from both Environment and DB settings.');
+    }
+    if (!window._cloudName) {
+      window._cloudName = 'clueless';
     }
   }
 

@@ -11,13 +11,24 @@ const env = (Astro.locals as any).runtime?.env;
 const db  = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
 const ADMIN_SECRET = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
 
-// Try to get cloud name from environment first
-let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
+// Try to get cloud name from environment first (Cloudflare, Vite, Node)
+let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME 
+              ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME 
+              ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
 
 // If missing, try to fetch from DB on the server
 if (!CLOUD_NAME && db) {
-  const settings = await getSettings(db);
-  CLOUD_NAME = settings.PUBLIC_CLOUDINARY_CLOUD_NAME;
+  try {
+    const settings = await getSettings(db);
+    CLOUD_NAME = settings.PUBLIC_CLOUDINARY_CLOUD_NAME;
+  } catch (e) {
+    console.error('Failed to fetch settings from DB:', e);
+  }
+}
+
+// Last resort fallback for local dev if everything else fails
+if (!CLOUD_NAME && import.meta.env.DEV) {
+  CLOUD_NAME = 'clueless';
 }
 
 const cookie = Astro.cookies.get('admin_session');

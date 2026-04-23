@@ -12,28 +12,31 @@
 
 import type { Photo } from '../types/photo';
 
-const CLOUD_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
+const DEFAULT_CLOUD_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
 
 export function cloudinaryUrl(
   publicId: string,
   transforms: string = 'f_auto,q_auto,w_1200',
+  cloudName?: string
 ): string {
   if (!publicId) return '';
   if (publicId.startsWith('http')) return publicId;
   
-  if (!CLOUD_NAME || CLOUD_NAME === 'your_cloud_name_here') {
+  const activeCloud = cloudName || DEFAULT_CLOUD_NAME;
+  
+  if (!activeCloud || activeCloud === 'your_cloud_name_here') {
     const seed = publicId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
     return `https://picsum.photos/seed/${seed}/1200/800`;
   }
-  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${transforms}/${publicId.replace(/^\//, '')}`;
+  return `https://res.cloudinary.com/${activeCloud}/image/upload/${transforms}/${publicId.replace(/^\//, '')}`;
 }
 
-export function cloudinaryThumb(publicId: string): string {
-  return cloudinaryUrl(publicId, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto');
+export function cloudinaryThumb(publicId: string, cloudName?: string): string {
+  return cloudinaryUrl(publicId, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto', cloudName);
 }
 
-export function cloudinaryHero(publicId: string): string {
-  return cloudinaryUrl(publicId, 'f_auto,q_auto,w_1920,h_1080,c_fill,g_auto');
+export function cloudinaryHero(publicId: string, cloudName?: string): string {
+  return cloudinaryUrl(publicId, 'f_auto,q_auto,w_1920,h_1080,c_fill,g_auto', cloudName);
 }
 
 /**
@@ -44,6 +47,7 @@ export function cloudinaryHero(publicId: string): string {
 export function cloudinaryFromRow(
   photo: Pick<Photo, 'public_id' | 'cloudinary_url'>,
   transforms: string = 'f_auto,q_auto,w_1200',
+  cloudName?: string
 ): string {
-  return photo.cloudinary_url ?? cloudinaryUrl(photo.public_id, transforms);
+  return photo.cloudinary_url ?? cloudinaryUrl(photo.public_id, transforms, cloudName);
 }

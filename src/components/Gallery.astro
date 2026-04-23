@@ -5,9 +5,10 @@ import type { Photo, Album } from '../types/photo';
 interface Props {
   photos: Photo[];
   albums: Album[];
+  cloudName?: string;
 }
 
-const { photos, albums } = Astro.props;
+const { photos, albums, cloudName } = Astro.props;
 const gridPhotos = photos.filter((p) => p.is_featured === 0);
 
 // Helper to get photos for a specific album
@@ -31,17 +32,22 @@ const uncategorizedPhotos = getAlbumPhotos(null);
     {
       activeAlbums.map((album) => (
         <div class="album-section mb-5">
-          <div class="container mb-4 reveal">
-            <h3 class="album-title">{album.title}</h3>
-            {album.description && <p class="album-description text-muted small">{album.description}</p>}
+          <div class="container mb-4 reveal d-flex justify-content-between align-items-end">
+            <div>
+              <h3 class="album-title">{album.title}</h3>
+              {album.description && <p class="album-description text-muted small mb-0">{album.description}</p>}
+            </div>
+            <button class="btn-view-album" data-album-id={album.id}>
+              Browse Album <span>→</span>
+            </button>
           </div>
           
           <div class="gallery-grid">
             {getAlbumPhotos(album.id).map((photo) => {
               const thumb = photo.cloudinary_url
-                ? cloudinaryFromRow(photo, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto')
-                : cloudinaryThumb(photo.public_id);
-              const full  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1400');
+                ? cloudinaryFromRow(photo, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto', cloudName)
+                : cloudinaryThumb(photo.public_id, cloudName);
+              const full  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1400', cloudName);
               return (
                 <div class="gallery-cell">
                   <img
@@ -73,15 +79,18 @@ const uncategorizedPhotos = getAlbumPhotos(null);
     {
       uncategorizedPhotos.length > 0 && (
         <div class="album-section mb-5">
-          <div class="container mb-4 reveal">
+          <div class="container mb-4 reveal d-flex justify-content-between align-items-end">
             <h3 class="album-title">Other Moments</h3>
+            <button class="btn-view-album" data-album-id="uncategorized">
+              Browse All <span>→</span>
+            </button>
           </div>
           <div class="gallery-grid">
             {uncategorizedPhotos.map((photo) => {
               const thumb = photo.cloudinary_url
-                ? cloudinaryFromRow(photo, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto')
-                : cloudinaryThumb(photo.public_id);
-              const full  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1400');
+                ? cloudinaryFromRow(photo, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto', cloudName)
+                : cloudinaryThumb(photo.public_id, cloudName);
+              const full  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1400', cloudName);
               return (
                 <div class="gallery-cell">
                   <img
@@ -136,5 +145,38 @@ const uncategorizedPhotos = getAlbumPhotos(null);
   }
   .album-section {
     padding-top: 2rem;
+  }
+  .btn-view-album {
+    background: transparent;
+    border: none;
+    color: var(--silver-dim, #7a7671);
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .btn-view-album span {
+    transition: transform 0.3s ease;
+    color: var(--accent-amber, #c8a96e);
+  }
+  .btn-view-album:hover {
+    color: var(--accent-amber, #c8a96e);
+    border-bottom-color: var(--accent-amber, #c8a96e);
+  }
+  .btn-view-album:hover span {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 576px) {
+    .btn-view-album {
+      font-size: 0.6rem;
+    }
   }
 </style>

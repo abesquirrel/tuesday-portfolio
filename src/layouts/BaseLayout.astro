@@ -203,24 +203,36 @@ const {
 
       // Initialize all lightbox triggers on the page
       const initLightbox = () => {
+        // Individual image triggers
         const allTriggers = Array.from(document.querySelectorAll('.lightbox-trigger')) as HTMLElement[];
-        
         allTriggers.forEach((el) => {
           el.addEventListener('click', () => {
-            // Find which group this trigger belongs to (e.g. the same album grid)
             const parentGrid = el.closest('.gallery-grid');
             let groupTriggers: HTMLElement[] = [];
             
             if (parentGrid) {
-              // If in a grid, the carousel is just that grid's photos
               groupTriggers = Array.from(parentGrid.querySelectorAll('.lightbox-trigger')) as HTMLElement[];
             } else {
-              // If not in a grid (like the Featured Image), it's a single-image carousel (or we could make it all featured ones)
               groupTriggers = [el];
             }
             
             const idx = groupTriggers.indexOf(el);
             openLightbox(idx, groupTriggers);
+          });
+        });
+
+        // Album level triggers (Open whole album)
+        const albumTriggers = Array.from(document.querySelectorAll('.btn-view-album')) as HTMLElement[];
+        albumTriggers.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const albumId = btn.getAttribute('data-album-id');
+            const parentSection = btn.closest('.album-section');
+            if (parentSection) {
+              const groupTriggers = Array.from(parentSection.querySelectorAll('.lightbox-trigger')) as HTMLElement[];
+              if (groupTriggers.length > 0) {
+                openLightbox(0, groupTriggers);
+              }
+            }
           });
         });
       };

@@ -4,11 +4,12 @@ import type { Photo } from '../types/photo';
 
 interface Props {
   photo: Photo;
+  cloudName?: string;
 }
-const { photo } = Astro.props;
+const { photo, cloudName } = Astro.props;
 
-const fullUrl  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1600');
-const thumbUrl = cloudinaryFromRow(photo, 'f_auto,q_auto,w_900');
+const fullUrl  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1600', cloudName);
+const thumbUrl = cloudinaryFromRow(photo, 'f_auto,q_auto,w_900', cloudName);
 ---
 
 <section id="featured">

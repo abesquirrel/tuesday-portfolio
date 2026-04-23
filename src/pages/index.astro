@@ -29,9 +29,14 @@ const heroImageId = settings.hero_image_id || featuredPhoto?.public_id || '';
 
   <FeaturedPhoto
     photo={featuredPhoto}
+    cloudName={settings.PUBLIC_CLOUDINARY_CLOUD_NAME}
   />
 
-  <Gallery photos={photosData} albums={albums} />
+  <Gallery 
+    photos={photosData} 
+    albums={albums} 
+    cloudName={settings.PUBLIC_CLOUDINARY_CLOUD_NAME} 
+  />
 
   <About settings={settings} />
 

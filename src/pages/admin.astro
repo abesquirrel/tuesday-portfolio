@@ -565,6 +565,21 @@ if (Astro.request.method === 'POST') {
               <input class="finput" id="about-image" type="text" placeholder="portfolio/about/portrait">
             </div>
           </div>
+
+          <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border)">
+            <div style="font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--amber); margin-bottom:14px; font-weight:700">⚙️ Site Configuration</div>
+            <div class="frow">
+              <div class="fgroup">
+                <label class="flabel">Cloudinary Cloud Name</label>
+                <input class="finput" id="conf-cloud-name" type="text" placeholder="your_cloud_name">
+                <div class="hint">Fallback if not set in environment variables.</div>
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Admin Display Name</label>
+                <input class="finput" id="conf-admin-name" type="text" placeholder="Tuesday Portfolio">
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- ── SOCIAL ── -->
@@ -991,6 +1006,8 @@ if (Astro.request.method === 'POST') {
     document.getElementById('about-also').value      = also;
     document.getElementById('about-hero-image').value = heroImage;
     document.getElementById('about-image').value     = aboutImage;
+    document.getElementById('conf-cloud-name').value = s.PUBLIC_CLOUDINARY_CLOUD_NAME || '';
+    document.getElementById('conf-admin-name').value = s.SITE_TITLE || '';
     document.getElementById('prev-bio').textContent  = bio;
     updateGearPreview();
   }
@@ -1013,6 +1030,8 @@ if (Astro.request.method === 'POST') {
       about_also_shooting:       document.getElementById('about-also').value,
       hero_image_id:             document.getElementById('about-hero-image').value,
       about_image_id:            document.getElementById('about-image').value,
+      PUBLIC_CLOUDINARY_CLOUD_NAME: document.getElementById('conf-cloud-name').value.trim(),
+      SITE_TITLE:                document.getElementById('conf-admin-name').value.trim(),
     };
     for (const [key, value] of Object.entries(updates)) {
       state.settings[key] = value;
@@ -1022,7 +1041,11 @@ if (Astro.request.method === 'POST') {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates)
     });
-    toast('About section saved!');
+    // Update local cloud name if it was empty
+    if (!window._cloudName && updates.PUBLIC_CLOUDINARY_CLOUD_NAME) {
+      window._cloudName = updates.PUBLIC_CLOUDINARY_CLOUD_NAME;
+    }
+    toast('Settings saved!');
   }
 
   // ─── Social ───────────────────────────────────────────────────────────
@@ -1109,7 +1132,7 @@ if (Astro.request.method === 'POST') {
     if (!pid) { preview.textContent = '—'; return; }
     preview.textContent = cn
       ? `res.cloudinary.com/${cn}/image/upload/…/${pid}`
-      : `(PUBLIC_CLOUDINARY_CLOUD_NAME not set in Env or DB)`;
+      : `(CLOUD_NAME missing) picsum seed: ${pid.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)}`;
   }
 
   // ─── Save: Photo ───────────────────────────────────────────────────────

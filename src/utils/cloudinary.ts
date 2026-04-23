@@ -14,7 +14,7 @@ import type { Photo } from '../types/photo';
 
 const DEFAULT_CLOUD_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME 
                        ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined)
-                       ?? (import.meta.env.DEV ? 'clueless' : undefined);
+                       ?? 'clueless';
 
 export function cloudinaryUrl(
   publicId: string,

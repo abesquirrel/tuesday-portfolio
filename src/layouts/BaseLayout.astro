@@ -95,8 +95,13 @@ const {
     <!-- ── Lightbox container ────────────────────────────────────────────── -->
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
       <div class="lightbox-controls">
-        <button class="lightbox-btn" id="lightboxPlay" aria-label="Start slideshow">▶</button>
-        <button class="lightbox-close" id="lightboxClose">✕ &nbsp;Close</button>
+        <button class="lightbox-btn" id="lightboxPlay" aria-label="Start slideshow">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="lightbox-close" id="lightboxClose">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          <span>Close</span>
+        </button>
       </div>
       <div class="lightbox-content">
         <button class="lightbox-nav prev" id="lightboxPrev" aria-label="Previous image">‹</button>

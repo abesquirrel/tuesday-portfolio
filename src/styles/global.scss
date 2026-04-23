@@ -597,35 +597,41 @@ footer {
   }
 
   .lightbox-btn, .lightbox-close {
-    background: rgba($darkroom-black, 0.5);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba($darkroom-black, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
     color: $silver-bright;
     font-family: 'Courier New', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0;
+    gap: 0.6rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 40px;
+
+    svg {
+      opacity: 0.8;
+      transition: transform 0.3s ease;
+    }
 
     &:hover { 
-      color: $accent-amber;
-      background: rgba($darkroom-black, 0.8);
-      border-color: $accent-amber;
+      color: $off-white;
+      background: rgba($accent-amber, 0.15);
+      border-color: rgba($accent-amber, 0.3);
+      svg { transform: scale(1.1); opacity: 1; }
     }
   }
 
   .lightbox-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     padding: 0;
-    font-size: 0.8rem;
+    border-radius: 50%;
   }
 
   .lightbox-nav {

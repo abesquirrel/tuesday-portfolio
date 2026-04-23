@@ -64,9 +64,9 @@ if (Astro.request.method === 'POST') {
       --text:     #e2ddd5;
       --muted:    #7a7570;
       --faint:    #3a3530;
-      --r: 8px;
-      --r-btn: 30px;
-      --r-sm: 4px;
+      --r: 0;
+      --r-btn: 0;
+      --r-sm: 0;
       --mono: 'IBM Plex Mono', monospace;
       --serif: 'Playfair Display', serif;
     }
@@ -86,6 +86,7 @@ if (Astro.request.method === 'POST') {
     }
     .login-box {
       width: 340px;
+      max-width: 90%;
       padding: 40px;
       border: 1px solid var(--border2);
       background: var(--paper);
@@ -102,13 +103,8 @@ if (Astro.request.method === 'POST') {
     }
     .login-input:focus { border-color: var(--amber); }
     .login-btn {
-      width: 100%; margin-top: 16px; padding: 11px;
-      background: var(--amber); border: none; color: #0a0a0a;
-      font-family: var(--mono); font-size: 11px; font-weight: 500;
-      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
-      border-radius: var(--r); transition: background .15s;
+      width: 100%; margin-top: 16px;
     }
-    .login-btn:hover { background: var(--amber2); }
 
     /* ─── Layout ─── */
     .shell { display: flex; min-height: 100vh; }
@@ -116,7 +112,8 @@ if (Astro.request.method === 'POST') {
     .sidebar {
       width: 210px; min-height: 100vh; background: var(--paper);
       border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; bottom: 0;
-      display: flex; flex-direction: column; z-index: 20;
+      display: flex; flex-direction: column; z-index: 100;
+      transition: transform 0.3s ease;
     }
     .sb-brand { padding: 24px 20px 18px; border-bottom: 1px solid var(--border); }
     .sb-brand-title { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--amber); }
@@ -132,14 +129,7 @@ if (Astro.request.method === 'POST') {
     .sb-item:hover { color: var(--text); background: rgba(255,255,255,.03); }
     .sb-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(212,168,75,.05); }
     .sb-item .ic { width: 16px; text-align: center; font-size: 13px; }
-    .sb-footer { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
-    .sb-view-btn {
-      display: block; padding: 7px 10px; text-align: center;
-      border: 1px solid var(--border2); color: var(--muted);
-      font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
-      text-decoration: none; border-radius: var(--r); transition: all .2s;
-    }
-    .sb-view-btn:hover { border-color: var(--amber); color: var(--amber); }
+    .sb-footer { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
 
     .main { margin-left: 210px; flex: 1; display: flex; flex-direction: column; }
     .topbar {
@@ -165,7 +155,7 @@ if (Astro.request.method === 'POST') {
       background: var(--card); color: var(--text);
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    .btn:hover { background: var(--rail); border-color: var(--amber); color: var(--amber); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .btn:hover { background: var(--rail); border-color: var(--amber); color: var(--amber); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .btn-primary { background: var(--amber); color: var(--ink); font-weight: 700; border-color: var(--amber); }
     .btn-primary:hover { background: #eac06a; color: var(--ink); box-shadow: 0 6px 16px rgba(212,168,75,0.25); }
     .btn-danger { background: rgba(181, 57, 43, 0.15); border-color: rgba(181, 57, 43, 0.3); color: #ff6b5b; }
@@ -213,8 +203,8 @@ if (Astro.request.method === 'POST') {
     .card-foot { padding: 8px 14px; border-top: 1px solid var(--border); background: var(--rail); display: flex; gap: 6px; align-items: center; }
 
     /* ─── Table ─── */
-    .tbl-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-top: 14px; }
-    table { width: 100%; border-collapse: collapse; }
+    .tbl-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow-x: auto; margin-top: 14px; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
     th { padding: 9px 14px; text-align: left; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--rail); }
     td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
@@ -222,7 +212,7 @@ if (Astro.request.method === 'POST') {
 
     /* ─── Badge ─── */
     .badge {
-      display: inline-block; padding: 2px 7px; border-radius: 20px;
+      display: inline-block; padding: 2px 7px; border-radius: 0;
       font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
       background: rgba(212,168,75,.1); color: var(--amber2);
       border: 1px solid rgba(212,168,75,.2);
@@ -240,7 +230,7 @@ if (Astro.request.method === 'POST') {
     /* ─── Modal ─── */
     .modal-bg {
       position: fixed; inset: 0; background: rgba(0,0,0,.8);
-      z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px;
+      z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
     }
     .modal-bg.open { display: flex; }
     .modal {
@@ -309,13 +299,60 @@ if (Astro.request.method === 'POST') {
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 
+    .mobile-nav-toggle {
+      display: none;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      color: var(--amber);
+      padding: 8px;
+      border-radius: var(--r-sm);
+      cursor: pointer;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 90;
+    }
+
     @media (max-width: 768px) {
-      .sidebar { width: 54px; }
-      .sb-brand-title, .sb-brand-sub, .sb-item span, .sb-section, .sb-footer { display: none; }
-      .sb-item { justify-content: center; padding: 10px; }
-      .main { margin-left: 54px; }
+      .sidebar {
+        transform: translateX(-100%);
+        width: 240px;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .sidebar-overlay.open {
+        display: block;
+      }
+      .main {
+        margin-left: 0;
+        width: 100%;
+        min-width: 0;
+      }
+      .mobile-nav-toggle { display: block; }
       .frow, .frow3 { grid-template-columns: 1fr; }
       .stats { grid-template-columns: 1fr 1fr; }
+
+      .topbar {
+        padding: 14px 18px;
+        width: 100%;
+      }
+      .content {
+        padding: 18px;
+        width: 100%;
+      }
+
+      .btn { padding: 12px 24px; font-size: 12px; } /* larger touch targets on mobile */
+
+      /* Ensure modals are properly centered and sized on small screens */
+      .modal {
+        width: 95%;
+        margin: 0 auto;
+      }
     }
   </style>
 </head>
@@ -329,11 +366,10 @@ if (Astro.request.method === 'POST') {
       <div class="login-box">
         <div class="login-logo">I think it was Tuesday</div>
         <div class="login-sub">Admin Panel</div>
-        <div style="font-size: 10px; color: gray;">DEBUG: Expected secret is {ADMIN_SECRET}</div>
         {loginError && <div style="color: #ff5555; font-size: 11px; margin-bottom: 10px;">{loginError}</div>}
         <label class="login-label">Password</label>
         <input class="login-input" type="password" name="password" autofocus placeholder="••••••••" />
-        <button class="login-btn" type="submit" style="display:flex;align-items:center;justify-content:center;gap:6px">Enter Darkroom <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
+        <button class="btn btn-primary login-btn" type="submit">Enter Darkroom <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
       </div>
     </form>
   </div>
@@ -342,8 +378,11 @@ if (Astro.request.method === 'POST') {
   <>
   <div class="shell">
 
+    <!-- ── Sidebar Overlay ── -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
     <!-- ── Sidebar ── -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="sb-brand">
         <div class="sb-brand-title">Tuesday</div>
         <div class="sb-brand-sub">Darkroom Admin</div>
@@ -371,10 +410,10 @@ if (Astro.request.method === 'POST') {
         </div>
       </nav>
       <div class="sb-footer">
-        <a href="/" target="_blank" class="sb-view-btn" style="display:flex;align-items:center;justify-content:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg> View Site</a>
+        <a href="/" target="_blank" class="btn btn-sm" style="width:100%;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg> View Site</a>
         <form method="POST" style="margin:0">
           <input type="hidden" name="action" value="logout" />
-          <button type="submit" class="sb-view-btn" style="width:100%;cursor:pointer;background:none;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout</button>
+          <button type="submit" class="btn btn-sm btn-danger" style="width:100%;cursor:pointer;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout</button>
         </form>
       </div>
     </aside>
@@ -382,6 +421,9 @@ if (Astro.request.method === 'POST') {
     <!-- ── Main ── -->
     <div class="main">
       <header class="topbar">
+        <button class="mobile-nav-toggle" onclick="toggleSidebar()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
         <div class="topbar-title" id="topbar-title">Overview</div>
         <div class="topbar-right">
           <span style="font-size:9px; letter-spacing:0.1em; padding:2px 8px; border-radius:10px; background:rgba(212,168,75,0.1); color:var(--amber); border:1px solid rgba(212,168,75,0.2);">
@@ -757,6 +799,12 @@ if (Astro.request.method === 'POST') {
     document.getElementById('panel-'+p).classList.add('active');
     el.classList.add('active');
     document.getElementById('topbar-title').textContent = panelTitles[p];
+
+    // Auto-close sidebar on mobile after selection
+    if (window.innerWidth <= 768) {
+      toggleSidebar(false);
+    }
+
     switch(p) {
       case 'dashboard': renderDashboard(); break;
       case 'photos':    renderPhotos(); break;
@@ -764,6 +812,20 @@ if (Astro.request.method === 'POST') {
       case 'featured':  renderFeatured(); break;
       case 'about':     renderAbout(); break;
       case 'social':    renderSocial(); break;
+    }
+  }
+
+  function toggleSidebar(force) {
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('sidebar-overlay');
+    const isOpen = (force !== undefined) ? !force : sb.classList.contains('open');
+
+    if (isOpen) {
+      sb.classList.remove('open');
+      ov.classList.remove('open');
+    } else {
+      sb.classList.add('open');
+      ov.classList.add('open');
     }
   }
 
@@ -1047,7 +1109,7 @@ if (Astro.request.method === 'POST') {
     if (!pid) { preview.textContent = '—'; return; }
     preview.textContent = cn
       ? `res.cloudinary.com/${cn}/image/upload/…/${pid}`
-      : `(no CLOUD_NAME set) picsum seed: ${pid.length * 7}`;
+      : `(PUBLIC_CLOUDINARY_CLOUD_NAME not set in Env or DB)`;
   }
 
   // ─── Save: Photo ───────────────────────────────────────────────────────
@@ -1203,7 +1265,19 @@ if (Astro.request.method === 'POST') {
   // ─── Boot ─────────────────────────────────────────────────────────────
   // Inject Cloudinary cloud name from server (set via meta tag)
   window._cloudName = document.querySelector('meta[name="cf-cloud"]')?.content || '';
-  boot();
+
+  // Also try to find it in settings if not in env
+  function resolveCloudName() {
+    if (!window._cloudName && state.settings.PUBLIC_CLOUDINARY_CLOUD_NAME) {
+      window._cloudName = state.settings.PUBLIC_CLOUDINARY_CLOUD_NAME;
+    }
+  }
+
+  (async () => {
+    await boot();
+    resolveCloudName();
+    if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
+  })();
   </script>
   </>
 )}

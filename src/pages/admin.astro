@@ -3,11 +3,22 @@
 // ─── Server-side: auth guard ───────────────────────────────────────────────
 export const prerender = false;
 
+import { getSettings } from '../lib/db';
+
 // Simple cookie-based session check
 // Set ADMIN_SECRET as a Cloudflare Pages secret via dashboard
 const env = (Astro.locals as any).runtime?.env;
+const db  = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
 const ADMIN_SECRET = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
-const CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+// Try to get cloud name from environment first
+let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+// If missing, try to fetch from DB on the server
+if (!CLOUD_NAME && db) {
+  const settings = await getSettings(db);
+  CLOUD_NAME = settings.PUBLIC_CLOUDINARY_CLOUD_NAME;
+}
 
 const cookie = Astro.cookies.get('admin_session');
 const isAuthed = cookie?.value === ADMIN_SECRET;
@@ -1293,6 +1304,11 @@ if (Astro.request.method === 'POST') {
   function resolveCloudName() {
     if (!window._cloudName && state.settings.PUBLIC_CLOUDINARY_CLOUD_NAME) {
       window._cloudName = state.settings.PUBLIC_CLOUDINARY_CLOUD_NAME;
+      console.log('Cloud Name resolved from DB settings:', window._cloudName);
+    } else if (window._cloudName) {
+      console.log('Cloud Name resolved from Environment:', window._cloudName);
+    } else {
+      console.warn('Cloud Name missing from both Environment and DB settings.');
     }
   }
 

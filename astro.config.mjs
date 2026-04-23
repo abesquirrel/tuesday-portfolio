@@ -6,6 +6,9 @@ export default defineConfig({
   site: 'https://tuesday.paulrojas.quest',
   output: "hybrid",
   adapter: cloudflare(),
+  image: {
+    service: { entrypoint: 'astro/assets/services/noop' }
+  },
   vite: {
     css: {
       preprocessorOptions: {

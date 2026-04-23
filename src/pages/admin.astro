@@ -64,9 +64,9 @@ if (Astro.request.method === 'POST') {
       --text:     #e2ddd5;
       --muted:    #7a7570;
       --faint:    #3a3530;
-      --r: 8px;
-      --r-btn: 30px;
-      --r-sm: 4px;
+      --r: 0;
+      --r-btn: 0;
+      --r-sm: 0;
       --mono: 'IBM Plex Mono', monospace;
       --serif: 'Playfair Display', serif;
     }
@@ -86,6 +86,7 @@ if (Astro.request.method === 'POST') {
     }
     .login-box {
       width: 340px;
+      max-width: 90%;
       padding: 40px;
       border: 1px solid var(--border2);
       background: var(--paper);
@@ -154,7 +155,7 @@ if (Astro.request.method === 'POST') {
       background: var(--card); color: var(--text);
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
-    .btn:hover { background: var(--rail); border-color: var(--amber); color: var(--amber); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .btn:hover { background: var(--rail); border-color: var(--amber); color: var(--amber); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .btn-primary { background: var(--amber); color: var(--ink); font-weight: 700; border-color: var(--amber); }
     .btn-primary:hover { background: #eac06a; color: var(--ink); box-shadow: 0 6px 16px rgba(212,168,75,0.25); }
     .btn-danger { background: rgba(181, 57, 43, 0.15); border-color: rgba(181, 57, 43, 0.3); color: #ff6b5b; }
@@ -211,7 +212,7 @@ if (Astro.request.method === 'POST') {
 
     /* ─── Badge ─── */
     .badge {
-      display: inline-block; padding: 2px 7px; border-radius: 20px;
+      display: inline-block; padding: 2px 7px; border-radius: 0;
       font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
       background: rgba(212,168,75,.1); color: var(--amber2);
       border: 1px solid rgba(212,168,75,.2);
@@ -229,7 +230,7 @@ if (Astro.request.method === 'POST') {
     /* ─── Modal ─── */
     .modal-bg {
       position: fixed; inset: 0; background: rgba(0,0,0,.8);
-      z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px;
+      z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
     }
     .modal-bg.open { display: flex; }
     .modal {
@@ -327,15 +328,31 @@ if (Astro.request.method === 'POST') {
       .sidebar-overlay.open {
         display: block;
       }
-      .main { margin-left: 0; }
+      .main {
+        margin-left: 0;
+        width: 100%;
+        min-width: 0;
+      }
       .mobile-nav-toggle { display: block; }
       .frow, .frow3 { grid-template-columns: 1fr; }
       .stats { grid-template-columns: 1fr 1fr; }
 
-      .topbar { padding: 14px 18px; }
-      .content { padding: 18px; }
+      .topbar {
+        padding: 14px 18px;
+        width: 100%;
+      }
+      .content {
+        padding: 18px;
+        width: 100%;
+      }
 
       .btn { padding: 12px 24px; font-size: 12px; } /* larger touch targets on mobile */
+
+      /* Ensure modals are properly centered and sized on small screens */
+      .modal {
+        width: 95%;
+        margin: 0 auto;
+      }
     }
   </style>
 </head>
@@ -1092,7 +1109,7 @@ if (Astro.request.method === 'POST') {
     if (!pid) { preview.textContent = '—'; return; }
     preview.textContent = cn
       ? `res.cloudinary.com/${cn}/image/upload/…/${pid}`
-      : `(no CLOUD_NAME set) picsum seed: ${pid.length * 7}`;
+      : `(PUBLIC_CLOUDINARY_CLOUD_NAME not set in Env or DB)`;
   }
 
   // ─── Save: Photo ───────────────────────────────────────────────────────
@@ -1248,7 +1265,19 @@ if (Astro.request.method === 'POST') {
   // ─── Boot ─────────────────────────────────────────────────────────────
   // Inject Cloudinary cloud name from server (set via meta tag)
   window._cloudName = document.querySelector('meta[name="cf-cloud"]')?.content || '';
-  boot();
+
+  // Also try to find it in settings if not in env
+  function resolveCloudName() {
+    if (!window._cloudName && state.settings.PUBLIC_CLOUDINARY_CLOUD_NAME) {
+      window._cloudName = state.settings.PUBLIC_CLOUDINARY_CLOUD_NAME;
+    }
+  }
+
+  (async () => {
+    await boot();
+    resolveCloudName();
+    if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
+  })();
   </script>
   </>
 )}

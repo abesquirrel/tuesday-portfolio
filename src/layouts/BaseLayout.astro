@@ -291,11 +291,11 @@ const {
       let touchEndX = 0;
       const swipeArea = document.getElementById('lightboxSwipeArea');
 
-      swipeArea?.addEventListener('touchstart', (e) => {
+      swipeArea?.addEventListener('touchstart', (e: TouchEvent) => {
         touchStartX = e.changedTouches[0].screenX;
       }, { passive: true });
 
-      swipeArea?.addEventListener('touchend', (e) => {
+      swipeArea?.addEventListener('touchend', (e: TouchEvent) => {
         touchEndX = e.changedTouches[0].screenX;
         handleSwipe();
       }, { passive: true });

@@ -420,9 +420,7 @@ if (Astro.request.method === 'POST') {
         <div class="sb-item" data-panel="albums" onclick="nav(this)">
           <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span><span>Albums</span>
         </div>
-        <div class="sb-item" data-panel="featured" onclick="nav(this)">
-          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span><span>Featured Photo</span>
-        </div>
+
         <div class="sb-section">Site</div>
         <div class="sb-item" data-panel="about" onclick="nav(this)">
           <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span><span>About / Bio</span>
@@ -514,20 +512,7 @@ if (Astro.request.method === 'POST') {
           <div class="cards" id="photos-grid"></div>
         </div>
 
-        <!-- ── FEATURED ── -->
-        <div id="panel-featured" class="panel">
-          <div class="sec-sub" style="margin-bottom:16px">
-            The featured photo appears in the hero strip and the "Featured Image" section.<br/>
-            Only one photo can be featured — setting a new one will un-feature the current one.
-          </div>
-          <div id="featured-current" style="margin-bottom:20px"></div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th></th><th>Title</th><th>Location</th><th>Camera</th><th>Film</th><th></th></tr></thead>
-              <tbody id="featured-table"></tbody>
-            </table>
-          </div>
-        </div>
+
 
         <!-- ── ALBUMS ── -->
         <div id="panel-albums" class="panel">
@@ -827,7 +812,7 @@ if (Astro.request.method === 'POST') {
   // ─── Nav ─────────────────────────────────────────────────────────────
   const panelTitles = {
     dashboard: 'Overview', photos: 'Photos', albums: 'Albums',
-    featured: 'Featured Photo', about: 'About / Bio', social: 'Social Links'
+    about: 'About / Bio', social: 'Social Links'
   };
   function nav(el) {
     const p = el.dataset.panel;
@@ -846,7 +831,6 @@ if (Astro.request.method === 'POST') {
       case 'dashboard': renderDashboard(); break;
       case 'photos':    renderPhotos(); break;
       case 'albums':    renderAlbums(); break;
-      case 'featured':  renderFeatured(); break;
       case 'about':     renderAbout(); break;
       case 'social':    renderSocial(); break;
     }
@@ -927,7 +911,6 @@ if (Astro.request.method === 'POST') {
               </div>
             </div>
             <div class="card-foot">
-              <button class="btn btn-xs" onclick="openModal('modal-photo','${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
               ${!p.is_featured?`<button class="btn btn-xs" onclick="setFeatured('${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Feature</button>`:''}
               <button class="btn btn-danger btn-xs" style="margin-left:auto" onclick="deletePhoto('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </div>
@@ -935,45 +918,7 @@ if (Astro.request.method === 'POST') {
         }).join('');
   }
 
-  // ─── Featured ─────────────────────────────────────────────────────────
-  function renderFeatured() {
-    const featured = state.photos.find(p => p.is_featured);
-    const CLOUD = window._cloudName || '';
-    const thumbUrl = (pid) => CLOUD
-      ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_600,h_360,c_fill/${pid}`
-      : `https://picsum.photos/seed/${pid.length*7}/600/360`;
 
-    if (featured) {
-      document.getElementById('featured-current').innerHTML = `
-        <div style="display:flex;gap:16px;align-items:flex-start;padding:16px;background:var(--card);border:1px solid var(--amber2);border-radius:var(--r)">
-          <img src="${thumbUrl(featured.public_id)}" style="width:180px;height:110px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">
-          <div>
-            <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber2);margin-bottom:4px">Currently Featured</div>
-            <div style="font-family:var(--serif);font-style:italic;font-size:18px;color:var(--amber)">${featured.title}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:4px">${featured.location} · ${featured.camera||''} ${featured.film_stock?'· '+featured.film_stock:''}</div>
-          </div>
-        </div>`;
-    } else {
-      document.getElementById('featured-current').innerHTML = `<p style="color:var(--muted);font-size:11px">No photo is currently featured.</p>`;
-    }
-
-    document.getElementById('featured-table').innerHTML = state.photos
-      .sort((a,b) => a.sort_order - b.sort_order)
-      .map(p => `
-        <tr style="${p.is_featured ? 'background:rgba(212,168,75,.05)' : ''}">
-          <td style="width:40px">${p.is_featured ? '<span class="badge badge-feat"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span>' : ''}</td>
-          <td style="font-family:var(--serif);color:var(--amber)">${p.title}</td>
-          <td style="color:var(--muted)">${p.location||'—'}</td>
-          <td style="color:var(--muted);font-size:11px">${p.camera||'—'}</td>
-          <td><span class="badge badge-${p.medium}">${p.medium}${p.film_stock?' · '+p.film_stock:''}</span></td>
-          <td>
-            ${p.is_featured
-              ? `<span style="font-size:10px;color:var(--muted)">Current</span>`
-              : `<button class="btn btn-xs" onclick="setFeatured('${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Set Featured</button>`
-            }
-          </td>
-        </tr>`).join('');
-  }
 
   async function setFeatured(id) {
     // Un-feature all, then feature this one
@@ -988,7 +933,6 @@ if (Astro.request.method === 'POST') {
     });
     toast(`"${target.title}" is now the featured photo.`);
     renderPhotos();
-    renderFeatured();
   }
 
   // ─── Albums ───────────────────────────────────────────────────────────

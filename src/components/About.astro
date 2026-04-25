@@ -8,7 +8,7 @@ interface Props {
 const { settings } = Astro.props;
 
 const portraitId = settings.about_image_id || 'portfolio/about/portrait';
-const portraitUrl = cloudinaryUrl(portraitId, 'f_auto,q_auto,w_600,h_750,c_fill,g_face');
+const portraitUrl = cloudinaryUrl(portraitId, 'f_auto,q_auto,w_240,h_240,c_fill,g_face');
 
 // Fallbacks for when settings aren't loaded (e.g. local dev without DB)
 const bio = settings.about_bio || "My name is Paul Rojas. I shoot film — mostly street, mostly in places where nobody's watching. The name of this site isn't a mystery: most of my best rolls happen on completely unremarkable days that I only remember because I had a camera.";
@@ -21,19 +21,19 @@ const alsoShooting = settings.about_also_shooting || "Fujifilm X-T20 · Classic 
   <div class="container">
     <div class="row g-5 align-items-start">
 
-      <div class="col-lg-4 reveal">
+      <div class="col-lg-1 col-md-2 col-4 mx-auto mx-lg-0 mb-4 mb-lg-0 reveal">
         <div class="about-portrait">
           <img
             src={portraitUrl}
             alt="Paul Rojas"
-            width="600"
-            height="750"
+            width="240"
+            height="240"
             loading="lazy"
           />
         </div>
       </div>
 
-      <div class="col-lg-8 reveal">
+      <div class="col-lg-11 reveal">
         <p class="section-eyebrow">About</p>
         <h2 class="section-title mb-4" style="font-size:clamp(1.6rem,3vw,2.2rem);">
           The photographer behind the camera.

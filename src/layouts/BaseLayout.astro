@@ -95,9 +95,7 @@ const {
     <!-- ── Lightbox container ────────────────────────────────────────────── -->
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
       <div class="lightbox-controls">
-        <button class="lightbox-btn" id="lightboxPlay" aria-label="Start slideshow">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        </button>
+
         <button class="lightbox-close" id="lightboxClose">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
           <span>Close</span>
@@ -176,11 +174,9 @@ const {
       const lightboxClose = document.getElementById('lightboxClose');
       const lightboxPrev  = document.getElementById('lightboxPrev');
       const lightboxNext  = document.getElementById('lightboxNext');
-      const lightboxPlay  = document.getElementById('lightboxPlay');
 
       let currentTriggers: HTMLElement[] = [];
       let currentIndex = -1;
-      let slideshowInterval: any = null;
 
       const updateLightbox = (index: number) => {
         if (index < 0 || index >= currentTriggers.length) return;
@@ -226,45 +222,14 @@ const {
           });
         });
 
-        // Album level triggers (Open whole album)
-        const albumTriggers = Array.from(document.querySelectorAll('.btn-view-album')) as HTMLElement[];
-        albumTriggers.forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const albumId = btn.getAttribute('data-album-id');
-            const parentSection = btn.closest('.album-section');
-            if (parentSection) {
-              const groupTriggers = Array.from(parentSection.querySelectorAll('.lightbox-trigger')) as HTMLElement[];
-              if (groupTriggers.length > 0) {
-                openLightbox(0, groupTriggers);
-              }
-            }
-          });
-        });
+
       };
 
       initLightbox();
 
-      const stopSlideshow = () => {
-        if (slideshowInterval) {
-          clearInterval(slideshowInterval);
-          slideshowInterval = null;
-          if (lightboxPlay) lightboxPlay.textContent = '▶';
-        }
-      };
 
-      const toggleSlideshow = () => {
-        if (slideshowInterval) {
-          stopSlideshow();
-        } else {
-          if (lightboxPlay) lightboxPlay.textContent = '⏸';
-          slideshowInterval = setInterval(() => {
-            navigate(1);
-          }, 4000);
-        }
-      };
 
       const closeLightbox = () => {
-        stopSlideshow();
         lightbox?.classList.remove('open');
         document.body.style.overflow = '';
         setTimeout(() => {
@@ -280,15 +245,13 @@ const {
       };
 
       lightboxClose?.addEventListener('click', closeLightbox);
-      lightboxPlay?.addEventListener('click', (e) => { e.stopPropagation(); toggleSlideshow(); });
+
       lightboxPrev?.addEventListener('click', (e) => {
         e.stopPropagation();
-        stopSlideshow();
         navigate(-1);
       });
       lightboxNext?.addEventListener('click', (e) => {
         e.stopPropagation();
-        stopSlideshow();
         navigate(1);
       });
 

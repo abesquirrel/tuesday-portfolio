@@ -32,14 +32,11 @@ const uncategorizedPhotos = getAlbumPhotos(null);
     {
       activeAlbums.map((album) => (
         <div class="album-section mb-5">
-          <div class="container mb-4 reveal d-flex justify-content-between align-items-end">
+          <div class="container mb-4 reveal">
             <div>
               <h3 class="album-title">{album.title}</h3>
               {album.description && <p class="album-description text-muted small mb-0">{album.description}</p>}
             </div>
-            <button class="btn-view-album" data-album-id={album.id}>
-              Browse Album <span>→</span>
-            </button>
           </div>
           
           <div class="gallery-grid">
@@ -79,11 +76,8 @@ const uncategorizedPhotos = getAlbumPhotos(null);
     {
       uncategorizedPhotos.length > 0 && (
         <div class="album-section mb-5">
-          <div class="container mb-4 reveal d-flex justify-content-between align-items-end">
+          <div class="container mb-4 reveal">
             <h3 class="album-title">Other Moments</h3>
-            <button class="btn-view-album" data-album-id="uncategorized">
-              Browse All <span>→</span>
-            </button>
           </div>
           <div class="gallery-grid">
             {uncategorizedPhotos.map((photo) => {
@@ -146,40 +140,5 @@ const uncategorizedPhotos = getAlbumPhotos(null);
   .album-section {
     padding-top: 2rem;
   }
-  .btn-view-album {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--silver-dim, #7a7671);
-    font-family: 'Courier New', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 0.6rem 1.4rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    border-radius: 40px;
-  }
-  .btn-view-album span {
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    color: var(--accent-amber, #c8a96e);
-    font-size: 1.1rem;
-    line-height: 1;
-  }
-  .btn-view-album:hover {
-    color: var(--off-white, #f0ede8);
-    background: rgba(200, 169, 110, 0.1);
-    border-color: rgba(200, 169, 110, 0.3);
-  }
-  .btn-view-album:hover span {
-    transform: translateX(6px);
-  }
 
-  @media (max-width: 576px) {
-    .btn-view-album {
-      font-size: 0.6rem;
-    }
-  }
 </style>

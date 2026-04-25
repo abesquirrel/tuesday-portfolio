@@ -46,13 +46,15 @@ const uncategorizedPhotos = getAlbumPhotos(null);
                 : cloudinaryThumb(photo.public_id, cloudName);
               const full  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1400', cloudName);
               return (
-                <div class="gallery-cell">
+                <div 
+                  class="gallery-cell lightbox-trigger"
+                  data-full={full}
+                  data-title={photo.title}
+                  data-meta={`${photo.location}${photo.camera ? ` · ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}${photo.roll ? ` · ${photo.roll}` : ''}`}
+                >
                   <img
                     src={thumb}
                     alt={photo.title}
-                    class="lightbox-trigger"
-                    data-full={full}
-                    data-meta={`${photo.location}${photo.camera ? ` · ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}${photo.roll ? ` · ${photo.roll}` : ''}`}
                     loading="lazy"
                     decoding="async"
                   />
@@ -86,13 +88,15 @@ const uncategorizedPhotos = getAlbumPhotos(null);
                 : cloudinaryThumb(photo.public_id, cloudName);
               const full  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1400', cloudName);
               return (
-                <div class="gallery-cell">
+                <div 
+                  class="gallery-cell lightbox-trigger"
+                  data-full={full}
+                  data-title={photo.title}
+                  data-meta={`${photo.location}${photo.camera ? ` · ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}${photo.roll ? ` · ${photo.roll}` : ''}`}
+                >
                   <img
                     src={thumb}
                     alt={photo.title}
-                    class="lightbox-trigger"
-                    data-full={full}
-                    data-meta={`${photo.location}${photo.camera ? ` · ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}${photo.roll ? ` · ${photo.roll}` : ''}`}
                     loading="lazy"
                     decoding="async"
                   />

@@ -183,7 +183,7 @@ const {
         currentIndex = index;
         const el = currentTriggers[currentIndex];
         const src   = el.getAttribute('data-full') || (el as HTMLImageElement).src;
-        const title = el.getAttribute('alt') || '';
+        const title = el.getAttribute('data-title') || el.getAttribute('alt') || '';
         const meta  = el.getAttribute('data-meta') || '';
         
         if (lightboxImg) {

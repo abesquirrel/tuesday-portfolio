@@ -1,5 +1,5 @@
 ---
-// src/components/admin/shared/Modal.astro
+// Modal.astro
 
 interface Props {
   id: string;
@@ -22,15 +22,12 @@ const sizes: Record<string, string> = {
 <dialog id={id} class="modal-dialog" open={isOpen} data-size={size} onClick={(e) => {
   if (e.target === e.currentTarget) onClose();
 }}>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby={title ? id + '-title' : undefined}>
+  <div class="modal" role="dialog" aria-modal="true">
     {title && (
       <div class="modal-head">
-        <h2 id={id + '-title'} class="modal-title">{title}</h2>
-        <button class="modal-close" onClick={onClose} aria-label="Close modal">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
+        <h2 class="modal-title">{title}</h2>
+        <button class="modal-close" onClick={onClose}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
     )}
@@ -70,9 +67,7 @@ const sizes: Record<string, string> = {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    animation: modalSlideIn 0.2s ease-out;
   }
-  @keyframes modalSlideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
   .modal-head {
     padding: 18px 22px 14px;
     border-bottom: 1px solid var(--border);
@@ -98,9 +93,6 @@ const sizes: Record<string, string> = {
     cursor: pointer;
     padding: 4px;
     border-radius: var(--r-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
   .modal-close:hover { color: var(--text); background: var(--rail); }
   .modal-body { padding: 20px 22px; overflow-y: auto; flex: 1; }
@@ -113,12 +105,5 @@ const sizes: Record<string, string> = {
     position: sticky;
     bottom: 0;
     background: var(--paper);
-  }
-  @media (max-width: 768px) {
-    .modal-dialog { padding: 10px; }
-    .modal { width: 100%; max-width: 100%; margin: 0 auto; max-height: 100vh; }
-    .modal-head { padding: 16px 18px 12px; }
-    .modal-body { padding: 16px 18px; height: calc(100vh - 120px); }
-    .modal-foot { padding: 12px 18px; }
   }
 </style>

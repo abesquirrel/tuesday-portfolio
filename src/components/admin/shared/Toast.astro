@@ -1,5 +1,5 @@
 ---
-// src/components/admin/shared/Toast.astro
+// Toast.astro
 
 interface Props {
   type: 'success' | 'error' | 'info' | 'warning';
@@ -29,14 +29,6 @@ const color = colors[type];
 <div class="toast" role="alert" aria-live="assertive" data-type={type}>
   <div class="toast-icon" set:html={icons[type]}></div>
   <span class="toast-message">{message}</span>
-  {onDismiss && (
-    <button class="toast-dismiss" onClick={onDismiss} aria-label="Dismiss notification">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-  )}
 </div>
 
 <style>
@@ -58,17 +50,4 @@ const color = colors[type];
   @keyframes slideIn { from { transform: translateY(80px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   .toast-icon { color: v-bind("color.text"); flex-shrink: 0; }
   .toast-message { flex: 1; color: var(--text); }
-  .toast-dismiss {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    padding: 4px;
-    border-radius: var(--r-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .toast-dismiss:hover { color: var(--text); background: var(--rail); }
-  .toast-dismiss:focus { outline: none; box-shadow: 0 0 0 2px v-bind("color.border"); }
 </style>

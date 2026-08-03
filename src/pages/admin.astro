@@ -1,156 +1,14 @@
 
 
-    // ===== Phase 1: Toast System =====
-    function showToast(message, type = 'success', duration = 3000) {
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-      const toast = document.createElement('div');
-      toast.className = 'toast' + (type === 'error' ? ' err' : '');
-      const icons = {
-        success: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-        error: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
-      };
-      const colors = { success: '#3a7d52', error: '#ff6b5b' };
-      toast.innerHTML = icons[type] + '<span style="color:' + colors[type] + ';flex:1">' + message + '</span>';
-      container.appendChild(toast);
-      setTimeout(() => toast.classList.add('show'), 100);
-      setTimeout(() => { toast.style.transform = 'translateY(80px)'; toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, duration);
+    // ===== Phase 1: Toast =====
+    function showToast(msg, type='success', dur=3000) {
+      const c=document.getElementById('toast-container'); if(!c)return;
+      const t=document.createElement('div'); t.className='toast'+(type==='error'?' err':'');
+      const icons={success:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',error:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'};
+      const cols={success:'#3a7d52',error:'#ff6b5b'}; t.innerHTML=icons[type]+'<span style="color:'+cols[type]+';flex:1">'+msg+'</span>'; c.appendChild(t);
+      setTimeout(()=>t.classList.add('show'),100); setTimeout(()=>{t.style.transform='translateY(80px)';t.style.opacity='0';setTimeout(()=>t.remove(),300)},dur);
     }
-
-    // ===== Phase 1: Loading State =====
-    let loadingCount = 0;
-    function showLoading() { loadingCount++; const o = document.getElementById('loading-overlay'); if (o) o.classList.add('active'); }
-    function hideLoading() { loadingCount = Math.max(0, loadingCount - 1); if (loadingCount === 0) { const o = document.getElementById('loading-overlay'); if (o) o.classList.remove('active'); } }
-
-    // ===== Phase 1: Form Validation =====
-    function validateForm(requiredFields = []) {
-      let isValid = true;
-      requiredFields.forEach(f => {
-        const field = document.getElementById(f);
-        const errorEl = document.querySelector('.error-' + f);
-        if (!field || !field.value || !field.value.trim()) {
-          if (field) field.classList.add('error');
-          if (errorEl) errorEl.classList.add('show');
-          isValid = false;
-        } else {
-          if (field) field.classList.remove('error');
-          if (errorEl) errorEl.classList.remove('show');
-        }
-      });
-      return isValid;
-    }
-
-    // ===== Phase 1: Cloudinary Helper =====
-    function getCloudinaryUrl(publicId, cloudName) {
-      if (!publicId || !cloudName) return '';
-      return 'https://res.cloudinary.com/' + cloudName + '/image/upload/w_400,h_300,c_fill,q_auto,f_jpg/' + publicId + '.jpg';
-    }
-
-    // ===== Phase 1: Photo Upload =====
-    function setupPhotoUpload() {
-      const uploadZone = document.getElementById('upload-zone');
-      const fileInput = document.getElementById('photo-upload-input');
-      if (!uploadZone || !fileInput) return;
-      
-      const cloudName = document.querySelector('meta[name="cf-cloud"]')?.content || 'clueless';
-      
-      uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-      uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-      uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) handleFileUpload(e.dataTransfer.files); });
-      uploadZone.addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', e => { if (e.target.files.length > 0) handleFileUpload(e.target.files); });
-      
-      async function handleFileUpload(files) {
-        showLoading();
-        for (const file of files) {
-          try {
-            if (!file.type.startsWith('image/')) { showToast('Please upload image files only', 'error'); continue; }
-            if (file.size > 5 * 1024 * 1024) { showToast('File too large (max 5MB)', 'error'); continue; }
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', 'portfolio-uploads');
-            formData.append('folder', 'portfolio/grid');
-            
-            const response = await fetch('https://api.cloudinary.com/v1_1/' + cloudName + '/image/upload', { method: 'POST', body: formData });
-            if (!response.ok) throw new Error('Upload failed');
-            
-            const result = await response.json();
-            const publicId = result.public_id;
-            showToast('Image uploaded!');
-            
-            const modalBg = document.getElementById('modal-photo');
-            if (modalBg) {
-              modalBg.classList.add('open');
-              document.getElementById('ph-public_id').value = publicId;
-              document.getElementById('ph-title').value = file.name.replace(/.[^/.]+$/, "");
-              if (typeof updateCloudPreview === 'function') updateCloudPreview();
-              document.getElementById('ph-title').focus();
-            }
-          } catch (error) { showToast('Upload failed: ' + error.message, 'error'); }
-        }
-        hideLoading();
-        if (typeof renderPhotos === 'function') renderPhotos();
-      }
-    }
-
-    // ===== Phase 1: Enhanced Photo Form =====
-    function validatePhotoForm() { return validateForm(['ph-title', 'ph-public_id']); }
-    async function savePhoto() {
-      if (!validatePhotoForm()) { showToast('Please fill in all required fields', 'error'); return; }
-      const btn = document.querySelector('#modal-photo .btn-primary');
-      const orig = btn.innerHTML;
-      btn.classList.add('loading');
-      btn.innerHTML = 'Saving... <span class="spinner-small"></span>';
-      try {
-        const formData = new FormData();
-        ['id', 'public_id', 'title', 'caption', 'roll', 'location', 'medium', 'camera', 'lens', 'film_stock', 'album_id', 'is_featured', 'sort_order'].forEach(f => {
-          const el = document.getElementById('ph-' + f);
-          if (el && el.value) formData.append(f, el.value);
-        });
-        formData.append('action', 'update');
-        const response = await fetch('/api/photos', { method: 'POST', body: formData });
-        const result = await response.json();
-        if (result.error) throw new Error(result.error);
-        showToast('Photo saved successfully!');
-        closeModal('modal-photo');
-        if (typeof renderPhotos === 'function') renderPhotos();
-      } catch (error) { showToast('Error: ' + error.message, 'error'); }
-      finally { btn.classList.remove('loading'); btn.innerHTML = orig; }
-    }
-
-    // ===== Phase 1: Enhanced Photo Card =====
-    function renderPhotoCard(photo) {
-      const cloudName = document.querySelector('meta[name="cf-cloud"]')?.content || 'clueless';
-      const imageUrl = photo.cloudinary_url || getCloudinaryUrl(photo.public_id, cloudName);
-      const mediumClass = photo.medium === 'digital' ? 'badge-digital' : 'badge-film';
-      const featuredBadge = photo.is_featured === 1 ? '<span class="badge badge-feat">Featured</span>' : '';
-      const thumbHtml = imageUrl ? '<img src="' + imageUrl + '" alt="' + (photo.title || 'Photo') + '" loading="lazy" />' : '<div class="card-thumb-placeholder"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
-      return '<div class="card" data-id="' + (photo.id || '') + '"><div class="card-thumb">' + thumbHtml + '<div class="card-thumb-ov"><button class="btn btn-xs" onclick="editPhoto('' + (photo.id || '') + '')">Edit</button></div></div><div class="card-body"><div class="card-title">' + (photo.title || 'Untitled') + '</div><div class="card-meta">' + (photo.location || '') + (photo.location && photo.roll ? ' · ' : '') + (photo.roll || '') + '</div></div><div class="card-foot"><span class="badge ' + mediumClass + '">' + (photo.medium || 'film') + '</span>' + featuredBadge + '</div></div>';
-    }
-
-    // ===== Phase 1: Initialize =====
-    document.addEventListener('DOMContentLoaded', () => {
-      setupPhotoUpload();
-      const photosPanel = document.getElementById('panel-photos');
-      if (photosPanel) {
-        const html = '<div class="upload-zone" id="upload-zone"><input type="file" id="photo-upload-input" multiple accept="image/*"/><svg class="upload-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><div style="color:var(--amber);font-size:14px;margin-bottom:8px;">Drop photos here</div><div style="color:var(--muted);font-size:11px;">or click to browse</div></div>';
-        photosPanel.insertAdjacentHTML('afterbegin', html);
-      }
-      const photoForm = document.getElementById('modal-photo');
-      if (photoForm) {
-        ['ph-title', 'ph-public_id'].forEach(f => {
-          const el = document.getElementById(f);
-          if (el) {
-            const err = document.createElement('div');
-            err.className = 'error-message error-' + f; err.textContent = 'This field is required';
-            el.parentNode.insertBefore(err, el.nextSibling);
-          }
-        });
-        const btn = photoForm.querySelector('.btn-primary');
-        if (btn) btn.onclick = savePhoto;
-      }
-    });
+    let loadingCount=0; function showLoading(){loadingCount++;const o=document.getElementById('loading-overlay');if(o)o.classList.add('active')} function hideLoading(){loadingCount=Math.max(0,loadingCount-1);if(loadingCount===0){const o=document.getElementById('loading-overlay');if(o)o.classList.remove('active')}} function validateForm(req=[]){let v=true;req.forEach(f=>{const field=document.getElementById(f);const err=document.querySelector('.error-'+f);if(!field||!field.value||!field.value.trim()){if(field)field.classList.add('error');if(err)err.classList.add('show');v=false}else{if(field)field.classList.remove('error');if(err)err.classList.remove('show')}});return v} function getCloudinaryUrl(pid,cname){if(!pid||!cname)return '';return 'https://res.cloudinary.com/'+cname+'/image/upload/w_400,h_300,c_fill,q_auto,f_jpg/'+pid+'.jpg'} function setupPhotoUpload(){const uz=document.getElementById('upload-zone');const fi=document.getElementById('photo-upload-input');if(!uz||!fi)return;const cn=document.querySelector('meta[name="cf-cloud"]')?.content||'clueless';uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('dragover')});uz.addEventListener('dragleave',()=>uz.classList.remove('dragover'));uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('dragover');if(e.dataTransfer.files.length>0)handleFileUpload(e.dataTransfer.files)});uz.addEventListener('click',()=>fi.click());fi.addEventListener('change',e=>{if(e.target.files.length>0)handleFileUpload(e.target.files)});async function handleFileUpload(files){showLoading();for(const file of files){try{if(!file.type.startsWith('image/')){showToast('Images only','error');continue}if(file.size>5*1024*1024){showToast('Max 5MB','error');continue}const fd=new FormData();fd.append('file',file);fd.append('upload_preset','portfolio-uploads');fd.append('folder','portfolio/grid');const r=await fetch('https://api.cloudinary.com/v1_1/'+cn+'/image/upload',{method:'POST',body:fd});if(!r.ok)throw new Error('Upload failed');const res=await r.json();const pid=res.public_id;showToast('Uploaded!');const mb=document.getElementById('modal-photo');if(mb){mb.classList.add('open');document.getElementById('ph-public_id').value=pid;document.getElementById('ph-title').value=file.name.replace(/.[^/.]+$/,'');if(typeof updateCloudPreview==='function')updateCloudPreview();document.getElementById('ph-title').focus()}catch(e){showToast('Error: '+e.message,'error')}hideLoading();if(typeof renderPhotos==='function')renderPhotos()}} function validatePhotoForm(){return validateForm(['ph-title','ph-public_id'])} async function savePhoto(){if(!validatePhotoForm()){showToast('Required fields missing','error');return}const btn=document.querySelector('#modal-photo .btn-primary');const orig=btn.innerHTML;btn.classList.add('loading');btn.innerHTML='Saving... <span class="spinner-small"></span>';try{const fd=new FormData();['id','public_id','title','caption','roll','location','medium','camera','lens','film_stock','album_id','is_featured','sort_order'].forEach(f=>{const el=document.getElementById('ph-'+f);if(el&&el.value)fd.append(f,el.value)});fd.append('action','update');const r=await fetch('/api/photos',{method:'POST',body:fd});const res=await r.json();if(res.error)throw new Error(res.error);showToast('Saved!');closeModal('modal-photo');if(typeof renderPhotos==='function')renderPhotos()}catch(e){showToast('Error: '+e.message,'error')}finally{btn.classList.remove('loading');btn.innerHTML=orig}} function renderPhotoCard(photo){const cn=document.querySelector('meta[name="cf-cloud"]')?.content||'clueless';const imgUrl=photo.cloudinary_url||getCloudinaryUrl(photo.public_id,cn);const mc=photo.medium==='digital'?'badge-digital':'badge-film';const fb=photo.is_featured===1?'<span class="badge badge-feat">Featured</span>':'';const thumb=imgUrl?'<img src="'+imgUrl+'" alt="'+(photo.title||'Photo')+'" loading="lazy" />':'<div class="card-thumb-placeholder"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';return '<div class="card" data-id="'+(photo.id||'')+'"><div class="card-thumb">'+thumb+'<div class="card-thumb-ov"><button class="btn btn-xs" onclick="editPhoto(''+(photo.id||'')+'')">Edit</button></div></div><div class="card-body"><div class="card-title">'+(photo.title||'Untitled')+'</div><div class="card-meta">'+(photo.location||'')+(photo.location&&photo.roll?' · ':'')+(photo.roll||'')+'</div></div><div class="card-foot"><span class="badge '+mc+'">'+(photo.medium||'film')+'</span>'+fb+'</div></div>'} document.addEventListener('DOMContentLoaded',()=>{setupPhotoUpload();const pp=document.getElementById('panel-photos');if(pp){pp.insertAdjacentHTML('afterbegin','<div class="upload-zone" id="upload-zone"><input type="file" id="photo-upload-input" multiple accept="image/*"/><svg class="upload-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><div style="color:var(--amber);font-size:14px;margin-bottom:8px;">Drop photos here</div><div style="color:var(--muted);font-size:11px;">or click to browse</div></div>')}const pf=document.getElementById('modal-photo');if(pf){['ph-title','ph-public_id'].forEach(f=>{const el=document.getElementById(f);if(el){const err=document.createElement('div');err.className='error-message error-'+f;err.textContent='This field is required';el.parentNode.insertBefore(err,el.nextSibling)}});const btn=pf.querySelector('.btn-primary');if(btn)btn.onclick=savePhoto}});
 
 
   <!-- Phase 1: Toast Container -->
@@ -538,69 +396,36 @@ if (Astro.request.method === 'POST') {
   
 
     /* ==== Phase 1: Loading States ==== */
-    .loading-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-      display: none; align-items: center; justify-content: center; z-index: 10000;
-    }
+    .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 10000; }
     .loading-overlay.active { display: flex; }
-    .spinner {
-      width: 40px; height: 40px; border: 3px solid var(--border2);
-      border-top-color: var(--amber); border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border2); border-top-color: var(--amber); border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ==== Phase 1: Toast Notifications ==== */
-    .toast-container {
-      position: fixed; bottom: 20px; right: 20px; z-index: 9999;
-      display: flex; flex-direction: column; gap: 8px; pointer-events: none;
-    }
-    .toast {
-      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
-      background: var(--card); border: 1px solid var(--border);
-      border-left: 3px solid var(--green); border-radius: var(--r);
-      font-size: 12px; color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      transform: translateY(80px); opacity: 0; transition: all 0.3s;
-      pointer-events: auto; animation: slideIn 0.3s ease-out forwards;
-    }
+    /* ==== Phase 1: Toast ==== */
+    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: var(--r); font-size: 12px; color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: auto; animation: slideIn 0.3s ease-out forwards; }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.err { border-left-color: var(--red); }
     @keyframes slideIn { from { transform: translateY(80px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
     /* ==== Phase 1: Upload Zone ==== */
-    .upload-zone {
-      border: 2px dashed var(--border2); border-radius: var(--r); padding: 40px;
-      text-align: center; cursor: pointer; transition: all 0.3s;
-      background: var(--rail); margin-bottom: 20px;
-    }
+    .upload-zone { border: 2px dashed var(--border2); border-radius: var(--r); padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; background: var(--rail); margin-bottom: 20px; }
     .upload-zone:hover { border-color: var(--amber); background: rgba(212,168,75,0.05); }
     .upload-zone.dragover { border-color: var(--amber); background: rgba(212,168,75,0.1); }
     .upload-zone input[type="file"] { display: none; }
     .upload-zone-icon { width: 48px; height: 48px; color: var(--amber); margin-bottom: 12px; }
 
-    /* ==== Phase 1: Photo Card Thumbnails ==== */
+    /* ==== Phase 1: Thumbnails ==== */
     .card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
     .card-thumb:hover img { transform: scale(1.05); }
-    .card-thumb-placeholder {
-      width: 100%; height: 100%; background: var(--rail);
-      display: flex; align-items: center; justify-content: center; color: var(--border2);
-    }
+    .card-thumb-placeholder { width: 100%; height: 100%; background: var(--rail); display: flex; align-items: center; justify-content: center; color: var(--border2); }
 
-    /* ==== Phase 1: Form Validation ==== */
-    .finput.error, .ftextarea.error, .fselect.error {
-      border-color: var(--red) !important; background: rgba(181, 57, 43, 0.1);
-    }
+    /* ==== Phase 1: Validation ==== */
+    .finput.error, .ftextarea.error, .fselect.error { border-color: var(--red) !important; background: rgba(181, 57, 43, 0.1); }
     .error-message { font-size: 10px; color: var(--red); margin-top: 4px; display: none; }
     .error-message.show { display: block; }
-
-    /* ==== Phase 1: Button Loading State ==== */
     .btn.loading { opacity: 0.7; pointer-events: none; }
-    .btn .spinner-small {
-      width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: white; border-radius: 50%;
-      animation: spin 0.8s linear infinite; display: inline-block;
-      margin-left: 6px; vertical-align: middle;
-    }
+    .btn .spinner-small { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; margin-left: 6px; vertical-align: middle; }
 </style>
 </head>
 <body>

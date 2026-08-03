@@ -1,7 +1,6 @@
 ---
 // src/pages/api/photos.ts
 import type { APIRoute } from 'astro';
-import { getPhotos as getPhotosFromDb } from '../../lib/db';
 
 const ADMIN_SECRET = import.meta.env.ADMIN_SECRET || 'change-me-in-cf-dashboard';
 

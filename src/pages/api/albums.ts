@@ -21,7 +21,6 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const albumsResult = await db.prepare('SELECT * FROM albums ORDER BY sort_order ASC').all();
     const albums = albumsResult.results || [];
 
-    // Get photo counts for each album
     const albumsWithCounts = await Promise.all(albums.map(async (album) => {
       const countResult = await db.prepare('SELECT COUNT(*) as count FROM photos WHERE album_id = ?').bind(album.id).first();
       return { ...album, photoCount: countResult.results?.[0]?.count || 0 };

@@ -1,4 +1,3 @@
-
 export const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success', duration = 3000): void => {
   const event = new CustomEvent('toast', { 
     detail: { id: Date.now().toString(), type, message, duration } 

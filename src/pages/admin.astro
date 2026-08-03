@@ -1,3 +1,9 @@
+
+
+  <!-- Phase 1: Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+  <!-- Phase 1: Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay"><div class="spinner"></div></div>
 ---
 // src/pages/admin.astro
 // ─── Server-side: auth guard ───────────────────────────────────────────────
@@ -384,34 +390,7 @@ X(0);
         margin: 0 auto;
       }
     }
-  
-
-    /* Phase 1: Loading */
-    .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 10000; }
-    .loading-overlay.active { display: flex; }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border2); border-top-color: var(--amber); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    /* Phase 1: Toast */
-    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-    .toast { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: var(--r); font-size: 12px; color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: auto; }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.err { border-left-color: var(--red); }
-    @keyframes slideIn { from { transform: translateY(80px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    /* Phase 1: Upload */
-    .upload-zone { border: 2px dashed var(--border2); border-radius: var(--r); padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; background: var(--rail); margin-bottom: 20px; }
-    .upload-zone:hover { border-color: var(--amber); background: rgba(212,168,75,0.05); }
-    .upload-zone input[type=file] { display: none; }
-    /* Phase 1: Thumbnails */
-    .card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
-    .card-thumb:hover img { transform: scale(1.05); }
-    .card-thumb-placeholder { width: 100%; height: 100%; background: var(--rail); display: flex; align-items: center; justify-content: center; color: var(--border2); }
-    /* Phase 1: Validation */
-    .finput.error { border-color: var(--red) !important; background: rgba(181,57,43,0.1); }
-    .error-message { font-size: 10px; color: var(--red); margin-top: 4px; display: none; }
-    .error-message.show { display: block; }
-    .btn.loading { opacity: 0.7; pointer-events: none; }
-    .btn .spinner-small { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; margin-left: 6px; vertical-align: middle; }
-</style>
+  </style>
 </head>
 <body>
 

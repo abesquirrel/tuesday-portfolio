@@ -848,25 +848,70 @@ if (Astro.request.method === 'POST') {
   // ─── Bootstrap: load all data ─────────────────────────────────────────
   async function boot() {
     try {
-      const [photos, albums, settings, social] = await Promise.all([
-        apiFetch('photos'), apiFetch('albums'),
-        apiFetch('settings'), apiFetch('social')
+      const [photosRes, albumsRes, settingsRes, socialRes] = await Promise.all([
+        fetch(`${API}/photos`), fetch(`${API}/albums`),
+        fetch(`${API}/settings`), fetch(`${API}/social`)
       ]);
-      state.photos   = photos   || [];
+
+      // Check for auth or DB errors on first response
+      if (photosRes.status === 401) {
+        showBootError('Authentication error', 'Your session may have expired. Try logging out and back in.', 'logout');
+        return;
+      }
+      if (photosRes.status === 503) {
+        const err = await photosRes.json().catch(() => ({}));
+        showBootError('Database not connected', err.error || 'D1 database binding is not available.', 'dev');
+        return;
+      }
+      if (!photosRes.ok) {
+        showBootError('API error', `Server returned ${photosRes.status}. Check the console for details.`, null);
+        return;
+      }
+
+      const photos   = await photosRes.json();
+      const albums   = await albumsRes.json().catch(() => []);
+      const settings = await settingsRes.json().catch(() => ({}));
+      const social   = await socialRes.json().catch(() => []);
+
+      state.photos   = photos?.photos || photos   || [];
       state.albums   = albums   || [];
       state.settings = settings || {};
       state.social   = social   || [];
     } catch(e) {
-      toast('Could not load data from D1. Check API route.', true);
+      showBootError('Connection failed', 'Could not reach the API. Are you running the dev server correctly?', 'dev');
       console.error(e);
     }
     renderDashboard();
     populateAlbumSelects();
   }
 
+  function showBootError(title, message, hint) {
+    const devHint = `<div style="margin-top:14px;padding:12px;background:rgba(212,168,75,0.05);border:1px solid rgba(212,168,75,0.15);border-radius:3px">
+      <div style="font-size:10px;color:var(--amber);font-weight:700;letter-spacing:.1em;margin-bottom:6px">⚠️ TO CONNECT THE ADMIN TO YOUR DATABASE</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">
+        <code style="background:var(--rail);padding:2px 6px;color:var(--amber)">npm run dev</code> uses a static JSON fallback with no database.<br>
+        To run with D1 (Cloudflare) locally, use:<br><br>
+        <code style="background:var(--rail);padding:4px 8px;color:var(--amber);display:block;margin-top:4px">npx wrangler pages dev -- npx astro dev</code><br>
+        Or just deploy to Cloudflare Pages — the admin will connect automatically.
+      </div>
+    </div>`;
+    const logoutHint = `<div style="margin-top:14px"><a href="/admin" style="color:var(--amber)" onclick="document.cookie='admin_session=;path=/;max-age=0'">Click here to log out and log in again</a></div>`;
+
+    document.getElementById('dash-stats').innerHTML = `
+      <div style="grid-column:1/-1;background:rgba(181,57,43,0.1);border:1px solid rgba(181,57,43,0.3);border-radius:3px;padding:18px 20px">
+        <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#ff6b5b;margin-bottom:8px;font-weight:700">❌ ${title}</div>
+        <div style="font-size:13px;color:var(--text)">${message}</div>
+        ${hint === 'dev' ? devHint : hint === 'logout' ? logoutHint : ''}
+      </div>`;
+    document.getElementById('dash-rows').innerHTML = '';
+  }
+
   async function apiFetch(resource, opts = {}) {
     const res = await fetch(`${API}/${resource}`, opts);
-    if (!res.ok) throw new Error(`${resource}: ${res.status}`);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `${resource}: HTTP ${res.status}`);
+    }
     return res.json();
   }
 

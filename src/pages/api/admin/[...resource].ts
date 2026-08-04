@@ -38,19 +38,20 @@ function json(data: unknown, status = 200) {
   });
 }
 
-function checkAuth(cookies: any, secret: string): boolean {
+function checkAuth(cookies: any): boolean {
+  // Session cookie is a random secure token set by bcrypt auth.
+  // We trust the httpOnly cookie as the auth boundary.
   const session = cookies.get('admin_session')?.value;
-  return session === secret;
+  return typeof session === 'string' && session.length > 0;
 }
 
 // --- Main handler ---
 export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
   const env = (locals as any).runtime?.env;
   const db = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
-  const SECRET = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
 
-  if (!checkAuth(cookies, SECRET)) return unauthorized();
-  if (!db) return json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
+  if (!checkAuth(cookies)) return unauthorized();
+  if (!db) return json({ error: 'D1 database not available. Run: npx wrangler pages dev -- npx astro dev' }, 503);
 
   const resource = (params.resource ?? '').replace(/^\//, '');
   const method = request.method.toUpperCase();

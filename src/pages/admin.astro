@@ -60,7 +60,8 @@ if (!ADMIN_PASSWORD_HASH && env?.ADMIN_SECRET) {
 // Cloud name logic
 let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME
               ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
-              ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
+              ?? (typeof p
+rocess !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
 if (!CLOUD_NAME && db) {
   try {
     const settings = await getSettings(db);
@@ -123,7 +124,8 @@ if (Astro.request.method === 'POST') {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content=
+"width=device-width, initial-scale=1.0" />
   <title>Admin — Tuesday Portfolio</title>
   <meta name="robots" content="noindex,nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -172,7 +174,8 @@ if (Astro.request.method === 'POST') {
       border: 1px solid var(--border2);
       background: var(--paper);
     }
-    .login-logo { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--amber); margin-bottom: 6px; }
+    .login-logo { font-family: var(--serif); font-style: italic;
+ font-size: 22px; color: var(--amber); margin-bottom: 6px; }
     .login-sub { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
     .login-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
     .login-input {
@@ -209,7 +212,8 @@ if (Astro.request.method === 'POST') {
     }
     .sb-item:hover { color: var(--text); background: rgba(255,255,255,.03); }
     .sb-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(212,168,75,.05); }
-    .sb-item .ic { width: 16px; text-align: center; font-size: 13px; }
+ 
+   .sb-item .ic { width: 16px; text-align: center; font-size: 13px; }
     .sb-footer { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
 
     .main { margin-left: 210px; flex: 1; display: flex; flex-direction: column; }
@@ -242,7 +246,8 @@ if (Astro.request.method === 'POST') {
     .btn-danger { background: rgba(181, 57, 43, 0.15); border-color: rgba(181, 57, 43, 0.3); color: #ff6b5b; }
     .btn-danger:hover { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 6px 16px rgba(181,57,43,0.3); }
     .btn-sm { padding: 9px 18px; font-size: 11px; }
-    .btn-xs { padding: 7px 14px; font-size: 10px; }
+    .btn-xs { padding: 7px 14px; font-size:
+ 10px; }
 
     /* ─── Forms ─── */
     .fgroup { margin-bottom: 16px; }
@@ -281,7 +286,8 @@ if (Astro.request.method === 'POST') {
     .card-body { padding: 12px 14px; }
     .card-title { font-family: var(--serif); font-size: 14px; color: var(--amber); margin-bottom: 2px; }
     .card-meta { font-size: 10px; color: var(--muted); line-height: 1.5; }
-    .card-foot { padding: 8px 14px; border-top: 1px solid var(--border); background: var(--rail); display: flex; gap: 6px; align-items: center; }
+    .card-foot { padding: 8
+px 14px; border-top: 1px solid var(--border); background: var(--rail); display: flex; gap: 6px; align-items: center; }
 
     /* ─── Table ─── */
     .tbl-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow-x: auto; margin-top: 14px; }
@@ -311,7 +317,8 @@ if (Astro.request.method === 'POST') {
     /* ─── Modal ─── */
     .modal-bg {
       position: fixed; inset: 0; background: rgba(0,0,0,.8);
-      z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
+      z-index: 1000; display: none; align-items: center; justify-content: ce
+nter; padding: 20px;
     }
     .modal-bg.open { display: flex; }
     .modal {
@@ -349,13 +356,29 @@ if (Astro.request.method === 'POST') {
       position: relative;
     }
     .about-preview::before { content: 'LIVE PREVIEW'; position: absolute; top: 8px; right: 12px; font-size: 8px; letter-spacing: .15em; color: var(--faint); }
-    .about-preview-bio { font-family: var(--serif); font-size: 13px; line-height: 1.7; color: #ccc; margin-bottom: 12px; }
+    .about-preview-bio { font-family: var(--serif); font-size: 13px; line-height: 1.7; color: #ccc;
+ margin-bottom: 12px; }
     .about-preview-gear { font-size: 11px; color: var(--muted); line-height: 1.8; }
     .about-preview-gear strong { color: var(--amber2); }
 
     /* ─── Sort handle ─── */
     .drag-handle { cursor: grab; color: var(--faint); font-size: 14px; padding: 0 6px; }
     .drag-handle:active { cursor: grabbing; }
+
+    /* ─── Upload Zone ─── */
+    .upload-zone { background: var(--card); border: 2px dashed var(--border2); border-radius: var(--r); padding: 40px; text-align: center; cursor: pointer; margin-bottom: 20px; transition: all .2s; position: relative; overflow: hidden; }
+    .upload-zone:hover { border-color: var(--amber); background: var(--rail); }
+    .upload-zone.drag-over { border-color: var(--amber); background: rgba(212,168,75,0.05); }
+    .upload-zone.uploading { pointer-events: none; }
+    .upload-content { display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--muted); }
+    .upload-content svg { color: var(--amber2); opacity: 0.7; }
+    .upload-content h3 { font-family: var(--serif); font-style: italic; color: var(--amber); margin: 0; }
+    .upload-content p { margin: 0; font-size: 13px; }
+    .upload-content .hint { font-size: 10px; color: var(--faint); }
+    .upload-progress { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; }
+    .progress-bar { width: 80%; height: 4px; background: var(--border2); border-radius: 2px; margin-bottom: 12px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--amber); border-radius: 2px; width: 0%; transition: width 0.2s; }
+    #progress-text { font-size: 12px; color: var(--amber); }
     /* ─── Drag and Drop ─── */
     tr.dragging { opacity: 0.5; background: rgba(212,168,75,0.1); }
     tr.drag-over { border-top: 2px solid var(--amber); background: rgba(212,168,75,0.05); }
@@ -404,7 +427,8 @@ if (Astro.request.method === 'POST') {
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
-        width: 240px;
+        width: 240px
+;
       }
       .sidebar.open {
         transform: translateX(0);
@@ -465,7 +489,8 @@ if (Astro.request.method === 'POST') {
   <div class="shell">
 
     <!-- ── Sidebar Overlay ── -->
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></di
+v>
 
     <!-- ── Sidebar ── -->
     <aside class="sidebar" id="sidebar">
@@ -487,7 +512,8 @@ if (Astro.request.method === 'POST') {
 
         <div class="sb-section">Site</div>
         <div class="sb-item" data-panel="about" onclick="nav(this)">
-          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span><span>About / Bio</span>
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><
+/span><span>About / Bio</span>
         </div>
         <div class="sb-item" data-panel="social" onclick="nav(this)">
           <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></span><span>Social Links</span>
@@ -509,7 +535,8 @@ if (Astro.request.method === 'POST') {
         <button class="mobile-nav-toggle" onclick="toggleSidebar()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <div class="topbar-title" id="topbar-title">Overview</div>
+        <div class="to
+pbar-title" id="topbar-title">Overview</div>
         <div class="topbar-right">
           <span style="font-size:9px; letter-spacing:0.1em; padding:2px 8px; border-radius:10px; background:rgba(212,168,75,0.1); color:var(--amber); border:1px solid rgba(212,168,75,0.2);">
             Cloud: {CLOUD_NAME || 'Not Set'}
@@ -542,7 +569,8 @@ if (Astro.request.method === 'POST') {
             <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:10px;font-weight:700">🔴 Live Site Connection</div>
             <p style="font-size:12px;color:var(--text);line-height:1.6">
               Yes, this admin panel <strong>directly modifies your live website</strong>. <br/>
-              When you save a change here, your Cloudflare D1 database is updated instantly. The main page will reflect these changes the next time it's loaded.
+              When you save a change here
+, your Cloudflare D1 database is updated instantly. The main page will reflect these changes the next time it's loaded.
             </p>
             <div style="margin-top:14px;font-size:11px;color:var(--muted)">
               <strong>To add new photos:</strong> Use the CLI tool: <code style="background:var(--rail);padding:2px 6px;border-radius:3px;color:var(--amber)">npm run upload path/to/photo.jpg</code>
@@ -553,7 +581,29 @@ if (Astro.request.method === 'POST') {
         <!-- ── PHOTOS ── -->
         <div id="panel-photos" class="panel">
           <div class="sec-hdr">
-            <div class="sec-sub">Edit metadata, move between albums, toggle featured</div>
+            <div class="sec-sub">Edit metadata, move between albums, toggle featured</div
+
+        <!-- Upload Zone -->
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="file-input" multiple accept="image/*" style="display:none"
+            onchange="handleFileSelect(event)">
+          <div class="upload-content" onclick="document.getElementById('file-input').click()">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <h3>Upload Photos</h3>
+            <p>Drag & drop images here or click to browse</p>
+            <span class="hint">Supports: JPG, PNG, WebP</span>
+          </div>
+          <div class="upload-progress" id="upload-progress" style="display:none">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <span id="progress-text">Uploading...</span>
+          </div>
+        </div>>
             <button class="btn btn-primary" onclick="openModal('modal-photo', null)">+ Add Photo Record</button>
           </div>
 
@@ -583,7 +633,8 @@ if (Astro.request.method === 'POST') {
         <div id="panel-albums" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Albums group photos in the gallery section</div>
-            <button class="btn btn-primary" onclick="openModal('modal-album', null)">+ New Album</button>
+            <button class="btn btn-primary" onclick="openModal('modal-album', null)"
+>+ New Album</button>
           </div>
           <div class="tbl-wrap">
             <table>
@@ -629,7 +680,8 @@ if (Astro.request.method === 'POST') {
 
           <div class="frow">
             <div class="fgroup">
-              <label class="flabel">Hero Image (Cloudinary public_id)</label>
+              <label class="flabel">Hero Image (Cloudinary public
+_id)</label>
               <input class="finput" id="about-hero-image" type="text" placeholder="Leave blank to use Featured Photo">
             </div>
             <div class="fgroup">
@@ -674,7 +726,8 @@ if (Astro.request.method === 'POST') {
 
   <!-- ═══ MODALS ═══ -->
 
-  <!-- Photo modal -->
+  <!-- Photo modal --
+>
   <div class="modal-bg" id="modal-photo">
     <div class="modal">
       <div class="modal-head">
@@ -687,59 +740,6 @@ if (Astro.request.method === 'POST') {
 
         <div class="fgroup">
           <label class="flabel">Cloudinary public_id *</label>
-          <input class="finput" id="ph-public_id" type="text" placeholder="portfolio/grid/my-photo"
-            oninput="updateCloudPreview()">
-          <div class="cloudinary-id-preview">
-            Preview URL: <span id="ph-url-preview">—</span>
-          </div>
-        </div>
-
-        <div class="frow">
-          <div class="fgroup">
-            <label class="flabel">Title *</label>
-            <input class="finput" id="ph-title" type="text" placeholder="Corner Store, 6am">
-          </div>
-          <div class="fgroup">
-            <label class="flabel">Location</label>
-            <input class="finput" id="ph-location" type="text" placeholder="Brooklyn, NY">
-          </div>
-        </div>
-
-        <div class="fgroup">
-          <label class="flabel">Caption</label>
-          <textarea class="ftextarea" id="ph-caption" rows="2" placeholder="Nobody was awake except the clerk and the neon."></textarea>
-        </div>
-
-        <div class="frow">
-          <div class="fgroup">
-            <label class="flabel">Roll / Date</label>
-            <input class="finput" id="ph-roll" type="text" placeholder="Roll 01">
-          </div>
-          <div class="fgroup">
-            <label class="flabel">Album</label>
-            <select class="fselect" id="ph-album_id">
-              <option value="">— Uncategorised —</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="frow">
-          <div class="fgroup">
-            <label class="flabel">Medium</label>
-            <select class="fselect" id="ph-medium" onchange="toggleSimField()">
-              <option value="film">Film</option>
-              <option value="digital">Digital</option>
-            </select>
-          </div>
-          <div class="fgroup" id="sim-field">
-            <label class="flabel">Fujifilm Simulation</label>
-            <input class="finput" id="ph-simulation" type="text" placeholder="Classic Chrome">
-          </div>
-        </div>
-
-        <div class="frow">
-          <div class="fgroup">
-            <label class="flabel">Camera</label>
-            <input class="finput" id="ph-camera" type="text" placeholder="Nikkorma
+          <i
 
 ... [Content truncated]

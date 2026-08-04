@@ -43,6 +43,17 @@ function checkAuth(cookies: any, secret: string): boolean {
   return session === secret;
 }
 
+function validateCsrf(request: Request, cookies: any): boolean {
+  const headerToken = request.headers.get("X-CSRF-Token");
+  const cookieToken = cookies.get("csrf_token")?.value;
+  if (!headerToken && request.method === "POST") {
+    const formData = await request.formData();
+    const formToken = formData.get("csrf_token");
+    if (formToken) return formToken === cookieToken;
+  }
+  return headerToken === cookieToken;
+}
+
 // ─── Main handler ──────────────────────────────────────────────────────────
 export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
   const env      = (locals as any).runtime?.env;
@@ -50,7 +61,17 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
   const SECRET   = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
 
   if (!checkAuth(cookies, SECRET)) return unauthorized();
-  if (!db) return json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
+
+  // CSRF validation for non-GET requests
+  if (request.method !== "GET") {
+    if (!validateCsrf(request, cookies)) {
+      return new Response(JSON.stringify({ error: "Invalid CSRF token" }), {
+        status: 403, headers: { "Content-Type": "application/json" }
+      });
+    }
+  }
+  if (!db) return 
+json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
 
   const resource = (params.resource ?? '').replace(/^\//, '');
   const method   = request.method.toUpperCase();
@@ -98,7 +119,8 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
     if (parts[1] && method === 'PUT') {
       const p = await request.json() as any;
       if (p.is_featured) {
-        await db.prepare('UPDATE photos SET is_featured = 0').run();
+        await
+ db.prepare('UPDATE photos SET is_featured = 0').run();
       }
       await db.prepare(`
         UPDATE photos SET
@@ -147,7 +169,8 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
     }
     if (parts[1] && method === 'DELETE') {
       // Uncategorise photos in this album first
-      await db.prepare('UPDATE photos SET album_id = NULL WHERE album_id = ?').bind(parts[1]).run();
+      await db.prepare('UP
+DATE photos SET album_id = NULL WHERE album_id = ?').bind(parts[1]).run();
       await db.prepare('DELETE FROM albums WHERE id = ?').bind(parts[1]).run();
       return json({ ok: true });
     }
@@ -196,10 +219,31 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
       return json({ ok: true });
     }
     if (parts[1] && method === 'DELETE') {
-      await db.prepare('DELETE FROM social_links WHERE id = ?').bind(parseInt(parts[1])).run();
+      await db.prepare('DELETE FROM social_links WHERE id = 
+?').bind(parseInt(parts[1])).run();
       return json({ ok: true });
     }
   }
 
-  return json({ error: 'Not found' }, 404);
+  
+
+  // Reorder endpoints (for drag-and-drop)
+  if (parts[0] === "albums" && parts[1] === "reorder" && method === "POST") {
+    const items = await request.json() as Array<{ id: string; sort_order: number }>;
+    const stmts = items.map(item =>
+      db.prepare("UPDATE albums SET sort_order = ? WHERE id = ?").bind(item.sort_order, item.id)
+    );
+    await db.batch(stmts);
+    return json({ ok: true });
+  }
+
+  if (parts[0] === "social" && parts[1] === "reorder" && method === "POST") {
+    const items = await request.json() as Array<{ id: number; sort_order: number }>;
+    const stmts = items.map(item =>
+      db.prepare("UPDATE social_links SET sort_order = ? WHERE id = ?").bind(item.sort_order, item.id)
+    );
+    await db.batch(stmts);
+    return json({ ok: true });
+  }
+return json({ error: 'Not found' }, 404);
 };

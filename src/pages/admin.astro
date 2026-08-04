@@ -50,8 +50,7 @@ if (!ADMIN_PASSWORD_HASH && env?.ADMIN_SECRET) {
 // Cloud name logic
 let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME
               ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
-              ?? (typeof p
-rocess !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
+              ?? (typeof processrocess !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
 if (!CLOUD_NAME && db) {
   try {
     const settings = await getSettings(db);
@@ -110,7 +109,8 @@ if (Astro.request.method === 'POST') {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device
+-width, initial-scale=1.0" />
   <title>Admin — Tuesday Portfolio</title>
   <meta name="robots" content="noindex,nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -160,7 +160,8 @@ if (Astro.request.method === 'POST') {
     }
     .login-logo { font-family: var(--serif); font-style: itali
 c;
- font-size: 22px; color: var(--amber); margin-bottom: 6px; }
+ font-size: 
+22px; color: var(--amber); margin-bottom: 6px; }
     .login-sub { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
     .login-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
     .login-input {
@@ -196,7 +197,8 @@ c;
     .sb-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(212,168,75,.05); 
 }
  
-   .sb-item .ic { width: 16px; text-align: center; font-size: 13px; }
+   .sb-item .
+ic { width: 16px; text-align: center; font-size: 13px; }
     .sb-footer { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
     .main { margin-left: 210px; flex: 1; display: flex; flex-direction: column; }
     .topbar {
@@ -228,7 +230,8 @@ c;
     .btn-xs { padding: 7px 14px; font-s
 ize:
  10px; }
-    /* ─── Forms ─── */
+    /*
+ ─── Forms ─── */
     .fgroup { margin-bottom: 16px; }
     .flabel { display: block; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
     .finput, .ftextarea, .fselect {
@@ -266,7 +269,8 @@ ize:
     .card-meta { font-size: 10px; color: var(--muted); line-height: 1.5; }
     .card-foot { paddi
 ng: 8
-px 14px; border-top: 1px solid var(--border); background: var(--rail); display: flex; gap: 6px; align-items: center; }
+px 14px; border
+-top: 1px solid var(--border); background: var(--rail); display: flex; gap: 6px; align-items: center; }
     /* ─── Table ─── */
     .tbl-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow-x: auto; margin-top: 14px; }
     table { width: 100%; border-collapse: collapse; min-width: 600px; }
@@ -294,7 +298,8 @@ px 14px; border-top: 1px solid var(--border); background: var(--rail); display: 
       position: fixed; inset: 0; background: rgba(0,0,0,.8);
       z-index: 1000; display: none; align-items: center; justify-conte
 nt: ce
-nter; padding: 20px;
+nter; padding: 20
+px;
     }
     .modal-bg.open { display: flex; }
     .modal {
@@ -331,7 +336,8 @@ nter; padding: 20px;
     .about-preview::before { content: 'LIVE PREVIEW'; position: absolute; top: 8px; right: 12px; font-size: 8px; letter-spacing: .15em; color: var(--faint); }
     .about-preview-bio { font-family: var(--serif); font-size: 13px; line-height: 1.7; color
 : #ccc;
- margin-bottom: 12px; }
+ margin-bottom: 12
+px; }
     .about-preview-gear { font-size: 11px; color: var(--muted); line-height: 1.8; }
     .about-preview-gear strong { color: var(--amber2); }
     /* ─── Sort handle ─── */
@@ -382,7 +388,8 @@ nter; padding: 20px;
       display: none;
       background: var(--paper);
       
-border: 1px solid var(--border);
+border: 1px solid var(--border)
+;
       color: var(--amber);
       padding: 8px;
       border-radius: var(--r-sm);
@@ -447,7 +454,8 @@ border: 1px solid var(--border);
         <label class="login-label">Password</label>
         <input class="login-input" type="password" name="password" autofocus placeholder="••••••••" />
         <button class="btn btn-primary login-btn" type="submit">Enter Darkroom <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="current
-Color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
+Color" stroke-width="2" stroke-linec
+ap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
       </div>
     </form>
   </div>
@@ -476,7 +484,8 @@ v>
           <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span><span>Albums</span>
         
 </div>
-        <div class="sb-section">Site</div>
+        <div class="sb-section
+">Site</div>
         <div class="sb-item" data-panel="about" onclick="nav(this)">
           <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><
 /span><span>About / Bio</span>
@@ -498,7 +507,8 @@ v>
     <div class="main">
       <header class="topbar">
     
-    <button class="mobile-nav-toggle" onclick="toggleSidebar()">
+    <button class="mobile-nav-toggle" 
+onclick="toggleSidebar()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
         <div class="to
@@ -529,7 +539,8 @@ pbar-title" id="topbar-title">Overview</div>
           </div>
           <div style="margin-top:20px;padding:18px;background:rgba(212,168,75,0.03);border:1px solid rgba(212,168,75,0.1);border-r
 adius:var(--r-sm)">
-            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:10px;font-weight:700">🔴 Live Site Connection</div>
+            <div styl
+e="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:10px;font-weight:700">🔴 Live Site Connection</div>
             <p style="font-size:12px;color:var(--text);line-height:1.6">
               Yes, this admin panel <strong>directly modifies your live website</strong>. <br/>
               When you save a change here
@@ -562,7 +573,8 @@ adius:var(--r-sm)">
               <option value="0">Grid
  only</option>
             </select>
-          </div>
+     
+     </div>
           <div class="cards" id="photos-grid"></div>
         </div>
         <!-- ── ALBUMS ── -->
@@ -606,7 +618,8 @@ adius:var(--r-sm)">
               <input class="finput" id="about-developing" type="text" oninput="
 updateGearPreview()">
             </div>
-            <div class="fgroup">
+       
+     <div class="fgroup">
               <label class="flabel">Also Shooting (digital)</label>
               <input class="finput" id="about-also" type="text" oninput="updateGearPreview()">
             </div>
@@ -645,7 +658,8 @@ _id)</label>
           </div
 >
           <div class="tbl-wrap">
-            <table>
+            <ta
+ble>
               <thead><tr><th style="width: 30px"></th><th>Label</th><th>URL</th><th>Order</th><th></th></tr></thead>
               <tbody id="social-table"></tbody>
             </table>

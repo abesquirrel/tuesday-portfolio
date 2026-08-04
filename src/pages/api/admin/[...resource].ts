@@ -3,24 +3,24 @@
 // REST API for the admin panel.
 // All routes are session-protected (same cookie as the admin page).
 //
-// GET    /api/admin/photos           → all photos
-// POST   /api/admin/photos           → insert photo
-// PUT    /api/admin/photos/:id       → update photo
-// DELETE /api/admin/photos/:id       → delete photo
-// POST   /api/admin/photos/feature   → set one photo as featured
+// GET    /api/admin/photos           -> all photos
+// POST   /api/admin/photos           -> insert photo
+// PUT    /api/admin/photos/:id       -> update photo
+// DELETE /api/admin/photos/:id       -> delete photo
+// POST   /api/admin/photos/feature   -> set one photo as featured
 //
-// GET    /api/admin/albums           → all albums
-// POST   /api/admin/albums           → insert album
-// PUT    /api/admin/albums/:id       → update album
-// DELETE /api/admin/albums/:id       → delete album
+// GET    /api/admin/albums           -> all albums
+// POST   /api/admin/albums           -> insert album
+// PUT    /api/admin/albums/:id       -> update album
+// DELETE /api/admin/albums/:id       -> delete album
 //
-// GET    /api/admin/settings         → all site_settings as object
-// PUT    /api/admin/settings         → upsert multiple settings
+// GET    /api/admin/settings         -> all site_settings as object
+// PUT    /api/admin/settings         -> upsert multiple settings
 //
-// GET    /api/admin/social           → all social_links
-// POST   /api/admin/social           → insert link
-// PUT    /api/admin/social/:id       → update link
-// DELETE /api/admin/social/:id       → delete link
+// GET    /api/admin/social           -> all social_links
+// POST   /api/admin/social           -> insert link
+// PUT    /api/admin/social/:id       -> update link
+// DELETE /api/admin/social/:id       -> delete link
 
 import type { APIRoute } from 'astro';
 
@@ -43,21 +43,20 @@ function checkAuth(cookies: any, secret: string): boolean {
   return session === secret;
 }
 
-// ─── Main handler ──────────────────────────────────────────────────────────
+// --- Main handler ---
 export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
-  const env      = (locals as any).runtime?.env;
-  const db       = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
-  const SECRET   = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
+  const env = (locals as any).runtime?.env;
+  const db = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
+  const SECRET = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
 
   if (!checkAuth(cookies, SECRET)) return unauthorized();
-  if (!db) return 
-json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
+  if (!db) return json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
 
   const resource = (params.resource ?? '').replace(/^\//, '');
-  const method   = request.method.toUpperCase();
-  const parts    = resource.split('/');
+  const method = request.method.toUpperCase();
+  const parts = resource.split('/');
 
-  // ── photos ──────────────────────────────────────────────────────────────
+  // --- photos ---
   if (parts[0] === 'photos') {
     // POST /api/admin/photos/feature
     if (parts[1] === 'feature' && method === 'POST') {
@@ -67,7 +66,7 @@ json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
       return json({ ok: true });
     }
 
-        // GET /api/admin/photos
+    // GET /api/admin/photos
     if (!parts[1] && method === 'GET') {
       const url = new URL(request.url);
       const page = parseInt(url.searchParams.get('page') || '1');
@@ -92,7 +91,9 @@ json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
           totalPages: Math.ceil(count / limit)
         }
       });
-    }// POST /api/admin/photos
+    }
+
+    // POST /api/admin/photos
     if (!parts[1] && method === 'POST') {
       const p = await request.json() as any;
       if (p.is_featured) {
@@ -102,13 +103,14 @@ json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
         INSERT OR REPLACE INTO photos
           (id, public_id, cloudinary_url, title, caption, roll, location, medium, simulation, camera, lens, film_stock, album_id, sort_order, is_featured)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-      `).bind(
-        p.id, p.public_id, p.cloudinary_url ?? null, p.title,
-        p.caption ?? '', p.roll ?? '', p.location ?? '',
-        p.medium ?? 'film', p.simulation ?? null,
-        p.camera ?? null, p.lens ?? null, p.film_stock ?? null,
-        p.album_id ?? null, p.sort_order ?? 99, p.is_featured ?? 0
-      ).run();
+      `)
+        .bind(
+          p.id, p.public_id, p.cloudinary_url ?? null, p.title,
+          p.caption ?? '', p.roll ?? '', p.location ?? '',
+          p.medium ?? 'film', p.simulation ?? null,
+          p.camera ?? null, p.lens ?? null, p.film_stock ?? null,
+          p.album_id ?? null, p.sort_order ?? 99, p.is_featured ?? 0
+        ).run();
       return json({ ok: true, id: p.id }, 201);
     }
 
@@ -116,8 +118,7 @@ json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
     if (parts[1] && method === 'PUT') {
       const p = await request.json() as any;
       if (p.is_featured) {
-        await
- db.prepare('UPDATE photos SET is_featured = 0').run();
+        await db.prepare('UPDATE photos SET is_featured = 0').run();
       }
       await db.prepare(`
         UPDATE photos SET
@@ -144,7 +145,7 @@ json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
     }
   }
 
-  // ── albums ──────────────────────────────────────────────────────────────
+  // --- albums ---
   if (parts[0] === 'albums') {
     if (!parts[1] && method === 'GET') {
       const { results } = await db.prepare('SELECT * FROM albums ORDER BY sort_order ASC').all();
@@ -166,14 +167,13 @@ json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
     }
     if (parts[1] && method === 'DELETE') {
       // Uncategorise photos in this album first
-      await db.prepare('UP
-DATE photos SET album_id = NULL WHERE album_id = ?').bind(parts[1]).run();
+      await db.prepare('UPDATE photos SET album_id = NULL WHERE album_id = ?').bind(parts[1]).run();
       await db.prepare('DELETE FROM albums WHERE id = ?').bind(parts[1]).run();
       return json({ ok: true });
     }
   }
 
-  // ── settings ─────────────────────────────────────────────────────────────
+  // --- settings ---
   if (parts[0] === 'settings') {
     if (method === 'GET') {
       const { results } = await db.prepare('SELECT * FROM site_settings').all();
@@ -193,7 +193,7 @@ DATE photos SET album_id = NULL WHERE album_id = ?').bind(parts[1]).run();
     }
   }
 
-  // ── social ───────────────────────────────────────────────────────────────
+  // --- social ---
   if (parts[0] === 'social') {
     if (!parts[1] && method === 'GET') {
       const { results } = await db
@@ -216,8 +216,7 @@ DATE photos SET album_id = NULL WHERE album_id = ?').bind(parts[1]).run();
       return json({ ok: true });
     }
     if (parts[1] && method === 'DELETE') {
-      await db.prepare('DELETE FROM social_links WHERE id = 
-?').bind(parseInt(parts[1])).run();
+      await db.prepare('DELETE FROM social_links WHERE id = ?').bind(parseInt(parts[1])).run();
       return json({ ok: true });
     }
   }

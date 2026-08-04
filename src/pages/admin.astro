@@ -364,21 +364,6 @@ nter; padding: 20px;
     /* ─── Sort handle ─── */
     .drag-handle { cursor: grab; color: var(--faint); font-size: 14px; padding: 0 6px; }
     .drag-handle:active { cursor: grabbing; }
-
-    /* ─── Upload Zone ─── */
-    .upload-zone { background: var(--card); border: 2px dashed var(--border2); border-radius: var(--r); padding: 40px; text-align: center; cursor: pointer; margin-bottom: 20px; transition: all .2s; position: relative; overflow: hidden; }
-    .upload-zone:hover { border-color: var(--amber); background: var(--rail); }
-    .upload-zone.drag-over { border-color: var(--amber); background: rgba(212,168,75,0.05); }
-    .upload-zone.uploading { pointer-events: none; }
-    .upload-content { display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--muted); }
-    .upload-content svg { color: var(--amber2); opacity: 0.7; }
-    .upload-content h3 { font-family: var(--serif); font-style: italic; color: var(--amber); margin: 0; }
-    .upload-content p { margin: 0; font-size: 13px; }
-    .upload-content .hint { font-size: 10px; color: var(--faint); }
-    .upload-progress { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; }
-    .progress-bar { width: 80%; height: 4px; background: var(--border2); border-radius: 2px; margin-bottom: 12px; overflow: hidden; }
-    .progress-fill { height: 100%; background: var(--amber); border-radius: 2px; width: 0%; transition: width 0.2s; }
-    #progress-text { font-size: 12px; color: var(--amber); }
     /* ─── Drag and Drop ─── */
     tr.dragging { opacity: 0.5; background: rgba(212,168,75,0.1); }
     tr.drag-over { border-top: 2px solid var(--amber); background: rgba(212,168,75,0.05); }
@@ -581,29 +566,7 @@ pbar-title" id="topbar-title">Overview</div>
         <!-- ── PHOTOS ── -->
         <div id="panel-photos" class="panel">
           <div class="sec-hdr">
-            <div class="sec-sub">Edit metadata, move between albums, toggle featured</div
-
-        <!-- Upload Zone -->
-        <div class="upload-zone" id="upload-zone">
-          <input type="file" id="file-input" multiple accept="image/*" style="display:none"
-            onchange="handleFileSelect(event)">
-          <div class="upload-content" onclick="document.getElementById('file-input').click()">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-            <h3>Upload Photos</h3>
-            <p>Drag & drop images here or click to browse</p>
-            <span class="hint">Supports: JPG, PNG, WebP</span>
-          </div>
-          <div class="upload-progress" id="upload-progress" style="display:none">
-            <div class="progress-bar">
-              <div class="progress-fill" id="progress-fill"></div>
-            </div>
-            <span id="progress-text">Uploading...</span>
-          </div>
-        </div>>
+            <div class="sec-sub">Edit metadata, move between albums, toggle featured</div>
             <button class="btn btn-primary" onclick="openModal('modal-photo', null)">+ Add Photo Record</button>
           </div>
 

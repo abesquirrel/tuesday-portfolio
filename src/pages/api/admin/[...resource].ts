@@ -23,8 +23,6 @@
 // DELETE /api/admin/social/:id       → delete link
 
 import type { APIRoute } from 'astro';
-import { v2 as cloudinary } from 'cloudinary';
-
 
 export const prerender = false;
 
@@ -49,20 +47,7 @@ function checkAuth(cookies: any, secret: string): boolean {
 export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
   const env      = (locals as any).runtime?.env;
   const db       = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
-  // Configure Cloudinary
-const CLOUDINARY_CLOUD_NAME = env?.CLOUDINARY_CLOUD_NAME ?? import.meta.env.CLOUDINARY_CLOUD_NAME;
-const CLOUDINARY_API_KEY = env?.CLOUDINARY_API_KEY ?? import.meta.env.CLOUDINARY_API_KEY;
-const CLOUDINARY_API_SECRET = env?.CLOUDINARY_API_SECRET ?? import.meta.env.CLOUDINARY_API_SECRET;
-
-if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
-  cloudinary.config({
-    cloud_name: CLOUDINARY_CLOUD_NAME,
-    api_key: CLOUDINARY_API_KEY,
-    api_secret: CLOUDINARY_API_SECRET
-  });
-}
-
-const SECRET   = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
+  const SECRET   = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
 
   if (!checkAuth(cookies, SECRET)) return unauthorized();
   if (!db) return 
@@ -82,15 +67,32 @@ json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
       return json({ ok: true });
     }
 
-    // GET /api/admin/photos
+        // GET /api/admin/photos
     if (!parts[1] && method === 'GET') {
-      const { results } = await db
-        .prepare('SELECT p.*, a.title as album_title FROM photos p LEFT JOIN albums a ON p.album_id = a.id ORDER BY p.sort_order ASC')
-        .all();
-      return json(results);
-    }
+      const url = new URL(request.url);
+      const page = parseInt(url.searchParams.get('page') || '1');
+      const limit = parseInt(url.searchParams.get('limit') || '24');
+      const offset = (page - 1) * limit;
 
-    // POST /api/admin/photos
+      const { results } = await db
+        .prepare('SELECT p.*, a.title as album_title FROM photos p LEFT JOIN albums a ON p.album_id = a.id ORDER BY p.sort_order ASC LIMIT ? OFFSET ?')
+        .bind(limit, offset)
+        .all();
+
+      const { count } = await db
+        .prepare('SELECT COUNT(*) as count FROM photos')
+        .first();
+
+      return json({
+        photos: results,
+        pagination: {
+          page,
+          limit,
+          total: count,
+          totalPages: Math.ceil(count / limit)
+        }
+      });
+    }// POST /api/admin/photos
     if (!parts[1] && method === 'POST') {
       const p = await request.json() as any;
       if (p.is_featured) {
@@ -142,43 +144,7 @@ json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
     }
   }
 
-  // POST /api/admin/photos/upload (file upload)
-    if (parts[0] === 'photos' && parts[1] === 'upload' && method === 'POST') {
-      const formData = await request.formData();
-      const file = formData.get('file') as File;
-      
-      if (!file || !(file instanceof File)) {
-        return json({ error: 'No file provided' }, 400);
-      }
-      
-      if (!CLOUDINARY_CLOUD_NAME) {
-        return json({ error: 'Cloudinary not configured' }, 500);
-      }
-      
-      try {
-        // Convert file to buffer
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        
-        // Upload to Cloudinary
-        const uploadResult = await new Promise((resolve, reject) => {
-          cloudinary.uploader.upload_stream(
-            { resource_type: 'image', folder: 'portfolio' },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          ).end(buffer);
-        });
-        
-        return json(uploadResult);
-      } catch (error) {
-        console.error('Cloudinary upload error:', error);
-        return json({ error: 'Upload failed', details: String(error) }, 500);
-      }
-    }
-
-// ── albums ──────────────────────────────────────────────────────────────
+  // ── albums ──────────────────────────────────────────────────────────────
   if (parts[0] === 'albums') {
     if (!parts[1] && method === 'GET') {
       const { results } = await db.prepare('SELECT * FROM albums ORDER BY sort_order ASC').all();

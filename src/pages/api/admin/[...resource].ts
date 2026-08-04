@@ -50,7 +50,9 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
   const SECRET   = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
 
   if (!checkAuth(cookies, SECRET)) return unauthorized();
-  if (!db) return json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
+  if (!db) return 
+
+json({ error: 'D1 binding not found. Check wrangler.toml' }, 503);
 
   const resource = (params.resource ?? '').replace(/^\//, '');
   const method   = request.method.toUpperCase();
@@ -66,15 +68,32 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
       return json({ ok: true });
     }
 
-    // GET /api/admin/photos
+        // GET /api/admin/photos
     if (!parts[1] && method === 'GET') {
-      const { results } = await db
-        .prepare('SELECT p.*, a.title as album_title FROM photos p LEFT JOIN albums a ON p.album_id = a.id ORDER BY p.sort_order ASC')
-        .all();
-      return json(results);
-    }
+      const url = new URL(request.url);
+      const page = parseInt(url.searchParams.get('page') || '1');
+      const limit = parseInt(url.searchParams.get('limit') || '24');
+      const offset = (page - 1) * limit;
 
-    // POST /api/admin/photos
+      const { results } = await db
+        .prepare('SELECT p.*, a.title as album_title FROM photos p LEFT JOIN albums a ON p.album_id = a.id ORDER BY p.sort_order ASC LIMIT ? OFFSET ?')
+        .bind(limit, offset)
+        .all();
+
+      const { count } = await db
+        .prepare('SELECT COUNT(*) as count FROM photos')
+        .first();
+
+      return json({
+        photos: results,
+        pagination: {
+          page,
+          limit,
+          total: count,
+          totalPages: Math.ceil(count / limit)
+        }
+      });
+    }// POST /api/admin/photos
     if (!parts[1] && method === 'POST') {
       const p = await request.json() as any;
       if (p.is_featured) {
@@ -84,7 +103,8 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
         INSERT OR REPLACE INTO photos
           (id, public_id, cloudinary_url, title, caption, roll, location, medium, simulation, camera, lens, film_stock, album_id, sort_order, is_featured)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-      `).bind(
+      `)
+.bind(
         p.id, p.public_id, p.cloudinary_url ?? null, p.title,
         p.caption ?? '', p.roll ?? '', p.location ?? '',
         p.medium ?? 'film', p.simulation ?? null,
@@ -98,7 +118,8 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
     if (parts[1] && method === 'PUT') {
       const p = await request.json() as any;
       if (p.is_featured) {
-        await db.prepare('UPDATE photos SET is_featured = 0').run();
+        await
+ db.prepare('UPDATE photos SET is_featured = 0').run();
       }
       await db.prepare(`
         UPDATE photos SET
@@ -135,7 +156,8 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
       const a = await request.json() as any;
       await db.prepare(
         'INSERT OR IGNORE INTO albums (id, title, description, sort_order) VALUES (?,?,?,?)'
-      ).bind(a.id, a.title, a.description ?? '', a.sort_order ?? 0).run();
+      ).bind(a.id, a.t
+itle, a.description ?? '', a.sort_order ?? 0).run();
       return json({ ok: true, id: a.id }, 201);
     }
     if (parts[1] && method === 'PUT') {
@@ -147,7 +169,8 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
     }
     if (parts[1] && method === 'DELETE') {
       // Uncategorise photos in this album first
-      await db.prepare('UPDATE photos SET album_id = NULL WHERE album_id = ?').bind(parts[1]).run();
+      await db.prepare('UP
+DATE photos SET album_id = NULL WHERE album_id = ?').bind(parts[1]).run();
       await db.prepare('DELETE FROM albums WHERE id = ?').bind(parts[1]).run();
       return json({ ok: true });
     }
@@ -184,7 +207,8 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
     if (!parts[1] && method === 'POST') {
       const l = await request.json() as any;
       const { meta } = await db.prepare(
-        'INSERT INTO social_links (label, url, sort_order) VALUES (?,?,?)'
+        'INSERT INTO social_links (label, url, sort_order) VALUES (
+?,?,?)'
       ).bind(l.label, l.url, l.sort_order ?? 0).run();
       return json({ ok: true, id: meta.last_row_id }, 201);
     }
@@ -196,7 +220,8 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
       return json({ ok: true });
     }
     if (parts[1] && method === 'DELETE') {
-      await db.prepare('DELETE FROM social_links WHERE id = ?').bind(parseInt(parts[1])).run();
+      await db.prepare('DELETE FROM social_links WHERE id = 
+?').bind(parseInt(parts[1])).run();
       return json({ ok: true });
     }
   }

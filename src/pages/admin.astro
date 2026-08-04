@@ -1,224 +1,67 @@
-
-
-// ===== Phase 1: Toast =====
-function showToast(msg, type, dur) {
-  if (!type) type = 'success';
-  if (!dur) dur = 3000;
-  const c = document.getElementById('toast-container');
-  if (!c) return;
-  const tEl = document.createElement('div');
-  tEl.className = 'toast' + (type === 'error' ? ' err' : '');
-  var color = type === 'error' ? '#ff6b5b' : '#3a7d52';
-  var icon = type === 'error' 
-    ? '<svg width=14 height=14 viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=2><circle cx=12 cy=12 r=10/><line x1=15 y1=9 x2=9 y2=15/><line x1=9 y1=9 x2=15 y2=15/></svg>'
-    : '<svg width=14 height=14 viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=2><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
-  tEl.innerHTML = icon + '<span style="color:' + color + ';flex:1">' + msg + '</span>';
-  c.appendChild(tEl);
-  setTimeout(function() { tEl.classList.add('show'); }, 100);
-  setTimeout(function() { 
-    tEl.style.transform = 'translateY(80px)';
-    tEl.style.opacity = '0';
-    setTimeout(function() { tEl.remove(); }, 300);
-  }, dur);
-}
-
-// ===== Phase 1: Loading =====
-var loadingCount = 0;
-function showLoading() {
-  loadingCount++;
-  var o = document.getElementById('loading-overlay');
-  if (o) o.classList.add('active');
-}
-function hideLoading() {
-  loadingCount = Math.max(0, loadingCount - 1);
-  if (loadingCount === 0) {
-    var o = document.getElementById('loading-overlay');
-    if (o) o.classList.remove('active');
-  }
-}
-
-// ===== Phase 1: Validation =====
-function validateForm(requiredFields) {
-  if (!requiredFields) requiredFields = [];
-  var isValid = true;
-  requiredFields.forEach(function(f) {
-    var field = document.getElementById(f);
-    var errorEl = document.querySelector('.error-' + f);
-    if (!field || !field.value || !field.value.trim()) {
-      if (field) field.classList.add('error');
-      if (errorEl) errorEl.classList.add('show');
-      isValid = false;
-    } else {
-      if (field) field.classList.remove('error');
-      if (errorEl) errorEl.classList.remove('show');
-    }
-  });
-  return isValid;
-}
-
-// ===== Phase 1: Cloudinary =====
-function getCUrl(publicId, cloudName) {
-  if (!publicId || !cloudName) return '';
-  return 'https://res.cloudinary.com/' + cloudName + '/image/upload/w_400,h_300,c_fill,q_auto,f_jpg/' + publicId + '.jpg';
-}
-
-// ===== Phase 1: Upload =====
-function setupUpload() {
-  var uz = document.getElementById('upload-zone');
-  var fi = document.getElementById('photo-upload-input');
-  if (!uz || !fi) return;
-  var cn = document.querySelector('meta[name=cf-cloud]')?.content || 'clueless';
-  uz.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    uz.classList.add('dragover');
-  });
-  uz.addEventListener('dragleave', function() {
-    uz.classList.remove('dragover');
-  });
-  uz.addEventListener('drop', function(e) {
-    e.preventDefault();
-    uz.classList.remove('dragover');
-    if (e.dataTransfer.files.length > 0) handleUpload(e.dataTransfer.files);
-  });
-  uz.addEventListener('click', function() { fi.click(); });
-  fi.addEventListener('change', function(e) {
-    if (e.target.files.length > 0) handleUpload(e.target.files);
-  });
-  
-  async function handleUpload(files) {
-    showLoading();
-    for (var i = 0; i < files.length; i++) {
-      var file = files[i];
-      try {
-        if (!file.type.startsWith('image/')) {
-          showToast('Images only', 'error');
-          continue;
-        }
-        if (file.size > 5242880) {
-          showToast('Max 5MB', 'error');
-          continue;
-        }
-        var fd = new FormData();
-        fd.append('file', file);
-        fd.append('upload_preset', 'portfolio-uploads');
-        fd.append('folder', 'portfolio/grid');
-        var r = await fetch('https://api.cloudinary.com/v1_1/' + cn + '/image/upload', {
-          method: 'POST',
-          body: fd
-        });
-        if (!r.ok) throw new Error('Upload failed');
-        var res = await r.json();
-        var pid = res.public_id;
-        showToast('Uploaded!');
-        var mb = document.getElementById('modal-photo');
-        if (mb) {
-          mb.classList.add('open');
-          document.getElementById('ph-public_id').value = pid;
-          document.getElementById('ph-title').value = file.name.replace(/\.[^/.]+$/, '');
-          if (typeof updateCloudPreview === 'function') updateCloudPreview();
-          document.getElementById('ph-title').focus();
-        }
-      } catch (e) {
-        showToast('Error: ' + e.message, 'error');
-      }
-    }
-    hideLoading();
-    if (typeof renderPhotos === 'function') renderPhotos();
-  }
-}
-
-// ===== Phase 1: Photo Form =====
-function savePhoto() {
-  if (!validateForm(['ph-title', 'ph-public_id'])) {
-    showToast('Fields required', 'error');
-    return;
-  }
-  var btn = document.querySelector('#modal-photo .btn-primary');
-  var orig = btn.innerHTML;
-  btn.classList.add('loading');
-  btn.innerHTML = 'Saving...<span class="spinner-small"></span>';
-  try {
-    var fd = new FormData();
-    ['id', 'public_id', 'title', 'caption', 'roll', 'location', 'medium', 'camera', 'lens', 'film_stock', 'album_id', 'is_featured', 'sort_order'].forEach(function(f) {
-      var el = document.getElementById('ph-' + f);
-      if (el && el.value) fd.append(f, el.value);
-    });
-    fd.append('action', 'update');
-    fetch('/api/photos', { method: 'POST', body: fd })
-      .then(function(r) { return r.json(); })
-      .then(function(res) {
-        if (res.error) throw new Error(res.error);
-        showToast('Saved!');
-        closeModal('modal-photo');
-        if (typeof renderPhotos === 'function') renderPhotos();
-      })
-      .catch(function(e) { showToast('Error: ' + e.message, 'error'); })
-      .finally(function() { 
-        btn.classList.remove('loading');
-        btn.innerHTML = orig;
-      });
-  } catch (e) {
-    btn.classList.remove('loading');
-    btn.innerHTML = orig;
-  }
-}
-
-// ===== Phase 1: Photo Card =====
-function renderPhotoCard(p) {
-  var cn = document.querySelector('meta[name=cf-cloud]')?.content || 'clueless';
-  var iu = p.cloudinary_url || getCUrl(p.public_id, cn);
-  var mc = p.medium === 'digital' ? 'badge-digital' : 'badge-film';
-  var fb = p.is_featured === 1 ? '<span class="badge badge-feat">Featured</span>' : '';
-  var th = iu 
-    ? '<img src="' + iu + '" alt="' + (p.title || 'Photo') + '" loading="lazy" />'
-    : '<div class="card-thumb-placeholder"><svg width=48 height=48 viewBox="0 0 24 24" fill=none stroke=currentColor><rect x=3 y=3 width=18 height=18 rx=2/><circle cx=8.5 cy=8.5 r=1.5/><polyline points="21 15 16 10 5 21"/></svg></div>';
-  return '<div class="card" data-id="' + (p.id || '') + '"><div class="card-thumb">' + th + '<div class="card-thumb-ov"><button class="btn btn-xs" onclick="editPhoto('' + (p.id || '') + '')">Edit</button></div></div><div class="card-body"><div class="card-title">' + (p.title || 'Untitled') + '</div><div class="card-meta">' + (p.location || '') + (p.location && p.roll ? ' · ' : '') + (p.roll || '') + '</div></div><div class="card-foot"><span class="badge ' + mc + '">' + (p.medium || 'film') + '</span>' + fb + '</div></div>';
-}
-
-// ===== Phase 1: Init =====
-document.addEventListener('DOMContentLoaded', function() {
-  setupUpload();
-  var pp = document.getElementById('panel-photos');
-  if (pp) {
-    pp.insertAdjacentHTML('afterbegin', '<div class="upload-zone" id="upload-zone"><input type="file" id="photo-upload-input" multiple accept="image/*"><svg class="upload-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><div style="color:var(--amber);font-size:14px;margin-bottom:8px;">Drop photos here</div><div style="color:var(--muted);font-size:11px;">or click to browse</div></div>');
-  }
-  var pf = document.getElementById('modal-photo');
-  if (pf) {
-    ['ph-title', 'ph-public_id'].forEach(function(f) {
-      var el = document.getElementById(f);
-      if (el) {
-        var err = document.createElement('div');
-        err.className = 'error-message error-' + f;
-        err.textContent = 'Required';
-        el.parentNode.insertBefore(err, el.nextSibling);
-      }
-    });
-    var btn = pf.querySelector('.btn-primary');
-    if (btn) btn.onclick = savePhoto;
-  }
-  if (typeof loadData === 'function') loadData();
-});
-
-<div id="toast-container" class="toast-container"></div>
-<div id="loading-overlay" class="loading-overlay"><div class="spinner"></div></div>---
+---
 // src/pages/admin.astro
-// ─── Server-side: auth guard ───────────────────────────────────────────────
+// ─── Server-side: auth guard + security ──────────────────────────────────
 export const prerender = false;
 
 import { getSettings } from '../lib/db';
+import bcrypt from 'bcrypt-wasm';
 
-// Simple cookie-based session check
-// Set ADMIN_SECRET as a Cloudflare Pages secret via dashboard
+// Initialize bcrypt-wasm
+const bcryptReady = bcrypt.init();
+
+// Generate secure random tokens
+function generateSecureToken() {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+// ─── Environment & DB ───────────────────────────────────────────────────
 const env = (Astro.locals as any).runtime?.env;
-const db  = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
-const ADMIN_SECRET = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
+const db = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
 
-// Try to get cloud name from environment first (Cloudflare, Vite, Node)
-let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME 
-              ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME 
-              ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
+// Generate and manage CSRF token
+let csrfToken = Astro.cookies.get('csrf_token')?.value;
+if (!csrfToken) {
+  csrfToken = generateSecureToken();
+  Astro.cookies.set('csrf_token', csrfToken, {
+    httpOnly: true,
+    secure: Astro.url.protocol === 'https:',
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 60 * 60 * 24, // 24 hours
+  });
+}
 
-// If missing, try to fetch from DB on the server
+// Session management
+const sessionCookie = Astro.cookies.get('admin_session')?.value;
+const isAuthed = !!sessionCookie;
+
+// Initialize bcrypt
+await bcryptReady;
+
+// Get hashed password from env or DB
+let ADMIN_PASSWORD_HASH = env?.ADMIN_PASSWORD_HASH ?? import.meta.env.ADMIN_PASSWORD_HASH;
+if (!ADMIN_PASSWORD_HASH && db) {
+  try {
+    const settings = await getSettings(db);
+    ADMIN_PASSWORD_HASH = settings.ADMIN_PASSWORD_HASH;
+  } catch (e) {
+    console.error('Failed to fetch settings:', e);
+  }
+}
+
+// Migration: hash ADMIN_SECRET if it exists and no hash exists
+if (!ADMIN_PASSWORD_HASH && env?.ADMIN_SECRET) {
+  ADMIN_PASSWORD_HASH = await bcrypt.hash(env.ADMIN_SECRET, 10);
+  console.warn('⚠️ Created password hash from ADMIN_SECRET. Set ADMIN_PASSWORD_HASH in your environment variables.');
+}
+
+// Cloud name logic
+let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME
+              ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
+              ?? (typeof p
+rocess !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
 if (!CLOUD_NAME && db) {
   try {
     const settings = await getSettings(db);
@@ -227,48 +70,62 @@ if (!CLOUD_NAME && db) {
     console.error('Failed to fetch settings from DB:', e);
   }
 }
-
-// Global fallback if everything else fails
-if (!CLOUD_NAME) {
-  CLOUD_NAME = 'clueless';
-}
-
-const cookie = Astro.cookies.get('admin_session');
-const isAuthed = cookie?.value === ADMIN_SECRET;
+if (!CLOUD_NAME) CLOUD_NAME = 'clueless';
 
 let loginError = '';
 
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
-  const action = form.get('action');
-  if (action === 'login') {
-    const pw = form.get('password');
-    if (pw === ADMIN_SECRET) {
-      Astro.cookies.set('admin_session', ADMIN_SECRET, {
-        httpOnly: true, secure: Astro.url.protocol === 'https:', sameSite: 'strict', path: '/',
-        maxAge: 60 * 60 * 24 * 7,
-      });
+  
+  // Validate CSRF token on all POST requests
+  const csrfFromForm = form.get('csrf_token');
+  if (!csrfFromForm || csrfFromForm !== csrfToken) {
+    loginError = 'Invalid request. Please refresh the page and try again.';
+  } else {
+    const action = form.get('action');
+    
+    if (action === 'login') {
+      const pw = form.get('password');
+      if (!pw) {
+        loginError = 'Password is required.';
+      } else if (ADMIN_PASSWORD_HASH) {
+        const isValid = await bcrypt.compare(String(pw), ADMIN_PASSWORD_HASH);
+        if (isValid) {
+          // Generate random session token (not the password)
+          const sessionToken = generateSecureToken();
+          Astro.cookies.set('admin_session', sessionToken, {
+            httpOnly: true,
+            secure: Astro.url.protocol === 'https:',
+            sameSite: 'strict',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+          });
+          return Astro.redirect('/admin');
+        } else {
+          loginError = 'Incorrect password. Please try again.';
+        }
+      } else {
+        loginError = 'Admin password not configured. Set ADMIN_PASSWORD_HASH.';
+      }
+    }
+
+    // ── Logout ─────────────────────────────────────────────────────────
+    if (action === 'logout') {
+      Astro.cookies.delete('admin_session', { path: '/' });
+      Astro.cookies.delete('csrf_token', { path: '/' });
       return Astro.redirect('/admin');
-    } else {
-      loginError = 'Incorrect password. Please try again.';
     }
   }
-
-  // ── Logout ───────────────────────
-──────────────────────────────────────
-  if (action === 'logout') {
-    Astro.cookies.delete('admin_session', { path: '/' });
-    return Astr
-o.redirect('/admin');
-  }
 }
+---
 ---
 
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content=
+"width=device-width, initial-scale=1.0" />
   <title>Admin — Tuesday Portfolio</title>
   <meta name="robots" content="noindex,nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -308,18 +165,17 @@ o.redirect('/admin');
       justify-content: center;
       background: var(--ink);
       /* grain overlay */
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filte
-r='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
     }
     .login-box {
       width: 340px;
       max-width: 90%;
       padding: 40px;
-      bord
-er: 1px solid var(--border2);
+      border: 1px solid var(--border2);
       background: var(--paper);
     }
-    .login-logo { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--amber); margin-bottom: 6px; }
+    .login-logo { font-family: var(--serif); font-style: italic;
+ font-size: 22px; color: var(--amber); margin-bottom: 6px; }
     .login-sub { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
     .login-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
     .login-input {
@@ -351,14 +207,13 @@ er: 1px solid var(--border2);
     .sb-section { padding: 10px 18px 4px; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
     .sb-item {
       display: flex; align-items: center; gap: 9px; padding: 9px 18px;
-      cursor: pointer; color: var(--muted); fon
-t-size: 12px;
+      cursor: pointer; color: var(--muted); font-size: 12px;
       border-left: 2px solid transparent; transition: all .15s;
     }
-    .sb-item:hover { color: var(--text); background: rgba(2
-55,255,255,.03); }
+    .sb-item:hover { color: var(--text); background: rgba(255,255,255,.03); }
     .sb-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(212,168,75,.05); }
-    .sb-item .ic { width: 16px; text-align: center; font-size: 13px; }
+ 
+   .sb-item .ic { width: 16px; text-align: center; font-size: 13px; }
     .sb-footer { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
 
     .main { margin-left: 210px; flex: 1; display: flex; flex-direction: column; }
@@ -388,12 +243,11 @@ t-size: 12px;
     .btn:hover { background: var(--rail); border-color: var(--amber); color: var(--amber); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .btn-primary { background: var(--amber); color: var(--ink); font-weight: 700; border-color: var(--amber); }
     .btn-primary:hover { background: #eac06a; color: var(--ink); box-shadow: 0 6px 16px rgba(212,168,75,0.25); }
-    .btn-danger { background: rgba(181, 57, 43, 0.15); border-co
-lor: rgba(181, 57, 43, 0.3); color: #ff6b5b; }
-    .btn-danger:hover { background: var(--red); color: white; border-color: var(--red); box-shado
-w: 0 6px 16px rgba(181,57,43,0.3); }
+    .btn-danger { background: rgba(181, 57, 43, 0.15); border-color: rgba(181, 57, 43, 0.3); color: #ff6b5b; }
+    .btn-danger:hover { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 6px 16px rgba(181,57,43,0.3); }
     .btn-sm { padding: 9px 18px; font-size: 11px; }
-    .btn-xs { padding: 7px 14px; font-size: 10px; }
+    .btn-xs { padding: 7px 14px; font-size:
+ 10px; }
 
     /* ─── Forms ─── */
     .fgroup { margin-bottom: 16px; }
@@ -428,13 +282,12 @@ w: 0 6px 16px rgba(181,57,43,0.3); }
       display: flex; align-items: center; justify-content: center;
       opacity: 0; transition: opacity .2s; pointer-events: none;
     }
-    .card-thumb:hover 
-.card-thumb-ov { opacity: 1; }
+    .card-thumb:hover .card-thumb-ov { opacity: 1; }
     .card-body { padding: 12px 14px; }
-    .card-title { font-family: var(--serif); font-size: 14px; color: var(--
-amber); margin-bottom: 2px; }
+    .card-title { font-family: var(--serif); font-size: 14px; color: var(--amber); margin-bottom: 2px; }
     .card-meta { font-size: 10px; color: var(--muted); line-height: 1.5; }
-    .card-foot { padding: 8px 14px; border-top: 1px solid var(--border); background: var(--rail); display: flex; gap: 6px; align-items: center; }
+    .card-foot { padding: 8
+px 14px; border-top: 1px solid var(--border); background: var(--rail); display: flex; gap: 6px; align-items: center; }
 
     /* ─── Table ─── */
     .tbl-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow-x: auto; margin-top: 14px; }
@@ -458,15 +311,14 @@ amber); margin-bottom: 2px; }
     /* ─── Stats ─── */
     .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 24px; }
     .stat { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 18px; }
-    .stat-lbl { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margi
-n-bottom: 5px; }
+    .stat-lbl { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
     .stat-val { font-family: var(--serif); font-size: 26px; color: var(--amber); }
 
     /* ─── Modal ─── */
     .modal-bg {
-     
- position: fixed; inset: 0; background: rgba(0,0,0,.8);
-      z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
+      position: fixed; inset: 0; background: rgba(0,0,0,.8);
+      z-index: 1000; display: none; align-items: center; justify-content: ce
+nter; padding: 20px;
     }
     .modal-bg.open { display: flex; }
     .modal {
@@ -501,18 +353,20 @@ n-bottom: 5px; }
     .about-preview {
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--r); padding: 20px; margin-bottom: 20px;
-      posit
-ion: relative;
+      position: relative;
     }
-    .about-preview::before { content: 'LIVE PREVIEW'; position: absolute; top: 8px; right: 12px; font-size: 8px; letter-spacin
-g: .15em; color: var(--faint); }
-    .about-preview-bio { font-family: var(--serif); font-size: 13px; line-height: 1.7; color: #ccc; margin-bottom: 12px; }
+    .about-preview::before { content: 'LIVE PREVIEW'; position: absolute; top: 8px; right: 12px; font-size: 8px; letter-spacing: .15em; color: var(--faint); }
+    .about-preview-bio { font-family: var(--serif); font-size: 13px; line-height: 1.7; color: #ccc;
+ margin-bottom: 12px; }
     .about-preview-gear { font-size: 11px; color: var(--muted); line-height: 1.8; }
     .about-preview-gear strong { color: var(--amber2); }
 
     /* ─── Sort handle ─── */
     .drag-handle { cursor: grab; color: var(--faint); font-size: 14px; padding: 0 6px; }
     .drag-handle:active { cursor: grabbing; }
+    /* ─── Drag and Drop ─── */
+    tr.dragging { opacity: 0.5; background: rgba(212,168,75,0.1); }
+    tr.drag-over { border-top: 2px solid var(--amber); background: rgba(212,168,75,0.05); }
 
     /* ─── Toast ─── */
     .toast {
@@ -555,15 +409,14 @@ g: .15em; color: var(--faint); }
       z-index: 90;
     }
 
-    @media (max-wid
-th: 768px) {
+    @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
-        width: 240px;
+        width: 240px
+;
       }
       .sidebar.open {
-        transform: translate
-X(0);
+        transform: translateX(0);
       }
       .sidebar-overlay.open {
         display: block;
@@ -594,35 +447,8 @@ X(0);
         margin: 0 auto;
       }
     }
-  
-
-/* Phase 1: Loading */
-.loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 10000; }
-.loading-overlay.active { display: flex; }
-.spinner { width: 40px; height: 40px; border: 3px solid var(--border2); border-top-color: var(--amber); border-radius: 50%; animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-/* Phase 1: Toast */
-.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.toast { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: var(--r); font-size: 12px; color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: auto; }
-.toast.show { transform: translateY(0); opacity: 1; }
-.toast.err { border-left-color: var(--red); }
-@keyframes slideIn { from { transform: translateY(80px); opacity: 0; } to { transform:
- translateY(0); opacity: 1; } }
-/* Phase 1: Upload */
-.upload-zone { border: 2px dashed var(--border2); border-radius: var(--r); padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; background: var(--rail); margin-bottom: 20px; }
-.upload-zone:hover { border-color: var(--amber); background: rgba(212,168,75,0.05); }
-.upload-zone input[type=file] { display: none; }
-/* Phase 1: Thumbnails */
-.card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
-.card-thumb:hover img { transform: scale(1.05); }
-.card-thumb-placeholder { width: 100%; height: 100%; background: var(--rail); display: flex; align-items: center; justify-content: center; color: var(--border2); }
-/* Phase 1: Validation */
-.finput.error { border-color: var(--red) !important; background: rgba(181,57,43,0.1); }
-.error-message { font-size: 10px; color: var(--red); margin-top: 4px; display: none; }
-.error-message.show { display: block; }
-.btn.loading { opacity: 0.7; pointer-events: none; }
-.btn .spinner-small { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; margin-left: 6px; vertical-align: middle; }
-</style>
+  </style>
+  <meta name="csrf-token" content={csrfToken} />
 </head>
 <body>
 
@@ -631,14 +457,14 @@ X(0);
   <div class="login-wrap">
     <form method="POST">
       <input type="hidden" name="action" value="login" />
+      <input type="hidden" name="csrf_token" value={csrfToken} />
       <div class="login-box">
         <div class="login-logo">I think it was Tuesday</div>
         <div class="login-sub">Admin Panel</div>
         {loginError && <div style="color: #ff5555; font-size: 11px; margin-bottom: 10px;">{loginError}</div>}
         <label class="login-label">Password</label>
         <input class="login-input" type="password" name="password" autofocus placeholder="••••••••" />
-        <button class="btn btn-primary login-btn" type="submit">Enter Darkroom <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
-e-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
+        <button class="btn btn-primary login-btn" type="submit">Enter Darkroom <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
       </div>
     </form>
   </div>
@@ -648,14 +474,14 @@ e-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" 
   <div class="shell">
 
     <!-- ── Sidebar Overlay ── -->
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></di
+v>
 
     <!-- ── Sidebar ── -->
     <aside class="sidebar" id="sidebar">
       <div class="sb-brand">
         <div class="sb-brand-title">Tuesday</div>
-        <div class="sb-b
-rand-sub">Darkroom Admin</div>
+        <div class="sb-brand-sub">Darkroom Admin</div>
       </div>
       <nav class="sb-nav">
         <div class="sb-section">Content</div>
@@ -669,20 +495,20 @@ rand-sub">Darkroom Admin</div>
           <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span><span>Albums</span>
         </div>
 
-    
-    <div class="sb-section">Site</div>
+        <div class="sb-section">Site</div>
         <div class="sb-item" data-panel="about" onclick="nav(this)">
-          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span><span>About / Bio</span>
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><
+/span><span>About / Bio</span>
         </div>
         <div class="sb-item" data-panel="social" onclick="nav(this)">
-          <span class="ic"><svg width="14" height="14" view
-Box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></span><span>Social Links</span>
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></span><span>Social Links</span>
         </div>
       </nav>
       <div class="sb-footer">
         <a href="/" target="_blank" class="btn btn-sm" style="width:100%;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg> View Site</a>
         <form method="POST" style="margin:0">
           <input type="hidden" name="action" value="logout" />
+          <input type="hidden" name="csrf_token" value={csrfToken} />
           <button type="submit" class="btn btn-sm btn-danger" style="width:100%;cursor:pointer;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout</button>
         </form>
       </div>
@@ -692,13 +518,12 @@ Box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-lineca
     <div class="main">
       <header class="topbar">
         <button class="mobile-nav-toggle" onclick="toggleSidebar()">
-          <svg wi
-dth="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <div class="topbar-title" id="topbar-title">Overview</div>
+        <div class="to
+pbar-title" id="topbar-title">Overview</div>
         <div class="topbar-right">
-          <span style="font-size:9px; letter-spacing:0.1em; padding:2px 8px; border-radius:10px; background:rgba(212,168,75,0.1); color:var(--amber); border:1px soli
-d rgba(212,168,75,0.2);">
+          <span style="font-size:9px; letter-spacing:0.1em; padding:2px 8px; border-radius:10px; background:rgba(212,168,75,0.1); color:var(--amber); border:1px solid rgba(212,168,75,0.2);">
             Cloud: {CLOUD_NAME || 'Not Set'}
           </span>
           <span style="font-size:10px;color:var(--muted); margin-left:10px;">D1 · Cloudinary</span>
@@ -726,15 +551,14 @@ d rgba(212,168,75,0.2);">
           </div>
 
           <div style="margin-top:20px;padding:18px;background:rgba(212,168,75,0.03);border:1px solid rgba(212,168,75,0.1);border-radius:var(--r-sm)">
-            <div style="font-size:10px;letter-spacing:.12em;te
-xt-transform:uppercase;color:var(--amber);margin-bottom:10px;font-weight:700">🔴 Live Site Connection</div>
+            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:10px;font-weight:700">🔴 Live Site Connection</div>
             <p style="font-size:12px;color:var(--text);line-height:1.6">
               Yes, this admin panel <strong>directly modifies your live website</strong>. <br/>
-              When you save a change here, your Cloudflare D1 database is updated instantly. The main page will reflect these changes the next time it's loaded.
+              When you save a change here
+, your Cloudflare D1 database is updated instantly. The main page will reflect these changes the next time it's loaded.
             </p>
             <div style="margin-top:14px;font-size:11px;color:var(--muted)">
-              <strong>To add new
- photos:</strong> Use the CLI tool: <code style="background:var(--rail);padding:2px 6px;border-radius:3px;color:var(--amber)">npm run upload path/to/photo.jpg</code>
+              <strong>To add new photos:</strong> Use the CLI tool: <code style="background:var(--rail);padding:2px 6px;border-radius:3px;color:var(--amber)">npm run upload path/to/photo.jpg</code>
             </div>
           </div>
         </div>
@@ -763,8 +587,7 @@ xt-transform:uppercase;color:var(--amber);margin-bottom:10px;font-weight:700">�
             </select>
           </div>
 
-          <div class="cards
-" id="photos-grid"></div>
+          <div class="cards" id="photos-grid"></div>
         </div>
 
 
@@ -773,13 +596,13 @@ xt-transform:uppercase;color:var(--amber);margin-bottom:10px;font-weight:700">�
         <div id="panel-albums" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Albums group photos in the gallery section</div>
-            <button class="btn btn-primary" onclick="openModal('modal-album', null)">+ New Album</button>
+            <button class="btn btn-primary" onclick="openModal('modal-album', null)"
+>+ New Album</button>
           </div>
           <div class="tbl-wrap">
             <table>
               <thead><tr><th style="width: 30px"></th><th>Title</th><th>Description</th><th>Photos</th><th>Order</th><th></th></tr></thead>
-             
- <tbody id="albums-table"></tbody>
+              <tbody id="albums-table"></tbody>
             </table>
           </div>
         </div>
@@ -813,20 +636,19 @@ xt-transform:uppercase;color:var(--amber);margin-bottom:10px;font-weight:700">�
               <input class="finput" id="about-developing" type="text" oninput="updateGearPreview()">
             </div>
             <div class="fgroup">
-        
-      <label class="flabel">Also Shooting (digital)</label>
+              <label class="flabel">Also Shooting (digital)</label>
               <input class="finput" id="about-also" type="text" oninput="updateGearPreview()">
             </div>
           </div>
 
           <div class="frow">
             <div class="fgroup">
-              <label class="flabel">Hero Image (Cloudinary public_id)</label>
+              <label class="flabel">Hero Image (Cloudinary public
+_id)</label>
               <input class="finput" id="about-hero-image" type="text" placeholder="Leave blank to use Featured Photo">
             </div>
             <div class="fgroup">
-              <label class="flabel">About Portrait (Cloudinar
-y public_id)</label>
+              <label class="flabel">About Portrait (Cloudinary public_id)</label>
               <input class="finput" id="about-image" type="text" placeholder="portfolio/about/portrait">
             </div>
           </div>
@@ -855,8 +677,7 @@ y public_id)</label>
           </div>
           <div class="tbl-wrap">
             <table>
-              <thead><tr><t
-h style="width: 30px"></th><th>Label</th><th>URL</th><th>Order</th><th></th></tr></thead>
+              <thead><tr><th style="width: 30px"></th><th>Label</th><th>URL</th><th>Order</th><th></th></tr></thead>
               <tbody id="social-table"></tbody>
             </table>
           </div>
@@ -868,12 +689,20 @@ h style="width: 30px"></th><th>Label</th><th>URL</th><th>Order</th><th></th></tr
 
   <!-- ═══ MODALS ═══ -->
 
-  <!-- Photo modal -->
+  <!-- Photo modal --
+>
   <div class="modal-bg" id="modal-photo">
     <div class="modal">
       <div class="modal-head">
         <div class="modal-title" id="modal-photo-ttl">Add Photo Record</div>
-        <button class="modal-x" onclick="closeModal('modal-photo')"><
-svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></lin
+        <button class="modal-x" onclick="closeModal('modal-photo')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="ph-id" />
+        <input type="hidden" name="csrf_token" value={csrfToken} />
+
+        <div class="fgroup">
+          <label class="flabel">Cloudinary public_id *</label>
+          <i
 
 ... [Content truncated]

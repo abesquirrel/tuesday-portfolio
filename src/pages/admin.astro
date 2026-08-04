@@ -365,18 +365,24 @@ nter; padding: 20px;
     .drag-handle { cursor: grab; color: var(--faint); font-size: 14px; padding: 0 6px; }
     .drag-handle:active { cursor: grabbing; }
 
-    /* ─── Form Validation ─── */
-    .finput.error, .ftextarea.error {
-      border-color: var(--red) !important;
-      background: rgba(181, 57, 43, 0.08);
+    /* ─── Pagination ─── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+      grid-column: 1 / -1;
     }
-    .error-message {
-      font-size: 10px;
-      color: var(--red);
-      margin-top: 4px;
-      display: none;
+    .pagination-info {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 0 8px;
     }
-    .error-message.show { display: block; }
+    .pagination .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
     /* ─── Drag and Drop ─── */
     tr.dragging { opacity: 0.5; background: rgba(212,168,75,0.1); }
     tr.drag-over { border-top: 2px solid var(--amber); background: rgba(212,168,75,0.05); }

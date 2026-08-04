@@ -364,6 +364,39 @@ nter; padding: 20px;
     /* ─── Sort handle ─── */
     .drag-handle { cursor: grab; color: var(--faint); font-size: 14px; padding: 0 6px; }
     .drag-handle:active { cursor: grabbing; }
+
+    /* ─── Loading States ─── */
+    .btn.loading { pointer-events: none; opacity: 0.7; }
+    .btn.loading .btn-text { display: none; }
+    .btn.loading .spinner { display: inline-block; }
+    .spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    .loading-overlay.show { display: flex; }
+    .loading-spinner-large {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border2);
+      border-top-color: var(--amber);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
     /* ─── Drag and Drop ─── */
     tr.dragging { opacity: 0.5; background: rgba(212,168,75,0.1); }
     tr.drag-over { border-top: 2px solid var(--amber); background: rgba(212,168,75,0.05); }
@@ -611,7 +644,7 @@ pbar-title" id="topbar-title">Overview</div>
         <div id="panel-about" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Bio and gear notes shown in the About section</div>
-            <button class="btn btn-primary" onclick="saveAbout()">Save Changes</button>
+            <button class="btn btn-primary" id="btn-save-about" onclick="withLoading(saveAbout, 'btn-save-about')"><span class="btn-text">Save Changes</span><span class="spinner"></span></button>Save Changes</button>
           </div>
 
           <div class="about-preview">

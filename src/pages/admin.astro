@@ -4,10 +4,10 @@
 export const prerender = false;
 
 import { getSettings } from '../lib/db';
-import bcrypt from 'bcrypt-wasm';
+import bcrypt from 'bcryptjs';
 
 // Initialize bcrypt-wasm
-const bcryptReady = bcrypt.init();
+const bcryptReady = Promise.resolve();
 
 // Generate secure random tokens
 function generateSecureToken() {
@@ -60,9 +60,7 @@ if (!ADMIN_PASSWORD_HASH && env?.ADMIN_SECRET) {
 // Cloud name logic
 let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME
               ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
-              ?? (typeof p
-
-rocess !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
+              ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
 if (!CLOUD_NAME && db) {
   try {
     const settings = await getSettings(db);
@@ -119,15 +117,12 @@ if (Astro.request.method === 'POST') {
   }
 }
 ---
----
 
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content
-=
-"width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin — Tuesday Portfolio</title>
   <meta name="robots" content="noindex,nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -176,9 +171,7 @@ if (Astro.request.method === 'POST') {
       border: 1px solid var(--border2);
       background: var(--paper);
     }
-    .login-logo { font-family: var(--serif); font-style: itali
-c;
- font-size: 22px; color: var(--amber); margin-bottom: 6px; }
+    .login-logo { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--amber); margin-bottom: 6px; }
     .login-sub { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
     .login-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
     .login-input {
@@ -214,10 +207,8 @@ c;
       border-left: 2px solid transparent; transition: all .15s;
     }
     .sb-item:hover { color: var(--text); background: rgba(255,255,255,.03); }
-    .sb-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(212,168,75,.05); 
-}
- 
-   .sb-item .ic { width: 16px; text-align: center; font-size: 13px; }
+    .sb-item.active { color: var(--amber); border-left-color: var(--amber); background: rgba(212,168,75,.05); }
+    .sb-item .ic { width: 16px; text-align: center; font-size: 13px; }
     .sb-footer { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
 
     .main { margin-left: 210px; flex: 1; display: flex; flex-direction: column; }
@@ -250,9 +241,7 @@ c;
     .btn-danger { background: rgba(181, 57, 43, 0.15); border-color: rgba(181, 57, 43, 0.3); color: #ff6b5b; }
     .btn-danger:hover { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 6px 16px rgba(181,57,43,0.3); }
     .btn-sm { padding: 9px 18px; font-size: 11px; }
-    .btn-xs { padding: 7px 14px; font-s
-ize:
- 10px; }
+    .btn-xs { padding: 7px 14px; font-size: 10px; }
 
     /* ─── Forms ─── */
     .fgroup { margin-bottom: 16px; }
@@ -291,9 +280,7 @@ ize:
     .card-body { padding: 12px 14px; }
     .card-title { font-family: var(--serif); font-size: 14px; color: var(--amber); margin-bottom: 2px; }
     .card-meta { font-size: 10px; color: var(--muted); line-height: 1.5; }
-    .card-foot { paddi
-ng: 8
-px 14px; border-top: 1px solid var(--border); background: var(--rail); display: flex; gap: 6px; align-items: center; }
+    .card-foot { padding: 8px 14px; border-top: 1px solid var(--border); background: var(--rail); display: flex; gap: 6px; align-items: center; }
 
     /* ─── Table ─── */
     .tbl-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow-x: auto; margin-top: 14px; }
@@ -323,9 +310,7 @@ px 14px; border-top: 1px solid var(--border); background: var(--rail); display: 
     /* ─── Modal ─── */
     .modal-bg {
       position: fixed; inset: 0; background: rgba(0,0,0,.8);
-      z-index: 1000; display: none; align-items: center; justify-conte
-nt: ce
-nter; padding: 20px;
+      z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
     }
     .modal-bg.open { display: flex; }
     .modal {
@@ -363,37 +348,13 @@ nter; padding: 20px;
       position: relative;
     }
     .about-preview::before { content: 'LIVE PREVIEW'; position: absolute; top: 8px; right: 12px; font-size: 8px; letter-spacing: .15em; color: var(--faint); }
-    .about-preview-bio { font-family: var(--serif); font-size: 13px; line-height: 1.7; color
-: #ccc;
- margin-bottom: 12px; }
+    .about-preview-bio { font-family: var(--serif); font-size: 13px; line-height: 1.7; color: #ccc; margin-bottom: 12px; }
     .about-preview-gear { font-size: 11px; color: var(--muted); line-height: 1.8; }
     .about-preview-gear strong { color: var(--amber2); }
 
     /* ─── Sort handle ─── */
     .drag-handle { cursor: grab; color: var(--faint); font-size: 14px; padding: 0 6px; }
     .drag-handle:active { cursor: grabbing; }
-
-    /* ─── Pagination ─── */
-    .pagination {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 20px;
-      grid-column: 1 / -1;
-    }
-    .pagination-info {
-      font-size: 11px;
-      color: var(--muted);
-      padding: 0 8px;
-    }
-    .pagination .btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    /* ─── Drag and Drop ─── */
-    tr.dragging { opacity: 0.5; background: rgba(212,168,75,0.1); }
-    tr.drag-over { border-top: 2px solid var(--amber); background: rgba(212,168,75,0.05); }
 
     /* ─── Toast ─── */
     .toast {
@@ -421,8 +382,7 @@ nter; padding: 20px;
     .mobile-nav-toggle {
       display: none;
       background: var(--paper);
-      
-border: 1px solid var(--border);
+      border: 1px solid var(--border);
       color: var(--amber);
       padding: 8px;
       border-radius: var(--r-sm);
@@ -440,8 +400,7 @@ border: 1px solid var(--border);
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
-        width: 240px
-;
+        width: 240px;
       }
       .sidebar.open {
         transform: translateX(0);
@@ -492,8 +451,7 @@ border: 1px solid var(--border);
         {loginError && <div style="color: #ff5555; font-size: 11px; margin-bottom: 10px;">{loginError}</div>}
         <label class="login-label">Password</label>
         <input class="login-input" type="password" name="password" autofocus placeholder="••••••••" />
-        <button class="btn btn-primary login-btn" type="submit">Enter Darkroom <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="current
-Color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
+        <button class="btn btn-primary login-btn" type="submit">Enter Darkroom <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
       </div>
     </form>
   </div>
@@ -503,8 +461,7 @@ Color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1=
   <div class="shell">
 
     <!-- ── Sidebar Overlay ── -->
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></di
-v>
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <!-- ── Sidebar ── -->
     <aside class="sidebar" id="sidebar">
@@ -522,13 +479,11 @@ v>
         </div>
         <div class="sb-item" data-panel="albums" onclick="nav(this)">
           <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span><span>Albums</span>
-        
-</div>
+        </div>
 
         <div class="sb-section">Site</div>
         <div class="sb-item" data-panel="about" onclick="nav(this)">
-          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><
-/span><span>About / Bio</span>
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span><span>About / Bio</span>
         </div>
         <div class="sb-item" data-panel="social" onclick="nav(this)">
           <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></span><span>Social Links</span>
@@ -547,12 +502,10 @@ v>
     <!-- ── Main ── -->
     <div class="main">
       <header class="topbar">
-    
-    <button class="mobile-nav-toggle" onclick="toggleSidebar()">
+        <button class="mobile-nav-toggle" onclick="toggleSidebar()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <div class="to
-pbar-title" id="topbar-title">Overview</div>
+        <div class="topbar-title" id="topbar-title">Overview</div>
         <div class="topbar-right">
           <span style="font-size:9px; letter-spacing:0.1em; padding:2px 8px; border-radius:10px; background:rgba(212,168,75,0.1); color:var(--amber); border:1px solid rgba(212,168,75,0.2);">
             Cloud: {CLOUD_NAME || 'Not Set'}
@@ -581,13 +534,11 @@ pbar-title" id="topbar-title">Overview</div>
             </table>
           </div>
 
-          <div style="margin-top:20px;padding:18px;background:rgba(212,168,75,0.03);border:1px solid rgba(212,168,75,0.1);border-r
-adius:var(--r-sm)">
+          <div style="margin-top:20px;padding:18px;background:rgba(212,168,75,0.03);border:1px solid rgba(212,168,75,0.1);border-radius:var(--r-sm)">
             <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:10px;font-weight:700">🔴 Live Site Connection</div>
             <p style="font-size:12px;color:var(--text);line-height:1.6">
               Yes, this admin panel <strong>directly modifies your live website</strong>. <br/>
-              When you save a change here
-, your Cloudflare D1 database is updated instantly. The main page will reflect these changes the next time it's loaded.
+              When you save a change here, your Cloudflare D1 database is updated instantly. The main page will reflect these changes the next time it's loaded.
             </p>
             <div style="margin-top:14px;font-size:11px;color:var(--muted)">
               <strong>To add new photos:</strong> Use the CLI tool: <code style="background:var(--rail);padding:2px 6px;border-radius:3px;color:var(--amber)">npm run upload path/to/photo.jpg</code>
@@ -615,8 +566,7 @@ adius:var(--r-sm)">
             <select class="fselect" id="filter-featured" style="width:auto" onchange="renderPhotos()">
               <option value="">All</option>
               <option value="1">Featured only</option>
-              <option value="0">Grid
- only</option>
+              <option value="0">Grid only</option>
             </select>
           </div>
 
@@ -629,8 +579,7 @@ adius:var(--r-sm)">
         <div id="panel-albums" class="panel">
           <div class="sec-hdr">
             <div class="sec-sub">Albums group photos in the gallery section</div>
-            <button class="btn btn-primary" onclick="openModal('modal-album', null)"
->+ New Album</button>
+            <button class="btn btn-primary" onclick="openModal('modal-album', null)">+ New Album</button>
           </div>
           <div class="tbl-wrap">
             <table>
@@ -666,8 +615,7 @@ adius:var(--r-sm)">
           <div class="frow">
             <div class="fgroup">
               <label class="flabel">Developing</label>
-              <input class="finput" id="about-developing" type="text" oninput="
-updateGearPreview()">
+              <input class="finput" id="about-developing" type="text" oninput="updateGearPreview()">
             </div>
             <div class="fgroup">
               <label class="flabel">Also Shooting (digital)</label>
@@ -677,8 +625,7 @@ updateGearPreview()">
 
           <div class="frow">
             <div class="fgroup">
-              <label class="flabel">Hero Image (Cloudinary public
-_id)</label>
+              <label class="flabel">Hero Image (Cloudinary public_id)</label>
               <input class="finput" id="about-hero-image" type="text" placeholder="Leave blank to use Featured Photo">
             </div>
             <div class="fgroup">
@@ -708,8 +655,7 @@ _id)</label>
           <div class="sec-hdr">
             <div class="sec-sub">Links shown in the Contact section</div>
             <button class="btn btn-primary" onclick="openModal('modal-social', null)">+ Add Link</button>
-          </div
->
+          </div>
           <div class="tbl-wrap">
             <table>
               <thead><tr><th style="width: 30px"></th><th>Label</th><th>URL</th><th>Order</th><th></th></tr></thead>
@@ -724,12 +670,669 @@ _id)</label>
 
   <!-- ═══ MODALS ═══ -->
 
-  <!-- Photo modal --
->
+  <!-- Photo modal -->
   <div class="modal-bg" id="modal-photo">
     <div class="modal">
       <div class="modal-head">
         <div class="modal-title" id="modal-photo-ttl">Add Photo Record</div>
-        <button class="modal-x" onclick="closeModal('modal-photo')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke
+        <button class="modal-x" onclick="closeModal('modal-photo')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="ph-id" />
 
-... [Content truncated]
+        <div class="fgroup">
+          <label class="flabel">Cloudinary public_id *</label>
+          <input class="finput" id="ph-public_id" type="text" placeholder="portfolio/grid/my-photo"
+            oninput="updateCloudPreview()">
+          <div class="cloudinary-id-preview">
+            Preview URL: <span id="ph-url-preview">—</span>
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Title *</label>
+            <input class="finput" id="ph-title" type="text" placeholder="Corner Store, 6am">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Location</label>
+            <input class="finput" id="ph-location" type="text" placeholder="Brooklyn, NY">
+          </div>
+        </div>
+
+        <div class="fgroup">
+          <label class="flabel">Caption</label>
+          <textarea class="ftextarea" id="ph-caption" rows="2" placeholder="Nobody was awake except the clerk and the neon."></textarea>
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Roll / Date</label>
+            <input class="finput" id="ph-roll" type="text" placeholder="Roll 01">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Album</label>
+            <select class="fselect" id="ph-album_id">
+              <option value="">— Uncategorised —</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Medium</label>
+            <select class="fselect" id="ph-medium" onchange="toggleSimField()">
+              <option value="film">Film</option>
+              <option value="digital">Digital</option>
+            </select>
+          </div>
+          <div class="fgroup" id="sim-field">
+            <label class="flabel">Fujifilm Simulation</label>
+            <input class="finput" id="ph-simulation" type="text" placeholder="Classic Chrome">
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Camera</label>
+            <input class="finput" id="ph-camera" type="text" placeholder="Nikkormat FT2">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Lens</label>
+            <input class="finput" id="ph-lens" type="text" placeholder="Nikon 50mm f/1.4">
+          </div>
+        </div>
+
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Film Stock</label>
+            <input class="finput" id="ph-film_stock" type="text" placeholder="Kodak Color 200">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Sort Order</label>
+            <input class="finput" id="ph-sort_order" type="number" value="99">
+          </div>
+        </div>
+
+        <div class="fgroup">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="ph-is_featured" style="accent-color:var(--amber);width:14px;height:14px">
+            <span style="font-size:11px;color:var(--muted)">Set as Featured Photo</span>
+          </label>
+          <div class="hint">This will un-feature any currently featured photo.</div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('modal-photo')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePhoto()">Save Photo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Album modal -->
+  <div class="modal-bg" id="modal-album">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title" id="modal-album-ttl">New Album</div>
+        <button class="modal-x" onclick="closeModal('modal-album')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="al-id" />
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Album ID (slug) *</label>
+            <input class="finput" id="al-id-val" type="text" placeholder="brooklyn">
+            <div class="hint">Lowercase, no spaces. Used as DB key.</div>
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Title *</label>
+            <input class="finput" id="al-title" type="text" placeholder="Brooklyn Streets">
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Description</label>
+          <textarea class="ftextarea" id="al-description" rows="2" placeholder="Morning light and neon signs in the borough."></textarea>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Sort Order</label>
+          <input class="finput" id="al-sort_order" type="number" value="0" style="width:100px">
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('modal-album')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveAlbum()">Save Album</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social modal -->
+  <div class="modal-bg" id="modal-social">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title" id="modal-social-ttl">Add Social Link</div>
+        <button class="modal-x" onclick="closeModal('modal-social')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="sl-id" />
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Label *</label>
+            <input class="finput" id="sl-label" type="text" placeholder="Instagram">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Sort Order</label>
+            <input class="finput" id="sl-sort_order" type="number" value="0" style="width:100px">
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">URL *</label>
+          <input class="finput" id="sl-url" type="url" placeholder="https://instagram.com/yourhandle">
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('modal-social')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSocial()">Save Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+  // @ts-nocheck
+  // ─── State ──────────────────────────────────────────────────────────────
+  const API = '/api/admin';
+  let state = { photos: [], albums: [], settings: {}, social: [] };
+
+  // ─── Bootstrap: load all data ─────────────────────────────────────────
+  async function boot() {
+    try {
+      const [photos, albums, settings, social] = await Promise.all([
+        apiFetch('photos'), apiFetch('albums'),
+        apiFetch('settings'), apiFetch('social')
+      ]);
+      state.photos   = photos   || [];
+      state.albums   = albums   || [];
+      state.settings = settings || {};
+      state.social   = social   || [];
+    } catch(e) {
+      toast('Could not load data from D1. Check API route.', true);
+      console.error(e);
+    }
+    renderDashboard();
+    populateAlbumSelects();
+  }
+
+  async function apiFetch(resource, opts = {}) {
+    const res = await fetch(`${API}/${resource}`, opts);
+    if (!res.ok) throw new Error(`${resource}: ${res.status}`);
+    return res.json();
+  }
+
+  // ─── Nav ─────────────────────────────────────────────────────────────
+  const panelTitles = {
+    dashboard: 'Overview', photos: 'Photos', albums: 'Albums',
+    about: 'About / Bio', social: 'Social Links'
+  };
+  function nav(el) {
+    const p = el.dataset.panel;
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.sb-item').forEach(x => x.classList.remove('active'));
+    document.getElementById('panel-'+p).classList.add('active');
+    el.classList.add('active');
+    document.getElementById('topbar-title').textContent = panelTitles[p];
+
+    // Auto-close sidebar on mobile after selection
+    if (window.innerWidth <= 768) {
+      toggleSidebar(false);
+    }
+
+    switch(p) {
+      case 'dashboard': renderDashboard(); break;
+      case 'photos':    renderPhotos(); break;
+      case 'albums':    renderAlbums(); break;
+      case 'about':     renderAbout(); break;
+      case 'social':    renderSocial(); break;
+    }
+  }
+
+  function toggleSidebar(force) {
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('sidebar-overlay');
+    const isOpen = (force !== undefined) ? !force : sb.classList.contains('open');
+
+    if (isOpen) {
+      sb.classList.remove('open');
+      ov.classList.remove('open');
+    } else {
+      sb.classList.add('open');
+      ov.classList.add('open');
+    }
+  }
+
+  // ─── Dashboard ────────────────────────────────────────────────────────
+  function renderDashboard() {
+    document.getElementById('s-photos').textContent   = state.photos.length;
+    document.getElementById('s-featured').textContent = state.photos.filter(p => p.is_featured).length;
+    document.getElementById('s-albums').textContent   = state.albums.length;
+    document.getElementById('s-social').textContent   = state.social.length;
+    document.getElementById('dash-rows').innerHTML = [
+      ['Photos',       state.photos.length,   'photos'],
+      ['Albums',       state.albums.length,   'albums'],
+      ['About / Bio',  '4 settings',          'about'],
+      ['Social Links', state.social.length,   'social'],
+    ].map(([label, count, panel]) => `
+      <tr>
+        <td style="color:var(--amber)">${label}</td>
+        <td style="color:var(--muted)">${count} record${count!==1?'s':''}</td>
+        <td><button class="btn btn-sm" onclick="navTo('${panel}')">Edit <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button></td>
+      </tr>
+    `).join('');
+  }
+
+  function navTo(panel) {
+    const el = document.querySelector(`[data-panel="${panel}"]`);
+    if(el) nav(el);
+  }
+
+  // ─── Photos ───────────────────────────────────────────────────────────
+  function renderPhotos() {
+    const albumFilter   = document.getElementById('filter-album')?.value || '';
+    const mediumFilter  = document.getElementById('filter-medium')?.value || '';
+    const featuredFilter = document.getElementById('filter-featured')?.value || '';
+
+    let list = [...state.photos].sort((a,b) => a.sort_order - b.sort_order);
+    if (albumFilter)    list = list.filter(p => p.album_id === albumFilter);
+    if (mediumFilter)   list = list.filter(p => p.medium === mediumFilter);
+    if (featuredFilter !== '') list = list.filter(p => String(p.is_featured) === featuredFilter);
+
+    const CLOUD = window._cloudName || '';
+    const thumbUrl = (pid) => CLOUD
+      ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400,h_260,c_fill/${pid}`
+      : `https://picsum.photos/seed/${pid.length*7}/400/260`;
+
+    document.getElementById('photos-grid').innerHTML = list.length === 0
+      ? `<p style="color:var(--muted);margin-top:16px;grid-column:1/-1">No photos match the current filter.</p>`
+      : list.map(p => {
+          const album = state.albums.find(a => a.id === p.album_id);
+          return `
+          <div class="card" id="photo-card-${p.id}">
+            <div class="card-thumb">
+              <img src="${thumbUrl(p.public_id)}" alt="${p.title}" loading="lazy"
+                onerror="this.style.display='none'">
+              <div class="card-thumb-ov"></div>
+            </div>
+            <div class="card-body">
+              <div class="card-title">${p.title}${p.is_featured?` <span class="badge badge-feat">featured</span>`:''}</div>
+              <div class="card-meta">
+                ${p.location || '—'} &nbsp;·&nbsp; ${p.roll || '—'}<br>
+                <span class="badge badge-${p.medium}">${p.medium}</span>
+                ${album?`<span class="badge">${album.title}</span>`:''}
+              </div>
+            </div>
+            <div class="card-foot">
+              <button class="btn btn-xs" onclick="openModal('modal-photo','${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
+              ${!p.is_featured?`<button class="btn btn-xs" onclick="setFeatured('${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Feature</button>`:''}
+              <button class="btn btn-danger btn-xs" style="margin-left:auto" onclick="deletePhoto('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </div>
+          </div>`;
+        }).join('');
+  }
+
+
+
+  async function setFeatured(id) {
+    // Un-feature all, then feature this one
+    for (const p of state.photos) p.is_featured = 0;
+    const target = state.photos.find(p => p.id === id);
+    if (!target) return;
+    target.is_featured = 1;
+    await apiFetch('photos/feature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    toast(`"${target.title}" is now the featured photo.`);
+    renderPhotos();
+  }
+
+  // ─── Albums ───────────────────────────────────────────────────────────
+  function renderAlbums() {
+    document.getElementById('albums-table').innerHTML = state.albums
+      .sort((a,b) => a.sort_order - b.sort_order)
+      .map(a => {
+        const count = state.photos.filter(p => p.album_id === a.id).length;
+        return `
+          <tr>
+            <td class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></td>
+            <td style="color:var(--amber)">${a.title}</td>
+            <td style="color:var(--muted);font-size:11px;max-width:240px">${a.description||'—'}</td>
+            <td><span class="badge">${count}</span></td>
+            <td style="color:var(--muted)">${a.sort_order}</td>
+            <td>
+              <button class="btn btn-xs" onclick="openModal('modal-album','${a.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
+              <button class="btn btn-danger btn-xs" onclick="deleteAlbum('${a.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            </td>
+          </tr>`;
+      }).join('');
+  }
+
+  // ─── About ────────────────────────────────────────────────────────────
+  function renderAbout() {
+    const s = state.settings;
+    const bio = s.about_bio || '';
+    const shooting = s.about_currently_shooting || '';
+    const developing = s.about_developing || '';
+    const also = s.about_also_shooting || '';
+    const heroImage = s.hero_image_id || '';
+    const aboutImage = s.about_image_id || '';
+
+    document.getElementById('about-bio').value       = bio;
+    document.getElementById('about-shooting').value  = shooting;
+    document.getElementById('about-developing').value = developing;
+    document.getElementById('about-also').value      = also;
+    document.getElementById('about-hero-image').value = heroImage;
+    document.getElementById('about-image').value     = aboutImage;
+    document.getElementById('conf-cloud-name').value = s.PUBLIC_CLOUDINARY_CLOUD_NAME || '';
+    document.getElementById('conf-admin-name').value = s.SITE_TITLE || '';
+    document.getElementById('prev-bio').textContent  = bio;
+    updateGearPreview();
+  }
+
+  function updateGearPreview() {
+    const s = document.getElementById('about-shooting').value;
+    const d = document.getElementById('about-developing').value;
+    const a = document.getElementById('about-also').value;
+    document.getElementById('prev-gear').innerHTML =
+      (s ? `<strong>Currently shooting:</strong> ${s}<br>` : '') +
+      (d ? `<strong>Developing:</strong> ${d}<br>` : '') +
+      (a ? `<strong>Also shooting:</strong> ${a}` : '');
+  }
+
+  async function saveAbout() {
+    const updates = {
+      about_bio:                 document.getElementById('about-bio').value,
+      about_currently_shooting:  document.getElementById('about-shooting').value,
+      about_developing:          document.getElementById('about-developing').value,
+      about_also_shooting:       document.getElementById('about-also').value,
+      hero_image_id:             document.getElementById('about-hero-image').value,
+      about_image_id:            document.getElementById('about-image').value,
+      PUBLIC_CLOUDINARY_CLOUD_NAME: document.getElementById('conf-cloud-name').value.trim(),
+      SITE_TITLE:                document.getElementById('conf-admin-name').value.trim(),
+    };
+    for (const [key, value] of Object.entries(updates)) {
+      state.settings[key] = value;
+    }
+    await apiFetch('settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    // Update local cloud name if it was empty
+    if (!window._cloudName && updates.PUBLIC_CLOUDINARY_CLOUD_NAME) {
+      window._cloudName = updates.PUBLIC_CLOUDINARY_CLOUD_NAME;
+    }
+    toast('Settings saved!');
+  }
+
+  // ─── Social ───────────────────────────────────────────────────────────
+  function renderSocial() {
+    document.getElementById('social-table').innerHTML = state.social
+      .sort((a,b) => a.sort_order - b.sort_order)
+      .map(l => `
+        <tr>
+          <td class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></td>
+          <td style="color:var(--amber)">${l.label}</td>
+          <td style="font-size:11px"><a href="${l.url}" target="_blank" style="color:var(--muted);word-break:break-all">${l.url}</a></td>
+          <td style="color:var(--muted)">${l.sort_order}</td>
+          <td>
+            <button class="btn btn-xs" onclick="openModal('modal-social',${l.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
+            <button class="btn btn-danger btn-xs" onclick="deleteSocial(${l.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+          </td>
+        </tr>`).join('');
+  }
+
+  // ─── Populate album dropdowns ─────────────────────────────────────────
+  function populateAlbumSelects() {
+    const opts = state.albums.map(a => `<option value="${a.id}">${a.title}</option>`).join('');
+    const optsFull = `<option value="">— Uncategorised —</option>${opts}`;
+    const filterOpts = `<option value="">All Albums</option>${opts}`;
+    document.getElementById('ph-album_id').innerHTML = optsFull;
+    document.getElementById('filter-album').innerHTML = filterOpts;
+  }
+
+  // ─── Modals ───────────────────────────────────────────────────────────
+  function openModal(modalId, editId) {
+    if (modalId === 'modal-photo') {
+      const p = editId ? state.photos.find(x => x.id === editId) : null;
+      document.getElementById('modal-photo-ttl').textContent = p ? 'Edit Photo' : 'Add Photo Record';
+      document.getElementById('ph-id').value        = p?.id || '';
+      document.getElementById('ph-public_id').value = p?.public_id || '';
+      document.getElementById('ph-title').value     = p?.title || '';
+      document.getElementById('ph-location').value  = p?.location || '';
+      document.getElementById('ph-caption').value   = p?.caption || '';
+      document.getElementById('ph-roll').value      = p?.roll || '';
+      document.getElementById('ph-album_id').value  = p?.album_id || '';
+      document.getElementById('ph-medium').value    = p?.medium || 'film';
+      document.getElementById('ph-simulation').value = p?.simulation || '';
+      document.getElementById('ph-camera').value    = p?.camera || '';
+      document.getElementById('ph-lens').value      = p?.lens || '';
+      document.getElementById('ph-film_stock').value = p?.film_stock || '';
+      document.getElementById('ph-sort_order').value = p?.sort_order ?? 99;
+      document.getElementById('ph-is_featured').checked = !!p?.is_featured;
+      toggleSimField();
+      updateCloudPreview();
+    }
+    if (modalId === 'modal-album') {
+      const a = editId ? state.albums.find(x => x.id === editId) : null;
+      document.getElementById('modal-album-ttl').textContent = a ? 'Edit Album' : 'New Album';
+      document.getElementById('al-id').value          = a?.id || '';
+      document.getElementById('al-id-val').value      = a?.id || '';
+      document.getElementById('al-id-val').disabled   = !!a; // can't change PK
+      document.getElementById('al-title').value       = a?.title || '';
+      document.getElementById('al-description').value = a?.description || '';
+      document.getElementById('al-sort_order').value  = a?.sort_order ?? 0;
+    }
+    if (modalId === 'modal-social') {
+      const l = (editId && typeof editId === 'number') ? state.social.find(x => x.id === editId) : null;
+      document.getElementById('modal-social-ttl').textContent = l ? 'Edit Link' : 'Add Social Link';
+      document.getElementById('sl-id').value         = l?.id || '';
+      document.getElementById('sl-label').value      = l?.label || '';
+      document.getElementById('sl-url').value        = l?.url || '';
+      document.getElementById('sl-sort_order').value = l?.sort_order ?? state.social.length;
+    }
+    document.getElementById(modalId).classList.add('open');
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+
+  function toggleSimField() {
+    const isDigital = document.getElementById('ph-medium').value === 'digital';
+    document.getElementById('sim-field').style.opacity = isDigital ? '1' : '0.3';
+  }
+
+  function updateCloudPreview() {
+    const pid = document.getElementById('ph-public_id').value.trim();
+    const cn = window._cloudName || '';
+    const preview = document.getElementById('ph-url-preview');
+    if (!pid) { preview.textContent = '—'; return; }
+    preview.textContent = `res.cloudinary.com/${cn || 'clueless'}/image/upload/…/${pid}`;
+  }
+
+  // ─── Save: Photo ───────────────────────────────────────────────────────
+  async function savePhoto() {
+    const pid = document.getElementById('ph-public_id').value.trim();
+    const title = document.getElementById('ph-title').value.trim();
+    if (!pid || !title) { toast('public_id and title are required', true); return; }
+
+    const editId = document.getElementById('ph-id').value;
+    const isFeatured = document.getElementById('ph-is_featured').checked ? 1 : 0;
+
+    const payload = {
+      id:          editId || title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
+      public_id:   pid,
+      title,
+      location:    document.getElementById('ph-location').value,
+      caption:     document.getElementById('ph-caption').value,
+      roll:        document.getElementById('ph-roll').value,
+      album_id:    document.getElementById('ph-album_id').value || null,
+      medium:      document.getElementById('ph-medium').value,
+      simulation:  document.getElementById('ph-simulation').value || null,
+      camera:      document.getElementById('ph-camera').value || null,
+      lens:        document.getElementById('ph-lens').value || null,
+      film_stock:  document.getElementById('ph-film_stock').value || null,
+      sort_order:  parseInt(document.getElementById('ph-sort_order').value) || 99,
+      is_featured: isFeatured,
+      cloudinary_url: null,
+    };
+
+    if (isFeatured) state.photos.forEach(p => p.is_featured = 0);
+
+    if (editId) {
+      const idx = state.photos.findIndex(p => p.id === editId);
+      if (idx >= 0) state.photos[idx] = { ...state.photos[idx], ...payload };
+      await apiFetch(`photos/${editId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      state.photos.push(payload);
+      await apiFetch('photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    closeModal('modal-photo');
+    renderPhotos();
+    toast(editId ? 'Photo updated!' : 'Photo added!');
+  }
+
+  async function deletePhoto(id) {
+    if (!confirm('Delete this photo record? (Cloudinary asset is NOT deleted)')) return;
+    state.photos = state.photos.filter(p => p.id !== id);
+    await apiFetch(`photos/${id}`, { method: 'DELETE' });
+    renderPhotos();
+    toast('Photo deleted.');
+  }
+
+  // ─── Save: Album ───────────────────────────────────────────────────────
+  async function saveAlbum() {
+    const editId = document.getElementById('al-id').value;
+    const id     = document.getElementById('al-id-val').value.trim();
+    const title  = document.getElementById('al-title').value.trim();
+    if (!id || !title) { toast('ID and title are required', true); return; }
+
+    const payload = {
+      id, title,
+      description: document.getElementById('al-description').value,
+      sort_order:  parseInt(document.getElementById('al-sort_order').value) || 0,
+    };
+
+    if (editId) {
+      const idx = state.albums.findIndex(a => a.id === editId);
+      if (idx >= 0) state.albums[idx] = payload;
+      await apiFetch(`albums/${editId}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+    } else {
+      state.albums.push(payload);
+      await apiFetch('albums', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+    }
+
+    closeModal('modal-album');
+    populateAlbumSelects();
+    renderAlbums();
+    toast('Album saved!');
+  }
+
+  async function deleteAlbum(id) {
+    const count = state.photos.filter(p => p.album_id === id).length;
+    if (!confirm(`Delete album? ${count > 0 ? count+' photos will become uncategorised.' : ''}`)) return;
+    state.albums = state.albums.filter(a => a.id !== id);
+    state.photos.forEach(p => { if(p.album_id === id) p.album_id = null; });
+    await apiFetch(`albums/${id}`, { method: 'DELETE' });
+    populateAlbumSelects();
+    renderAlbums();
+    toast('Album deleted.');
+  }
+
+  // ─── Save: Social ─────────────────────────────────────────────────────
+  async function saveSocial() {
+    const editId = document.getElementById('sl-id').value;
+    const label  = document.getElementById('sl-label').value.trim();
+    const url    = document.getElementById('sl-url').value.trim();
+    if (!label || !url) { toast('Label and URL are required', true); return; }
+
+    const payload = {
+      label, url,
+      sort_order: parseInt(document.getElementById('sl-sort_order').value) || 0
+    };
+
+    if (editId) {
+      const id = parseInt(editId);
+      const idx = state.social.findIndex(l => l.id === id);
+      if (idx >= 0) state.social[idx] = { ...state.social[idx], ...payload };
+      await apiFetch(`social/${editId}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+    } else {
+      const res = await apiFetch('social', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      state.social.push({ ...payload, id: res.id });
+    }
+
+    closeModal('modal-social');
+    renderSocial();
+    toast('Social link saved!');
+  }
+
+  async function deleteSocial(id) {
+    if (!confirm('Delete this social link?')) return;
+    state.social = state.social.filter(l => l.id !== id);
+    await apiFetch(`social/${id}`, { method: 'DELETE' });
+    renderSocial();
+    toast('Link deleted.');
+  }
+
+  // ─── Toast ────────────────────────────────────────────────────────────
+  function toast(msg, isErr = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast' + (isErr ? ' err' : '') + ' show';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  // ─── Boot ─────────────────────────────────────────────────────────────
+  // Inject Cloudinary cloud name from server (set via meta tag)
+  window._cloudName = document.querySelector('meta[name="cf-cloud"]')?.content || '';
+
+  // Also try to find it in settings if not in env
+  function resolveCloudName() {
+    if (!window._cloudName && state.settings.PUBLIC_CLOUDINARY_CLOUD_NAME) {
+      window._cloudName = state.settings.PUBLIC_CLOUDINARY_CLOUD_NAME;
+    }
+    if (!window._cloudName) {
+      window._cloudName = 'clueless';
+    }
+  }
+
+  (async () => {
+    await boot();
+    resolveCloudName();
+    if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
+  })();
+  </script>
+  </>
+)}
+
+</body>
+</html>

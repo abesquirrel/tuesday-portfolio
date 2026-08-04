@@ -60,7 +60,7 @@ if (!ADMIN_PASSWORD_HASH && env?.ADMIN_SECRET) {
 // Cloud name logic
 let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME
               ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
-              ?? (typeof processrocess !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
+              ?? (typeof process!== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
 
 
 if (!CLOUD_NAME && db) {

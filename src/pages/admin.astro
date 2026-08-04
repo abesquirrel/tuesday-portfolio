@@ -1,22 +1,66 @@
 ---
 // src/pages/admin.astro
-// ─── Server-side: auth guard ───────────────────────────────────────────────
+// ─── Server-side: auth guard + security ──────────────────────────────────
 export const prerender = false;
 
 import { getSettings } from '../lib/db';
+import bcrypt from 'bcrypt-wasm';
 
-// Simple cookie-based session check
-// Set ADMIN_SECRET as a Cloudflare Pages secret via dashboard
+// Initialize bcrypt-wasm
+const bcryptReady = bcrypt.init();
+
+// Generate secure random tokens
+function generateSecureToken() {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+// ─── Environment & DB ───────────────────────────────────────────────────
 const env = (Astro.locals as any).runtime?.env;
-const db  = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
-const ADMIN_SECRET = env?.ADMIN_SECRET ?? import.meta.env.ADMIN_SECRET ?? 'change-me-in-cf-dashboard';
+const db = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
 
-// Try to get cloud name from environment first (Cloudflare, Vite, Node)
-let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME 
-              ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME 
+// Generate and manage CSRF token
+let csrfToken = Astro.cookies.get('csrf_token')?.value;
+if (!csrfToken) {
+  csrfToken = generateSecureToken();
+  Astro.cookies.set('csrf_token', csrfToken, {
+    httpOnly: true,
+    secure: Astro.url.protocol === 'https:',
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 60 * 60 * 24, // 24 hours
+  });
+}
+
+// Session management
+const sessionCookie = Astro.cookies.get('admin_session')?.value;
+const isAuthed = !!sessionCookie;
+
+// Initialize bcrypt
+await bcryptReady;
+
+// Get hashed password from env or DB
+let ADMIN_PASSWORD_HASH = env?.ADMIN_PASSWORD_HASH ?? import.meta.env.ADMIN_PASSWORD_HASH;
+if (!ADMIN_PASSWORD_HASH && db) {
+  try {
+    const settings = await getSettings(db);
+    ADMIN_PASSWORD_HASH = settings.ADMIN_PASSWORD_HASH;
+  } catch (e) {
+    console.error('Failed to fetch settings:', e);
+  }
+}
+
+// Migration: hash ADMIN_SECRET if it exists and no hash exists
+if (!ADMIN_PASSWORD_HASH && env?.ADMIN_SECRET) {
+  ADMIN_PASSWORD_HASH = await bcrypt.hash(env.ADMIN_SECRET, 10);
+  console.warn('⚠️ Created password hash from ADMIN_SECRET. Set ADMIN_PASSWORD_HASH in your environment variables.');
+}
+
+// Cloud name logic
+let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME
+              ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
               ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
-
-// If missing, try to fetch from DB on the server
 if (!CLOUD_NAME && db) {
   try {
     const settings = await getSettings(db);
@@ -25,39 +69,54 @@ if (!CLOUD_NAME && db) {
     console.error('Failed to fetch settings from DB:', e);
   }
 }
-
-// Global fallback if everything else fails
-if (!CLOUD_NAME) {
-  CLOUD_NAME = 'clueless';
-}
-
-const cookie = Astro.cookies.get('admin_session');
-const isAuthed = cookie?.value === ADMIN_SECRET;
+if (!CLOUD_NAME) CLOUD_NAME = 'clueless';
 
 let loginError = '';
 
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
-  const action = form.get('action');
-  if (action === 'login') {
-    const pw = form.get('password');
-    if (pw === ADMIN_SECRET) {
-      Astro.cookies.set('admin_session', ADMIN_SECRET, {
-        httpOnly: true, secure: Astro.url.protocol === 'https:', sameSite: 'strict', path: '/',
-        maxAge: 60 * 60 * 24 * 7,
-      });
+  
+  // Validate CSRF token on all POST requests
+  const csrfFromForm = form.get('csrf_token');
+  if (!csrfFromForm || csrfFromForm !== csrfToken) {
+    loginError = 'Invalid request. Please refresh the page and try again.';
+  } else {
+    const action = form.get('action');
+    
+    if (action === 'login') {
+      const pw = form.get('password');
+      if (!pw) {
+        loginError = 'Password is required.';
+      } else if (ADMIN_PASSWORD_HASH) {
+        const isValid = await bcrypt.compare(String(pw), ADMIN_PASSWORD_HASH);
+        if (isValid) {
+          // Generate random session token (not the password)
+          const sessionToken = generateSecureToken();
+          Astro.cookies.set('admin_session', sessionToken, {
+            httpOnly: true,
+            secure: Astro.url.protocol === 'https:',
+            sameSite: 'strict',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+          });
+          return Astro.redirect('/admin');
+        } else {
+          loginError = 'Incorrect password. Please try again.';
+        }
+      } else {
+        loginError = 'Admin password not configured. Set ADMIN_PASSWORD_HASH.';
+      }
+    }
+
+    // ── Logout ─────────────────────────────────────────────────────────
+    if (action === 'logout') {
+      Astro.cookies.delete('admin_session', { path: '/' });
+      Astro.cookies.delete('csrf_token', { path: '/' });
       return Astro.redirect('/admin');
-    } else {
-      loginError = 'Incorrect password. Please try again.';
     }
   }
-
-  // ── Logout ─────────────────────────────────────────────────────────────
-  if (action === 'logout') {
-    Astro.cookies.delete('admin_session', { path: '/' });
-    return Astro.redirect('/admin');
-  }
 }
+---
 ---
 
 <!doctype html>
@@ -380,6 +439,7 @@ if (Astro.request.method === 'POST') {
       }
     }
   </style>
+  <meta name="csrf-token" content={csrfToken} />
 </head>
 <body>
 
@@ -388,6 +448,7 @@ if (Astro.request.method === 'POST') {
   <div class="login-wrap">
     <form method="POST">
       <input type="hidden" name="action" value="login" />
+      <input type="hidden" name="csrf_token" value={csrfToken} />
       <div class="login-box">
         <div class="login-logo">I think it was Tuesday</div>
         <div class="login-sub">Admin Panel</div>
@@ -436,6 +497,7 @@ if (Astro.request.method === 'POST') {
         <a href="/" target="_blank" class="btn btn-sm" style="width:100%;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg> View Site</a>
         <form method="POST" style="margin:0">
           <input type="hidden" name="action" value="logout" />
+          <input type="hidden" name="csrf_token" value={csrfToken} />
           <button type="submit" class="btn btn-sm btn-danger" style="width:100%;cursor:pointer;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout</button>
         </form>
       </div>
@@ -621,6 +683,7 @@ if (Astro.request.method === 'POST') {
       </div>
       <div class="modal-body">
         <input type="hidden" id="ph-id" />
+        <input type="hidden" name="csrf_token" value={csrfToken} />
 
         <div class="fgroup">
           <label class="flabel">Cloudinary public_id *</label>
@@ -677,10 +740,6 @@ if (Astro.request.method === 'POST') {
         <div class="frow">
           <div class="fgroup">
             <label class="flabel">Camera</label>
-            <input class="finput" id="ph-camera" type="text" placeholder="Nikkormat FT2">
-          </div>
-          <div class="fgroup">
-            <label class="flabel">Lens</label>
-            <input class="finput" id="ph-lens" type="text" placeholder="Nikon 50mm f/1.4"
+            <input class="finput" id="ph-camera" type="text" placeholder="Nikkorma
 
 ... [Content truncated]

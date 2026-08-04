@@ -1,3 +1,4 @@
+<!-- Fixed syntax errors -->
 ---
 // src/pages/admin.astro
 // ─── Server-side: auth guard + security ──────────────────────────────────
@@ -60,9 +61,9 @@ if (!ADMIN_PASSWORD_HASH && env?.ADMIN_SECRET) {
 // Cloud name logic
 let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME
               ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
-              ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
+              ?? (typeof p
 
-
+rocess !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
 if (!CLOUD_NAME && db) {
   try {
     const settings = await getSettings(db);

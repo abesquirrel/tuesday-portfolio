@@ -710,8 +710,6 @@ if (Astro.request.method === 'POST') {
       border-color: var(--amber);
       background: var(--rail);
     }
-      border-color: var(--amber);
-    }
 
     .upload-status-badge {
       display: inline-flex; align-items: center; gap: 5px;
@@ -1400,6 +1398,36 @@ if (Astro.request.method === 'POST') {
     renderUploadQueue();
   }
 
+  function batchApplyAlbum(albumId) {
+    if (!albumId) return;
+    uploadQueue.forEach(item => {
+      if (item.status === 'pending') {
+        item.album_id = albumId;
+      }
+    });
+    renderUploadQueue();
+  }
+
+  function batchApplyMedium(medium) {
+    if (!medium) return;
+    uploadQueue.forEach(item => {
+      if (item.status === 'pending') {
+        item.medium = medium;
+      }
+    });
+    renderUploadQueue();
+  }
+
+  function batchApplyRoll(roll) {
+    if (!roll) return;
+    uploadQueue.forEach(item => {
+      if (item.status === 'pending') {
+        item.roll = roll;
+      }
+    });
+    renderUploadQueue();
+  }
+
   function renderUploadQueue() {
     const container = document.getElementById('upload-queue');
     const toolbar = document.getElementById('upload-toolbar');
@@ -1751,8 +1779,10 @@ if (Astro.request.method === 'POST') {
     const opts = state.albums.map(a => `<option value="${a.id}">${a.title}</option>`).join('');
     const optsFull = `<option value="">— Uncategorised —</option>${opts}`;
     const filterOpts = `<option value="">All Albums</option>${opts}`;
+    const batchOpts = `<option value="">+ Set Album for All</option>${opts}`;
     document.getElementById('ph-album_id').innerHTML = optsFull;
     document.getElementById('filter-album').innerHTML = filterOpts;
+    document.getElementById('batch-album').innerHTML = batchOpts;
   }
 
   // ─── Modals ───────────────────────────────────────────────────────────

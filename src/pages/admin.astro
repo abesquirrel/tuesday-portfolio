@@ -462,6 +462,94 @@ if (Astro.request.method === 'POST') {
         margin: 0 auto;
       }
     }
+
+    /* ─── Upload Panel ─── */
+    .dropzone {
+      border: 1px dashed rgba(212,168,75,0.4);
+      background: rgba(212,168,75,0.02);
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s ease;
+      border-radius: var(--r);
+      position: relative;
+    }
+    .dropzone.drag-over {
+      border-color: var(--amber);
+      background: rgba(212,168,75,0.06);
+    }
+    .dropzone input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .dropzone-icon { font-size: 28px; margin-bottom: 10px; opacity: 0.5; }
+    .dropzone-label {
+      font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--amber); margin-bottom: 4px;
+    }
+    .dropzone-sub { font-size: 10px; color: var(--muted); }
+
+    .upload-queue { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .upload-row {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden;
+      transition: border-color .2s;
+    }
+    .upload-row.done  { border-color: rgba(58,125,82,0.5); }
+    .upload-row.error { border-color: rgba(181,57,43,0.5); }
+    .upload-row-top {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 0;
+      align-items: stretch;
+    }
+    .upload-thumb {
+      width: 80px; height: 80px; flex-shrink: 0;
+      background: var(--rail);
+      position: relative; overflow: hidden;
+    }
+    .upload-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .upload-meta-fields {
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      align-content: start;
+    }
+    .upload-meta-fields .fgroup { margin-bottom: 0; }
+    .upload-status {
+      width: 60px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 6px;
+      padding: 10px;
+      background: var(--rail); border-left: 1px solid var(--border);
+      font-size: 18px;
+    }
+    .upload-status-label {
+      font-size: 8px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    }
+    .upload-bar-wrap {
+      height: 2px; background: var(--border);
+    }
+    .upload-bar {
+      height: 100%; background: var(--amber);
+      width: 0%; transition: width .3s ease;
+    }
+    .upload-filename {
+      font-size: 9px; letter-spacing: .1em; color: var(--muted);
+      text-transform: uppercase; padding: 0 14px 8px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .upload-actions {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px; border-top: 1px solid var(--border);
+      background: rgba(0,0,0,0.12);
+    }
+    .upload-count-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 5px;
+      background: var(--amber); color: var(--ink);
+      font-size: 9px; font-weight: 700; letter-spacing: 0;
+      border-radius: 10px; margin-left: 4px;
+    }
   </style>
   <meta name="csrf-token" content={csrfToken} />
 </head>
@@ -507,6 +595,10 @@ if (Astro.request.method === 'POST') {
         </div>
         <div class="sb-item" data-panel="albums" onclick="nav(this)">
           <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span><span>Albums</span>
+        </div>
+        <div class="sb-item" data-panel="upload" onclick="nav(this)">
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg></span>
+          <span>Upload Photos<span class="upload-count-badge" id="upload-badge" style="display:none">0</span></span>
         </div>
 
         <div class="sb-section">Site</div>
@@ -601,7 +693,33 @@ if (Astro.request.method === 'POST') {
           <div class="cards" id="photos-grid"></div>
         </div>
 
+        <!-- ── UPLOAD ── -->
+        <div id="panel-upload" class="panel">
+          <div class="sec-hdr">
+            <div class="sec-sub">Drag photos here — fill metadata — click Upload All</div>
+            <button class="btn btn-primary" id="upload-all-btn" onclick="uploadAll()" disabled>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
+              Upload All
+            </button>
+          </div>
 
+          <!-- Dropzone -->
+          <div class="dropzone" id="upload-dropzone"
+            ondragover="uploadDragOver(event)"
+            ondragleave="uploadDragLeave(event)"
+            ondrop="uploadDrop(event)">
+            <input type="file" id="upload-file-input" accept="image/*" multiple
+              onchange="uploadFilePicked(event)" />
+            <div class="dropzone-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.45"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
+            </div>
+            <div class="dropzone-label">Drop images here or click to browse</div>
+            <div class="dropzone-sub">JPEG, PNG, WEBP, HEIC · Multiple files supported</div>
+          </div>
+
+          <!-- File queue -->
+          <div class="upload-queue" id="upload-queue"></div>
+        </div>
 
         <!-- ── ALBUMS ── -->
         <div id="panel-albums" class="panel">
@@ -1007,6 +1125,201 @@ if (Astro.request.method === 'POST') {
   function navTo(panel) {
     const el = document.querySelector(`[data-panel="${panel}"]`);
     if(el) nav(el);
+  }
+
+  // ─── Upload ───────────────────────────────────────────────────────────
+  const uploadQueue = []; // { id, file, previewUrl, status, title, location, roll, medium, album_id }
+
+  function uploadDragOver(e) {
+    e.preventDefault();
+    document.getElementById('upload-dropzone').classList.add('drag-over');
+  }
+  function uploadDragLeave(e) {
+    document.getElementById('upload-dropzone').classList.remove('drag-over');
+  }
+  function uploadDrop(e) {
+    e.preventDefault();
+    document.getElementById('upload-dropzone').classList.remove('drag-over');
+    addFilesToQueue([...e.dataTransfer.files].filter(f => f.type.startsWith('image/')));
+  }
+  function uploadFilePicked(e) {
+    addFilesToQueue([...e.target.files]);
+    e.target.value = ''; // reset so same files can be re-added
+  }
+
+  function addFilesToQueue(files) {
+    files.forEach(file => {
+      const id = 'uq-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        uploadQueue.push({
+          id, file,
+          previewUrl: ev.target.result,
+          status: 'pending', // pending | uploading | done | error
+          progress: 0,
+          title: file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
+          location: '', roll: '', medium: 'film', album_id: '',
+        });
+        renderUploadQueue();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderUploadQueue() {
+    const container = document.getElementById('upload-queue');
+    const btn = document.getElementById('upload-all-btn');
+    const badge = document.getElementById('upload-badge');
+    const pending = uploadQueue.filter(i => i.status === 'pending').length;
+    btn.disabled = pending === 0;
+    if (pending > 0) {
+      badge.textContent = pending;
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+    }
+
+    const albums = state.albums || [];
+    const albumOptions = albums.map(a =>
+      `<option value="${a.id}">${a.title}</option>`
+    ).join('');
+
+    container.innerHTML = uploadQueue.map(item => {
+      const statusIcon = {
+        pending:   '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><circle cx="12" cy="12" r="10"></circle></svg>',
+        uploading: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>',
+        done:      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a7d52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+        error:     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff6b5b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+      }[item.status] || '';
+      const statusLabel = { pending:'Queue', uploading:'Uploading', done:'Done', error:'Failed' }[item.status];
+      const isLocked = item.status === 'uploading' || item.status === 'done';
+
+      return `
+      <div class="upload-row ${item.status}" id="${item.id}">
+        <div class="upload-row-top">
+          <div class="upload-thumb">
+            <img src="${item.previewUrl}" alt="" />
+          </div>
+          <div class="upload-meta-fields">
+            <div class="fgroup">
+              <label class="flabel">Title</label>
+              <input class="finput" value="${item.title.replace(/"/g,'&quot;')}" ${isLocked?'disabled':''}
+                oninput="uploadQueue.find(q=>q.id==='${item.id}').title=this.value" />
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Location</label>
+              <input class="finput" value="${item.location}" ${isLocked?'disabled':''}
+                oninput="uploadQueue.find(q=>q.id==='${item.id}').location=this.value" />
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Roll / Date</label>
+              <input class="finput" value="${item.roll}" ${isLocked?'disabled':''}
+                oninput="uploadQueue.find(q=>q.id==='${item.id}').roll=this.value" />
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Album</label>
+              <select class="fselect" ${isLocked?'disabled':''}
+                onchange="uploadQueue.find(q=>q.id==='${item.id}').album_id=this.value">
+                <option value="">— Uncategorised —</option>
+                ${albumOptions}
+              </select>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Medium</label>
+              <select class="fselect" ${isLocked?'disabled':''}
+                onchange="uploadQueue.find(q=>q.id==='${item.id}').medium=this.value">
+                <option value="film" ${item.medium==='film'?'selected':''}>Film</option>
+                <option value="digital" ${item.medium==='digital'?'selected':''}>Digital</option>
+              </select>
+            </div>
+            ${ item.status === 'error' ? `<div class="fgroup" style="grid-column:1/-1"><p style="font-size:10px;color:#ff6b5b;margin:0">${item.errorMsg||'Upload failed'}</p></div>` : '' }
+          </div>
+          <div class="upload-status">
+            ${statusIcon}
+            <span class="upload-status-label">${statusLabel}</span>
+          </div>
+        </div>
+        <div class="upload-bar-wrap"><div class="upload-bar" id="bar-${item.id}" style="width:${item.progress}%"></div></div>
+        <div class="upload-filename">${item.file.name}</div>
+        ${ item.status !== 'uploading' ? `
+        <div class="upload-actions">
+          ${ item.status === 'pending' ? `<button class="btn btn-xs btn-danger" onclick="removeUploadItem('${item.id}')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Remove</button>` : '' }
+          ${ item.status === 'error'   ? `<button class="btn btn-xs" onclick="retrySingle('${item.id}')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 .49-4.95"></path></svg> Retry</button>` : '' }
+          ${ item.status === 'done'    ? `<span style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#3a7d52">Saved to gallery</span>` : '' }
+        </div>` : '' }
+      </div>`;
+    }).join('');
+  }
+
+  function removeUploadItem(id) {
+    const idx = uploadQueue.findIndex(q => q.id === id);
+    if (idx !== -1) uploadQueue.splice(idx, 1);
+    renderUploadQueue();
+  }
+
+  async function uploadSingle(item) {
+    item.status = 'uploading';
+    item.progress = 10;
+    renderUploadQueue();
+
+    const fd = new FormData();
+    fd.append('file',     item.file);
+    fd.append('title',    item.title);
+    fd.append('location', item.location);
+    fd.append('roll',     item.roll);
+    fd.append('medium',   item.medium);
+    fd.append('album_id', item.album_id || '');
+
+    try {
+      // Simulate progress (XHR would give real progress; fetch doesn't)
+      const progressInterval = setInterval(() => {
+        if (item.progress < 80) {
+          item.progress += 15;
+          const bar = document.getElementById('bar-' + item.id);
+          if (bar) bar.style.width = item.progress + '%';
+        } else {
+          clearInterval(progressInterval);
+        }
+      }, 400);
+
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      clearInterval(progressInterval);
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      item.progress = 100;
+      item.status = 'done';
+      if (data.warning) toast(data.warning, true);
+    } catch (err) {
+      item.status = 'error';
+      item.errorMsg = err.message || 'Unknown error';
+    }
+
+    renderUploadQueue();
+  }
+
+  async function uploadAll() {
+    const pending = uploadQueue.filter(i => i.status === 'pending');
+    if (pending.length === 0) return;
+    for (const item of pending) {
+      await uploadSingle(item);
+    }
+    // Refresh photos grid so new images appear
+    const res = await apiFetch('photos');
+    if (res?.photos) state.photos = res.photos;
+    toast(`${pending.length} photo${pending.length > 1 ? 's' : ''} uploaded successfully.`);
+  }
+
+  async function retrySingle(id) {
+    const item = uploadQueue.find(q => q.id === id);
+    if (!item) return;
+    item.status = 'pending';
+    item.progress = 0;
+    item.errorMsg = '';
+    await uploadSingle(item);
   }
 
   // ─── Photos ───────────────────────────────────────────────────────────

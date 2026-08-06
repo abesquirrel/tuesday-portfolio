@@ -242,8 +242,23 @@ if (Astro.request.method === 'POST') {
     .btn-danger:hover { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 6px 16px rgba(181,57,43,0.3); }
     .btn-sm { padding: 9px 18px; font-size: 11px; letter-spacing: .14em; }
     .btn-xs {
-      padding: 6px 13px; font-size: 9px; letter-spacing: .14em;
-      border: 1px solid var(--border2); font-family: var(--mono); text-transform: uppercase;
+      padding: 6px 14px; font-size: 9px; letter-spacing: .16em;
+      font-family: var(--mono); text-transform: uppercase; font-weight: 500;
+      background: transparent; color: var(--amber);
+      border: 1px solid rgba(212,168,75,0.5);
+      box-shadow: none;
+    }
+    .btn-xs:hover {
+      background: var(--amber); color: var(--ink);
+      border-color: var(--amber);
+      box-shadow: 0 4px 12px rgba(212,168,75,0.2);
+    }
+    .btn-xs.btn-danger {
+      color: #ff6b5b; border-color: rgba(181,57,43,0.4); background: transparent;
+    }
+    .btn-xs.btn-danger:hover {
+      background: var(--red); color: white; border-color: var(--red);
+      box-shadow: 0 4px 12px rgba(181,57,43,0.25);
     }
 
     /* ─── Forms ─── */

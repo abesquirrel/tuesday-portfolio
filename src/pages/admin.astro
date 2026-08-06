@@ -491,28 +491,27 @@ if (Astro.request.method === 'POST') {
 
     .upload-toolbar {
       margin-top: 20px;
-      padding: 10px 14px;
+      padding: 12px 16px;
       background: var(--paper);
       border: 1px solid var(--border);
       border-radius: var(--r);
       display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .upload-toolbar-top {
+      display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 14px;
       flex-wrap: wrap;
     }
     .upload-toolbar-title {
-      font-size: 10px;
+      font-size: 11px;
       letter-spacing: .1em;
       text-transform: uppercase;
       color: var(--amber);
       font-weight: 500;
-    }
-    .upload-toolbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
     }
     .grid-size-control {
       display: flex;
@@ -536,12 +535,39 @@ if (Astro.request.method === 'POST') {
       height: 4px;
     }
 
+    .upload-batch-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .batch-label {
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .batch-select, .batch-input {
+      width: auto !important;
+      min-width: 130px;
+      padding: 4px 8px !important;
+      font-size: 10px !important;
+      background: var(--card) !important;
+      border: 1px solid var(--border2) !important;
+      color: var(--text) !important;
+      border-radius: var(--r) !important;
+    }
+
     .upload-queue {
-      --upload-card-min-width: 240px;
-      margin-top: 20px;
+      --upload-card-min-width: 200px;
+      margin-top: 18px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--upload-card-min-width, 240px)), 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--upload-card-min-width, 200px)), 1fr));
+      gap: 14px;
       align-items: stretch;
     }
 
@@ -556,16 +582,16 @@ if (Astro.request.method === 'POST') {
       position: relative;
     }
     .upload-card:hover {
-      border-color: rgba(212,168,75,0.35);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      border-color: rgba(212,168,75,0.4);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.35);
     }
-    .upload-card.done { border-color: rgba(58,125,82,0.4); }
-    .upload-card.error { border-color: rgba(181,57,43,0.4); }
+    .upload-card.done { border-color: rgba(58,125,82,0.4); background: rgba(58,125,82,0.02); }
+    .upload-card.error { border-color: rgba(181,57,43,0.4); background: rgba(181,57,43,0.02); }
 
     .upload-card-media {
       position: relative;
       width: 100%;
-      aspect-ratio: 4 / 3;
+      aspect-ratio: 1 / 1; /* SQUARE THUMBNAILS */
       background: var(--rail);
       overflow: hidden;
     }
@@ -577,19 +603,19 @@ if (Astro.request.method === 'POST') {
       transition: transform .3s ease;
     }
     .upload-card:hover .upload-card-media img {
-      transform: scale(1.03);
+      transform: scale(1.04);
     }
 
     .upload-card-badge {
       position: absolute;
-      top: 8px;
-      left: 8px;
+      top: 6px;
+      left: 6px;
       z-index: 2;
     }
     .upload-card-actions {
       position: absolute;
-      top: 8px;
-      right: 8px;
+      top: 6px;
+      right: 6px;
       z-index: 2;
       display: flex;
       gap: 4px;
@@ -614,22 +640,24 @@ if (Astro.request.method === 'POST') {
     .upload-card.error .upload-card-bar { background: var(--red); }
 
     .upload-card-body {
-      padding: 12px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       gap: 8px;
       flex: 1;
+      background: var(--paper);
     }
     .upload-card-header {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      align-items: center;
       gap: 6px;
-      margin-bottom: 2px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
     }
     .upload-card-title-text {
       font-family: var(--mono);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 500;
       color: var(--amber);
       white-space: nowrap;
@@ -637,7 +665,7 @@ if (Astro.request.method === 'POST') {
       text-overflow: ellipsis;
     }
     .upload-card-size-text {
-      font-size: 9px;
+      font-size: 8px;
       color: var(--muted);
       letter-spacing: .06em;
       flex-shrink: 0;
@@ -646,7 +674,7 @@ if (Astro.request.method === 'POST') {
     .upload-card-form {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
     .upload-card-form .fgroup {
       margin-bottom: 0;
@@ -654,12 +682,12 @@ if (Astro.request.method === 'POST') {
     .upload-card-form .frow {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      gap: 6px;
     }
     .upload-card-form .flabel {
       font-size: 8px;
       letter-spacing: .12em;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
       display: block;
       color: var(--muted);
       text-transform: uppercase;
@@ -667,7 +695,7 @@ if (Astro.request.method === 'POST') {
     .upload-card-form .finput,
     .upload-card-form .fselect {
       width: 100%;
-      padding: 5px 8px;
+      padding: 5px 7px;
       font-size: 10px;
       background: var(--card);
       border: 1px solid var(--border2);
@@ -675,9 +703,13 @@ if (Astro.request.method === 'POST') {
       font-family: var(--mono);
       border-radius: var(--r);
       outline: none;
+      transition: border-color .2s, background-color .2s;
     }
     .upload-card-form .finput:focus,
     .upload-card-form .fselect:focus {
+      border-color: var(--amber);
+      background: var(--rail);
+    }
       border-color: var(--amber);
     }
 
@@ -875,17 +907,32 @@ if (Astro.request.method === 'POST') {
 
           <!-- Upload Queue Toolbar -->
           <div class="upload-toolbar" id="upload-toolbar" style="display:none">
-            <div class="upload-toolbar-title" id="upload-queue-count">0 items queued</div>
-            <div class="upload-toolbar-actions">
+            <div class="upload-toolbar-top">
+              <div class="upload-toolbar-title" id="upload-queue-count">0 items queued</div>
               <div class="grid-size-control">
                 <label for="upload-grid-size" class="grid-size-label">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                  Card Size: <span id="upload-size-val">240px</span>
+                  Thumbnail Size: <span id="upload-size-val">200px</span>
                 </label>
-                <input type="range" id="upload-grid-size" class="grid-size-slider" min="160" max="380" value="240" step="10"
+                <input type="range" id="upload-grid-size" class="grid-size-slider" min="140" max="360" value="200" step="10"
                   oninput="updateUploadGridSize(this.value)" />
               </div>
-              <button class="btn btn-xs btn-danger" onclick="clearCompletedUploads()"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Clear Done</button>
+              <button class="btn btn-xs btn-danger" onclick="clearCompletedUploads()"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Clear Completed</button>
+            </div>
+
+            <!-- Batch metadata fill bar -->
+            <div class="upload-batch-bar">
+              <span class="batch-label">⚡ Batch Edit All:</span>
+              <select class="fselect batch-select" id="batch-album" onchange="batchApplyAlbum(this.value); this.value='';">
+                <option value="">+ Set Album for All</option>
+              </select>
+              <select class="fselect batch-select" id="batch-medium" onchange="batchApplyMedium(this.value); this.value='';">
+                <option value="">+ Set Medium for All</option>
+                <option value="film">Film</option>
+                <option value="digital">Digital</option>
+              </select>
+              <input class="finput batch-input" id="batch-roll" placeholder="+ Set Roll for All"
+                onchange="batchApplyRoll(this.value); this.value='';" />
             </div>
           </div>
 

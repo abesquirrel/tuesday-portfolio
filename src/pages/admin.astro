@@ -463,32 +463,7 @@ if (Astro.request.method === 'POST') {
       }
     }
 
-    /* ─── Upload Panel ─── */
-    .dropzone {
-      border: 1px dashed rgba(212,168,75,0.4);
-      background: rgba(212,168,75,0.02);
-      padding: 40px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: all .2s ease;
-      border-radius: var(--r);
-      position: relative;
-    }
-    .dropzone.drag-over {
-      border-color: var(--amber);
-      background: rgba(212,168,75,0.06);
-    }
-    .dropzone input[type=file] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-    }
-    .dropzone-icon { font-size: 28px; margin-bottom: 10px; opacity: 0.5; }
-    .dropzone-label {
-      font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
-      color: var(--amber); margin-bottom: 4px;
-    }
-    .dropzone-sub { font-size: 10px; color: var(--muted); }
-
-    /* ─── Upload Panel ─── */
+    /* ─── Upload Panel & Queue Grid ─── */
     .dropzone {
       border: 1px dashed rgba(212,168,75,0.4);
       background: rgba(212,168,75,0.02);
@@ -514,79 +489,214 @@ if (Astro.request.method === 'POST') {
     }
     .dropzone-sub { font-size: 10px; color: var(--muted); letter-spacing: .05em; }
 
-    .upload-queue { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
-    .upload-row {
-      background: var(--paper); border: 1px solid var(--border);
-      border-radius: var(--r); overflow: hidden; padding: 16px;
-      display: flex; flex-direction: column; gap: 14px;
+    .upload-toolbar {
+      margin-top: 20px;
+      padding: 10px 14px;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .upload-toolbar-title {
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--amber);
+      font-weight: 500;
+    }
+    .upload-toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .grid-size-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .grid-size-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      user-select: none;
+    }
+    .grid-size-slider {
+      width: 110px;
+      accent-color: var(--amber);
+      cursor: pointer;
+      height: 4px;
+    }
+
+    .upload-queue {
+      --upload-card-min-width: 240px;
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--upload-card-min-width, 240px)), 1fr));
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .upload-card {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
       transition: border-color .25s ease, box-shadow .25s ease;
+      position: relative;
     }
-    .upload-row:hover {
-      border-color: rgba(212,168,75,0.3);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    .upload-card:hover {
+      border-color: rgba(212,168,75,0.35);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
     }
-    .upload-row.done  { border-color: rgba(58,125,82,0.4); }
-    .upload-row.error { border-color: rgba(181,57,43,0.4); }
+    .upload-card.done { border-color: rgba(58,125,82,0.4); }
+    .upload-card.error { border-color: rgba(181,57,43,0.4); }
 
-    .upload-row-header {
-      display: flex; align-items: center; gap: 14px;
-      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    .upload-card-media {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: var(--rail);
+      overflow: hidden;
     }
-    .upload-thumb {
-      width: 64px; height: 64px; flex-shrink: 0; aspect-ratio: 1/1;
-      border-radius: var(--r); overflow: hidden;
-      border: 1px solid var(--border2); background: var(--rail);
+    .upload-card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: transform .3s ease;
     }
-    .upload-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-
-    .upload-file-info { flex: 1; min-width: 0; }
-    .upload-filename {
-      font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
-      color: var(--amber); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      margin-bottom: 3px; font-weight: 500;
-    }
-    .upload-filesize {
-      font-size: 9px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase;
+    .upload-card:hover .upload-card-media img {
+      transform: scale(1.03);
     }
 
-    .upload-header-right { display: flex; align-items: center; gap: 10px; }
+    .upload-card-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      z-index: 2;
+    }
+    .upload-card-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      display: flex;
+      gap: 4px;
+    }
+
+    .upload-card-bar-wrap {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: rgba(0,0,0,0.5);
+      z-index: 3;
+    }
+    .upload-card-bar {
+      height: 100%;
+      background: var(--amber);
+      width: 0%;
+      transition: width .3s ease;
+    }
+    .upload-card.done .upload-card-bar { background: var(--green); }
+    .upload-card.error .upload-card-bar { background: var(--red); }
+
+    .upload-card-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+    .upload-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+    .upload-card-title-text {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--amber);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .upload-card-size-text {
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: .06em;
+      flex-shrink: 0;
+    }
+
+    .upload-card-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .upload-card-form .fgroup {
+      margin-bottom: 0;
+    }
+    .upload-card-form .frow {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .upload-card-form .flabel {
+      font-size: 8px;
+      letter-spacing: .12em;
+      margin-bottom: 3px;
+      display: block;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .upload-card-form .finput,
+    .upload-card-form .fselect {
+      width: 100%;
+      padding: 5px 8px;
+      font-size: 10px;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: var(--mono);
+      border-radius: var(--r);
+      outline: none;
+    }
+    .upload-card-form .finput:focus,
+    .upload-card-form .fselect:focus {
+      border-color: var(--amber);
+    }
+
     .upload-status-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 4px 10px; font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
-      font-family: var(--mono); background: var(--card); border: 1px solid var(--border2);
-      color: var(--muted); border-radius: var(--r);
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 8px; font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+      font-family: var(--mono); background: rgba(0,0,0,0.75); border: 1px solid var(--border2);
+      color: var(--muted); border-radius: var(--r); backdrop-filter: blur(4px);
     }
     .upload-status-badge.done {
-      border-color: rgba(58,125,82,0.4); color: #3a7d52; background: rgba(58,125,82,0.08);
+      border-color: rgba(58,125,82,0.6); color: #4ade80; background: rgba(0,0,0,0.8);
     }
     .upload-status-badge.error {
-      border-color: rgba(181,57,43,0.4); color: #ff6b5b; background: rgba(181,57,43,0.08);
+      border-color: rgba(181,57,43,0.6); color: #ff6b5b; background: rgba(0,0,0,0.8);
     }
     .upload-status-badge.uploading {
-      border-color: rgba(212,168,75,0.4); color: var(--amber); background: rgba(212,168,75,0.08);
+      border-color: rgba(212,168,75,0.6); color: var(--amber); background: rgba(0,0,0,0.8);
     }
 
-    .upload-meta-form { display: flex; flex-direction: column; gap: 10px; }
-    .upload-meta-form .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .upload-meta-form .fgroup-full { grid-column: 1 / -1; }
-    .upload-meta-form .flabel {
-      display: block; font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 4px;
-    }
-    .upload-meta-form .finput,
-    .upload-meta-form .fselect {
-      width: 100%; padding: 7px 10px;
-      background: var(--card); border: 1px solid var(--border2);
-      color: var(--text); font-family: var(--mono); font-size: 11px;
-      border-radius: var(--r); outline: none; transition: border-color .2s, box-shadow .2s;
-    }
-    .upload-meta-form .finput:focus,
-    .upload-meta-form .fselect:focus {
-      border-color: var(--amber); box-shadow: 0 0 0 1px rgba(212,168,75,0.3);
-    }
-
-    .upload-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-    .upload-bar { height: 100%; background: var(--amber); width: 0%; transition: width .3s ease; }
     .upload-error-msg { font-size: 10px; color: #ff6b5b; margin-top: 2px; }
 
     .upload-count-badge {
@@ -761,6 +871,22 @@ if (Astro.request.method === 'POST') {
             </div>
             <div class="dropzone-label">Drop images here or click to browse</div>
             <div class="dropzone-sub">JPEG, PNG, WEBP, HEIC · Multiple files supported</div>
+          </div>
+
+          <!-- Upload Queue Toolbar -->
+          <div class="upload-toolbar" id="upload-toolbar" style="display:none">
+            <div class="upload-toolbar-title" id="upload-queue-count">0 items queued</div>
+            <div class="upload-toolbar-actions">
+              <div class="grid-size-control">
+                <label for="upload-grid-size" class="grid-size-label">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                  Card Size: <span id="upload-size-val">240px</span>
+                </label>
+                <input type="range" id="upload-grid-size" class="grid-size-slider" min="160" max="380" value="240" step="10"
+                  oninput="updateUploadGridSize(this.value)" />
+              </div>
+              <button class="btn btn-xs btn-danger" onclick="clearCompletedUploads()"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Clear Done</button>
+            </div>
           </div>
 
           <!-- File queue -->
@@ -1212,12 +1338,38 @@ if (Astro.request.method === 'POST') {
     });
   }
 
+  function updateUploadGridSize(val) {
+    const container = document.getElementById('upload-queue');
+    if (container) container.style.setProperty('--upload-card-min-width', val + 'px');
+    const label = document.getElementById('upload-size-val');
+    if (label) label.textContent = val + 'px';
+    try { localStorage.setItem('upload_grid_size', val); } catch(e){}
+  }
+
+  function clearCompletedUploads() {
+    for (let i = uploadQueue.length - 1; i >= 0; i--) {
+      if (uploadQueue[i].status === 'done') uploadQueue.splice(i, 1);
+    }
+    renderUploadQueue();
+  }
+
   function renderUploadQueue() {
     const container = document.getElementById('upload-queue');
+    const toolbar = document.getElementById('upload-toolbar');
+    const countLabel = document.getElementById('upload-queue-count');
     const btn = document.getElementById('upload-all-btn');
     const badge = document.getElementById('upload-badge');
+
     const pending = uploadQueue.filter(i => i.status === 'pending').length;
     btn.disabled = pending === 0;
+
+    if (uploadQueue.length > 0) {
+      if (toolbar) toolbar.style.display = 'flex';
+      if (countLabel) countLabel.textContent = `${uploadQueue.length} item${uploadQueue.length>1?'s':''} queued (${pending} pending)`;
+    } else {
+      if (toolbar) toolbar.style.display = 'none';
+    }
+
     if (pending > 0) {
       badge.textContent = pending;
       badge.style.display = 'inline-flex';
@@ -1242,69 +1394,74 @@ if (Astro.request.method === 'POST') {
       const fileSize = item.file ? (item.file.size / (1024 * 1024)).toFixed(2) + ' MB' : '';
 
       return `
-      <div class="upload-row ${item.status}" id="${item.id}">
-        <div class="upload-row-header">
-          <div class="upload-thumb">
-            <img src="${item.previewUrl}" alt="" />
-          </div>
-          <div class="upload-file-info">
-            <div class="upload-filename">${item.file.name}</div>
-            <div class="upload-filesize">${fileSize}</div>
-          </div>
-          <div class="upload-header-right">
+      <div class="upload-card ${item.status}" id="${item.id}">
+        <div class="upload-card-media">
+          <img src="${item.previewUrl}" alt="${item.file.name}" />
+          <div class="upload-card-badge">
             <div class="upload-status-badge ${item.status}">
               ${statusIcon}
               <span>${statusLabel}</span>
             </div>
-            ${ item.status === 'pending' ? `<button class="btn btn-xs btn-danger" onclick="removeUploadItem('${item.id}')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Remove</button>` : '' }
+          </div>
+          <div class="upload-card-actions">
+            ${ item.status === 'pending' ? `<button class="btn btn-xs btn-danger" onclick="removeUploadItem('${item.id}')" title="Remove"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>` : '' }
             ${ item.status === 'error'   ? `<button class="btn btn-xs" onclick="retrySingle('${item.id}')">Retry</button>` : '' }
           </div>
+          <div class="upload-card-bar-wrap"><div class="upload-card-bar" id="bar-${item.id}" style="width:${item.progress}%"></div></div>
         </div>
 
-        <div class="upload-meta-form">
-          <div class="frow">
-            <div class="fgroup fgroup-full">
+        <div class="upload-card-body">
+          <div class="upload-card-header">
+            <div class="upload-card-title-text" title="${item.file.name}">${item.file.name}</div>
+            <div class="upload-card-size-text">${fileSize}</div>
+          </div>
+
+          <div class="upload-card-form">
+            <div class="fgroup">
               <label class="flabel">Title</label>
               <input class="finput" value="${item.title.replace(/"/g,'&quot;')}" ${isLocked?'disabled':''}
                 oninput="uploadQueue.find(q=>q.id==='${item.id}').title=this.value" placeholder="Photo Title" />
             </div>
+            <div class="frow">
+              <div class="fgroup">
+                <label class="flabel">Location</label>
+                <input class="finput" value="${item.location}" ${isLocked?'disabled':''}
+                  oninput="uploadQueue.find(q=>q.id==='${item.id}').location=this.value" placeholder="Location" />
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Roll / Date</label>
+                <input class="finput" value="${item.roll}" ${isLocked?'disabled':''}
+                  oninput="uploadQueue.find(q=>q.id==='${item.id}').roll=this.value" placeholder="Roll 01" />
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fgroup">
+                <label class="flabel">Album</label>
+                <select class="fselect" ${isLocked?'disabled':''}
+                  onchange="uploadQueue.find(q=>q.id==='${item.id}').album_id=this.value">
+                  <option value="">— None —</option>
+                  ${albumOptions}
+                </select>
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Medium</label>
+                <select class="fselect" ${isLocked?'disabled':''}
+                  onchange="uploadQueue.find(q=>q.id==='${item.id}').medium=this.value">
+                  <option value="film" ${item.medium==='film'?'selected':''}>Film</option>
+                  <option value="digital" ${item.medium==='digital'?'selected':''}>Digital</option>
+                </select>
+              </div>
+            </div>
+            ${ item.status === 'error' ? `<div class="upload-error-msg">${item.errorMsg||'Upload failed'}</div>` : '' }
           </div>
-          <div class="frow">
-            <div class="fgroup">
-              <label class="flabel">Location</label>
-              <input class="finput" value="${item.location}" ${isLocked?'disabled':''}
-                oninput="uploadQueue.find(q=>q.id==='${item.id}').location=this.value" placeholder="e.g. Chicago, IL" />
-            </div>
-            <div class="fgroup">
-              <label class="flabel">Roll / Date</label>
-              <input class="finput" value="${item.roll}" ${isLocked?'disabled':''}
-                oninput="uploadQueue.find(q=>q.id==='${item.id}').roll=this.value" placeholder="e.g. Roll 02" />
-            </div>
-          </div>
-          <div class="frow">
-            <div class="fgroup">
-              <label class="flabel">Album</label>
-              <select class="fselect" ${isLocked?'disabled':''}
-                onchange="uploadQueue.find(q=>q.id==='${item.id}').album_id=this.value">
-                <option value="">— Uncategorised —</option>
-                ${albumOptions}
-              </select>
-            </div>
-            <div class="fgroup">
-              <label class="flabel">Medium</label>
-              <select class="fselect" ${isLocked?'disabled':''}
-                onchange="uploadQueue.find(q=>q.id==='${item.id}').medium=this.value">
-                <option value="film" ${item.medium==='film'?'selected':''}>Film</option>
-                <option value="digital" ${item.medium==='digital'?'selected':''}>Digital</option>
-              </select>
-            </div>
-          </div>
-          ${ item.status === 'error' ? `<div class="upload-error-msg">${item.errorMsg||'Upload failed'}</div>` : '' }
         </div>
-
-        <div class="upload-bar-wrap"><div class="upload-bar" id="bar-${item.id}" style="width:${item.progress}%"></div></div>
       </div>`;
     }).join('');
+
+    const savedSize = localStorage.getItem('upload_grid_size') || '240';
+    updateUploadGridSize(savedSize);
+    const slider = document.getElementById('upload-grid-size');
+    if (slider) slider.value = savedSize;
   }
 
   function removeUploadItem(id) {

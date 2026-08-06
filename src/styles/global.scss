@@ -309,10 +309,10 @@ body {
 
   .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 450px));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     justify-content: center;
-    gap: 4px;
-    padding: 0 4px;
+    gap: 16px;
+    padding: 0 16px;
     background-color: transparent;
     max-width: 1600px;
     margin: 0 auto;
@@ -321,11 +321,8 @@ body {
   .gallery-cell {
     position: relative;
     overflow: hidden;
-    background-color: transparent;
+    background-color: $darkroom-mid;
     aspect-ratio: 1 / 1;
-
-    &:nth-child(3n+1) { aspect-ratio: 1 / 1; }
-    &:nth-child(5n+2) { aspect-ratio: 1 / 1; }
 
     img {
       width: 100%;

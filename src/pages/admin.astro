@@ -1390,9 +1390,16 @@ if (Astro.request.method === 'POST') {
     if (featuredFilter !== '') list = list.filter(p => String(p.is_featured) === featuredFilter);
 
     const CLOUD = window._cloudName || '';
-    const thumbUrl = (pid) => CLOUD
-      ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400,h_260,c_fill/${pid}`
-      : `https://picsum.photos/seed/${pid.length*7}/400/260`;
+    const thumbUrl = (pid, url) => {
+      if (url) return url;
+      if (!pid) return 'https://picsum.photos/400/260';
+      if (pid.startsWith('http://') || pid.startsWith('https://') || pid.startsWith('data:')) return pid;
+      if (!CLOUD || CLOUD === 'clueless' || CLOUD === 'your_cloud_name_here') {
+        const seed = pid.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        return `https://picsum.photos/seed/${seed}/400/260`;
+      }
+      return `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400,h_260,c_fill/${pid.replace(/^\//, '')}`;
+    };
 
     document.getElementById('photos-grid').innerHTML = list.length === 0
       ? `<p style="color:var(--muted);margin-top:16px;grid-column:1/-1">No photos match the current filter.</p>`
@@ -1401,8 +1408,8 @@ if (Astro.request.method === 'POST') {
           return `
           <div class="card" id="photo-card-${p.id}">
             <div class="card-thumb">
-              <img src="${thumbUrl(p.public_id)}" alt="${p.title}" loading="lazy"
-                onerror="this.style.display='none'">
+              <img src="${thumbUrl(p.public_id, p.cloudinary_url)}" alt="${p.title.replace(/"/g, '&quot;')}" loading="lazy"
+                onerror="this.onerror=null;this.src='https://picsum.photos/seed/${p.id}/400/260';">
               <div class="card-thumb-ov"></div>
             </div>
             <div class="card-body">

@@ -13,8 +13,11 @@
 import type { Photo } from '../types/photo';
 
 const DEFAULT_CLOUD_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME 
-                       ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined)
-                       ?? 'clueless';
+                       ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
+
+function isPlaceholderCloud(cloud?: string): boolean {
+  return !cloud || cloud === 'clueless' || cloud === 'your_cloud_name_here';
+}
 
 export function cloudinaryUrl(
   publicId: string,
@@ -22,11 +25,11 @@ export function cloudinaryUrl(
   cloudName?: string
 ): string {
   if (!publicId) return '';
-  if (publicId.startsWith('http')) return publicId;
+  if (publicId.startsWith('http') || publicId.startsWith('data:')) return publicId;
   
   const activeCloud = cloudName || DEFAULT_CLOUD_NAME;
   
-  if (!activeCloud || activeCloud === 'your_cloud_name_here') {
+  if (isPlaceholderCloud(activeCloud)) {
     const seed = publicId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
     return `https://picsum.photos/seed/${seed}/1200/800`;
   }
@@ -34,6 +37,14 @@ export function cloudinaryUrl(
 }
 
 export function cloudinaryThumb(publicId: string, cloudName?: string): string {
+  if (!publicId) return '';
+  if (publicId.startsWith('http') || publicId.startsWith('data:')) return publicId;
+
+  const activeCloud = cloudName || DEFAULT_CLOUD_NAME;
+  if (isPlaceholderCloud(activeCloud)) {
+    const seed = publicId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return `https://picsum.photos/seed/${seed}/600/400`;
+  }
   return cloudinaryUrl(publicId, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto', cloudName);
 }
 

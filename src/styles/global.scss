@@ -305,11 +305,11 @@ body {
 // ─── Gallery Grid ─────────────────────────────────────────────────────────────
 #gallery {
   background-color: $darkroom-black;
-  padding: 5rem 0;
+  padding: 4rem 0;
 
   .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     justify-content: center;
     gap: 16px;
     padding: 0 16px;
@@ -721,10 +721,20 @@ footer {
   }
 
   .gallery-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+    gap: 12px !important;
+    padding: 0 12px !important;
 
     .gallery-cell {
       aspect-ratio: 1 / 1 !important;
     }
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 8px !important;
+    padding: 0 8px !important;
   }
 }

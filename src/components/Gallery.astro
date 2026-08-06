@@ -57,6 +57,7 @@ const uncategorizedPhotos = getAlbumPhotos(null);
                     alt={photo.title}
                     loading="lazy"
                     decoding="async"
+                    onerror={`this.onerror=null;this.src='https://picsum.photos/seed/${photo.id}/600/400';`}
                   />
                   <div class="gallery-cell-overlay">
                     <p class="cell-title">{photo.title}</p>
@@ -99,6 +100,7 @@ const uncategorizedPhotos = getAlbumPhotos(null);
                     alt={photo.title}
                     loading="lazy"
                     decoding="async"
+                    onerror={`this.onerror=null;this.src='https://picsum.photos/seed/${photo.id}/600/400';`}
                   />
                   <div class="gallery-cell-overlay">
                     <p class="cell-title">{photo.title}</p>

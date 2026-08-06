@@ -229,8 +229,8 @@ if (Astro.request.method === 'POST') {
     /* ─── Buttons ─── */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 10px 22px; border: 1px solid transparent; border-radius: var(--r-btn);
-      font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+      padding: 10px 22px; border: 1px solid var(--border2); border-radius: var(--r-btn);
+      font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
       cursor: pointer; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
       background: var(--card); color: var(--text);
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
@@ -238,10 +238,13 @@ if (Astro.request.method === 'POST') {
     .btn:hover { background: var(--rail); border-color: var(--amber); color: var(--amber); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .btn-primary { background: var(--amber); color: var(--ink); font-weight: 700; border-color: var(--amber); }
     .btn-primary:hover { background: #eac06a; color: var(--ink); box-shadow: 0 6px 16px rgba(212,168,75,0.25); }
-    .btn-danger { background: rgba(181, 57, 43, 0.15); border-color: rgba(181, 57, 43, 0.3); color: #ff6b5b; }
+    .btn-danger { background: rgba(181, 57, 43, 0.08); border-color: rgba(181, 57, 43, 0.28); color: #ff6b5b; }
     .btn-danger:hover { background: var(--red); color: white; border-color: var(--red); box-shadow: 0 6px 16px rgba(181,57,43,0.3); }
-    .btn-sm { padding: 9px 18px; font-size: 11px; }
-    .btn-xs { padding: 7px 14px; font-size: 10px; }
+    .btn-sm { padding: 9px 18px; font-size: 11px; letter-spacing: .14em; }
+    .btn-xs {
+      padding: 6px 13px; font-size: 9px; letter-spacing: .14em;
+      border: 1px solid var(--border2); font-family: var(--mono); text-transform: uppercase;
+    }
 
     /* ─── Forms ─── */
     .fgroup { margin-bottom: 16px; }
@@ -259,28 +262,38 @@ if (Astro.request.method === 'POST') {
     .hint { font-size: 10px; color: var(--muted); margin-top: 4px; }
 
     /* ─── Cards ─── */
-    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-top: 18px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; margin-top: 22px; }
     .card {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--r); overflow: hidden; transition: border-color .2s;
+      border-radius: var(--r); overflow: hidden;
+      transition: border-color .25s ease, box-shadow .25s ease;
     }
-    .card:hover { border-color: var(--border2); }
+    .card:hover {
+      border-color: rgba(212,168,75,0.35);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+    }
     .card-thumb {
-      width: 100%; height: 155px; background: var(--rail);
+      width: 100%; height: 190px; background: var(--rail);
       display: flex; align-items: center; justify-content: center;
       position: relative; overflow: hidden;
     }
-    .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+    .card:hover .card-thumb img { transform: scale(1.04); }
     .card-thumb-ov {
-      position: absolute; inset: 0; background: rgba(0,0,0,.3);
+      position: absolute; inset: 0; background: rgba(0,0,0,.25);
       display: flex; align-items: center; justify-content: center;
       opacity: 0; transition: opacity .2s; pointer-events: none;
     }
     .card-thumb:hover .card-thumb-ov { opacity: 1; }
-    .card-body { padding: 12px 14px; }
-    .card-title { font-family: var(--serif); font-size: 14px; color: var(--amber); margin-bottom: 2px; }
-    .card-meta { font-size: 10px; color: var(--muted); line-height: 1.5; }
-    .card-foot { padding: 8px 14px; border-top: 1px solid var(--border); background: var(--rail); display: flex; gap: 6px; align-items: center; }
+    .card-body { padding: 13px 16px 10px; }
+    .card-title { font-family: var(--serif); font-size: 14px; color: var(--amber); margin-bottom: 4px; }
+    .card-meta { font-size: 10px; color: var(--muted); line-height: 1.6; }
+    .card-foot {
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      display: flex; gap: 8px; align-items: center;
+    }
 
     /* ─── Table ─── */
     .tbl-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow-x: auto; margin-top: 14px; }

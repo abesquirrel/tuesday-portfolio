@@ -280,7 +280,7 @@ if (Astro.request.method === 'POST') {
     .cards {
       --photos-card-size: 200px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(var(--photos-card-size, 200px), 1fr));
+      grid-template-columns: repeat(auto-fill, var(--photos-card-size, 200px));
       gap: 16px;
       margin-top: 18px;
     }
@@ -291,12 +291,6 @@ if (Astro.request.method === 'POST') {
       aspect-ratio: 1 / 1;
       width: 100%;
       min-width: 0;
-      min-height: 0;
-    }
-    .card::before {
-      content: '';
-      display: block;
-      padding-bottom: 100%; /* In-flow 1:1 ratio box ensuring grid row tracks measure exact card height */
     }
     .card:hover {
       border-color: rgba(212,168,75,0.4);
@@ -597,7 +591,7 @@ if (Astro.request.method === 'POST') {
       --upload-card-size: 200px;
       margin-top: 18px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(var(--upload-card-size, 200px), 1fr));
+      grid-template-columns: repeat(auto-fill, var(--upload-card-size, 200px));
       gap: 16px;
     }
 

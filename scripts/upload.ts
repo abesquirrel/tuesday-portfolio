@@ -62,8 +62,9 @@ async function main() {
   // 2. Upload to Cloudinary
   console.log('\nUploading to Cloudinary...');
   try {
+    const targetFolder = album ? `portfolio/${album.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}` : 'portfolio/unsorted';
     const uploadResult = await cloudinary.uploader.upload(filePath, {
-      folder: `portfolio/grid`,
+      folder: targetFolder,
       public_id: id,
     });
 

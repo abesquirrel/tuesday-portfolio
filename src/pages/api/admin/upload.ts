@@ -105,11 +105,12 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
   const albumId    = String(formData.get('album_id')   || '').trim() || null;
   const isFeatured = formData.get('is_featured') === '1' ? 1 : 0;
 
-  // Build a unique public_id
-  const slug   = slugify(title) || 'photo';
-  const suffix = Date.now().toString(36);
-  const publicId = `${slug}-${suffix}`;
-  const folder   = 'portfolio/grid';
+  // Build a unique public_id and dynamic folder path (portfolio/<album> or portfolio/unsorted)
+  const slug        = slugify(title) || 'photo';
+  const suffix      = Date.now().toString(36);
+  const publicId    = `${slug}-${suffix}`;
+  const albumFolder = albumId ? slugify(albumId) : 'unsorted';
+  const folder      = `portfolio/${albumFolder}`;
 
   let uploadResult: { public_id: string; secure_url: string };
 

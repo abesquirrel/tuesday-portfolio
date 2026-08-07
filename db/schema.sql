@@ -44,7 +44,8 @@ CREATE TABLE IF NOT EXISTS social_links (
   id             INTEGER  PRIMARY KEY AUTOINCREMENT,
   label          TEXT     NOT NULL,
   url            TEXT     NOT NULL,
-  sort_order     INTEGER  DEFAULT 0
+  sort_order     INTEGER  DEFAULT 0,
+  icon           TEXT                           -- e.g. 'instagram', 'twitter', 'email'
 );
 
 CREATE INDEX IF NOT EXISTS idx_photos_featured   ON photos (is_featured);

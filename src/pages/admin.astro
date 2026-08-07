@@ -454,7 +454,10 @@ if (Astro.request.method === 'POST') {
       padding: 8px;
       border-radius: var(--r-sm);
       cursor: pointer;
+      transition: background 0.2s, color 0.2s;
     }
+    .mobile-nav-toggle:hover { background: var(--rail); color: var(--amber-glow); }
+    .shell.sidebar-hidden .mobile-nav-toggle { display: block; }
 
     .sidebar-overlay {
       display: none;

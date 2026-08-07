@@ -280,8 +280,7 @@ if (Astro.request.method === 'POST') {
     .cards {
       --photos-card-size: 200px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, var(--photos-card-size, 200px));
-      grid-auto-rows: var(--photos-card-size, 200px); /* Force square rows — more reliable than aspect-ratio on grid items */
+      grid-template-columns: repeat(auto-fill, minmax(var(--photos-card-size, 200px), 1fr));
       gap: 16px;
       margin-top: 18px;
     }
@@ -289,8 +288,10 @@ if (Astro.request.method === 'POST') {
       background: var(--paper); border: 1px solid var(--border);
       border-radius: var(--r); overflow: hidden; position: relative;
       transition: border-color .25s ease, box-shadow .25s ease;
-      width: 100%; height: 100%; /* Fill the explicit square grid cell */
+      aspect-ratio: 1 / 1;
+      width: 100%;
       min-width: 0;
+      min-height: 0;
     }
     .card:hover {
       border-color: rgba(212,168,75,0.4);
@@ -592,7 +593,7 @@ if (Astro.request.method === 'POST') {
       --upload-card-size: 200px;
       margin-top: 18px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, var(--upload-card-size, 200px));
+      grid-template-columns: repeat(auto-fill, minmax(var(--upload-card-size, 200px), 1fr));
       gap: 16px;
     }
 
@@ -1659,7 +1660,6 @@ if (Astro.request.method === 'POST') {
     const container = document.getElementById('photos-grid');
     if (container) {
       container.style.setProperty('--photos-card-size', val + 'px');
-      container.style.gridAutoRows = val + 'px'; // Keep rows square to match column width
     }
     const label = document.getElementById('photos-size-val');
     if (label) label.textContent = val + 'px';
@@ -1681,7 +1681,7 @@ if (Astro.request.method === 'POST') {
       const url = p?.cloudinary_url || p?.cloudinaryUrl || p?.url;
       if (url) return url;
       const pid = String(p?.public_id || p?.publicId || p?.id || '');
-      if (!pid) return `https://picsum.photos/seed/${p?.id || 'photo'}/400/400`;
+      if (!pid) return `https://picsum.photos/seed/${encodeURIComponent(p?.id || 'photo')}/400/400`;
       if (pid.startsWith('http://') || pid.startsWith('https://') || pid.startsWith('data:')) return pid;
       if (!CLOUD || CLOUD === 'your_cloud_name_here') {
         const seed = pid.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
@@ -1695,11 +1695,13 @@ if (Astro.request.method === 'POST') {
       : list.map(p => {
           const album = state.albums.find(a => a.id === p.album_id);
           const titleSafe = (p?.title || 'Untitled').replace(/"/g, '&quot;');
+          const pIdJs = String(p?.id || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          const pIdAttr = String(p?.id || '').replace(/[^a-zA-Z0-9_-]/g, '_');
           return `
-          <div class="card" id="photo-card-${p.id}">
+          <div class="card" id="photo-card-${pIdAttr}">
             <div class="card-thumb">
               <img src="${getPhotoThumb(p)}" alt="${titleSafe}" loading="lazy"
-                onerror="this.onerror=null;this.src='https://picsum.photos/seed/${p.id}/400/400';">
+                onerror="this.onerror=null;this.src='https://picsum.photos/seed/${encodeURIComponent(p.id)}/400/400';">
               <div class="card-thumb-ov"></div>
             </div>
             <div class="card-body">
@@ -1710,9 +1712,9 @@ if (Astro.request.method === 'POST') {
                 ${album?`<span class="badge">${album.title}</span>`:''}
               </div>
               <div class="card-foot">
-                <button class="btn btn-xs" onclick="openModal('modal-photo','${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
-                ${!p.is_featured?`<button class="btn btn-xs" onclick="setFeatured('${p.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Feature</button>`:''}
-                <button class="btn btn-danger btn-xs" style="margin-left:auto" onclick="deletePhoto('${p.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                <button class="btn btn-xs" onclick="openModal('modal-photo','${pIdJs}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
+                ${!p.is_featured?`<button class="btn btn-xs" onclick="setFeatured('${pIdJs}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Feature</button>`:''}
+                <button class="btn btn-danger btn-xs" style="margin-left:auto" onclick="deletePhoto('${pIdJs}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
               </div>
             </div>
           </div>`;

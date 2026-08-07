@@ -7,7 +7,7 @@
  * When you set up Cloudinary, set PUBLIC_CLOUDINARY_CLOUD_NAME in .env
  * and in your Cloudflare Pages environment variables.
  *
- * In placeholder mode (no cloud name), returns a picsum URL instead.
+ * When PUBLIC_CLOUDINARY_CLOUD_NAME is not configured, returns an empty string.
  */
 
 import type { Photo } from '../types/photo';
@@ -16,7 +16,7 @@ const DEFAULT_CLOUD_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
                        ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
 
 function isPlaceholderCloud(cloud?: string): boolean {
-  return !cloud || cloud === 'clueless' || cloud === 'your_cloud_name_here';
+  return !cloud || cloud === 'your_cloud_name_here';
 }
 
 export function cloudinaryUrl(

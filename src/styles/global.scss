@@ -296,8 +296,15 @@ body {
       letter-spacing: 0.15em;
       color: $silver-dim;
       text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
 
-      span { color: $accent-amber; margin-right: 0.5rem; }
+      svg, span {
+        color: $accent-amber;
+        flex-shrink: 0;
+      }
     }
   }
 }

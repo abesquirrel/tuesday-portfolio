@@ -76,7 +76,7 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
   const apiKey     = env?.CLOUDINARY_API_KEY            ?? (typeof process !== 'undefined' ? process.env?.CLOUDINARY_API_KEY : undefined)            ?? import.meta.env.CLOUDINARY_API_KEY;
   const apiSecret  = env?.CLOUDINARY_API_SECRET         ?? (typeof process !== 'undefined' ? process.env?.CLOUDINARY_API_SECRET : undefined)         ?? import.meta.env.CLOUDINARY_API_SECRET;
 
-  const isPlaceholderCloud = !cloudName || cloudName === 'clueless' || cloudName === 'your_cloud_name_here';
+  const isPlaceholderCloud = !cloudName || cloudName === 'your_cloud_name_here';
 
   // ── Parse form data ───────────────────────────────────────────────────────
   let formData: FormData;

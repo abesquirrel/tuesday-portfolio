@@ -1547,10 +1547,10 @@ if (Astro.request.method === 'POST') {
       const settings = await settingsRes.json().catch(() => ({}));
       const social   = await socialRes.json().catch(() => []);
 
-      state.photos   = photos?.photos || photos   || [];
-      state.albums   = albums   || [];
-      state.settings = settings || {};
-      state.social   = social   || [];
+state.photos   = photos?.photos     || photos   || [];
+state.albums   = albums?.albums     || albums   || [];
+state.settings = settings?.settings || settings || {};
+state.social   = social?.social     || social   || [];
     } catch(e) {
       showBootError('Connection failed', 'Could not reach the API. Are you running the dev server correctly?', 'dev');
       console.error(e);
@@ -2172,10 +2172,14 @@ if (Astro.request.method === 'POST') {
     const optsFull = `<option value="">— Uncategorised —</option>${opts}`;
     const filterOpts = `<option value="">All Albums</option>${opts}`;
     const batchOpts = `<option value="">+ Set Album for All</option>${opts}`;
-    document.getElementById('ph-album_id').innerHTML = optsFull;
-    document.getElementById('filter-album').innerHTML = filterOpts;
-    document.getElementById('batch-album').innerHTML = batchOpts;
-  }
+
+  const filterEl = document.getElementById('filter-album');
+  const prevFilterVal = filterEl.value;
+  document.getElementById('ph-album_id').innerHTML = optsFull;
+  filterEl.innerHTML = filterOpts;
+  filterEl.value = prevFilterVal; // restore selection
+  document.getElementById('batch-album').innerHTML = batchOpts;
+}
 
   // ─── Modals ───────────────────────────────────────────────────────────
   function openModal(modalId, editId) {

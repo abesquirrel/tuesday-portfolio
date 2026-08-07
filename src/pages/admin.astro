@@ -5,6 +5,7 @@ export const prerender = false;
 
 import { getSettings } from '../lib/db';
 import bcrypt from 'bcryptjs';
+import { CUSTOM_ERROR_THUMBNAIL } from '../utils/cloudinary';
 
 // Initialize bcrypt-wasm
 const bcryptReady = Promise.resolve();
@@ -128,6 +129,7 @@ if (Astro.request.method === 'POST') {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
   <meta name="cf-cloud" content={CLOUD_NAME} />
+  <meta name="cf-error-thumb" content={CUSTOM_ERROR_THUMBNAIL} />
   <style>
     /* ─── Design: editorial darkroom. Grain, deep blacks, amber safelight accents ─── */
     :root {
@@ -1708,17 +1710,27 @@ if (Astro.request.method === 'POST') {
     if (featuredFilter !== '') list = list.filter(p => String(p.is_featured) === featuredFilter);
 
     const CLOUD = window._cloudName || '';
+    const transformCloudinaryUrl = (url, transforms) => {
+      if (!url) return window.CUSTOM_ERROR_THUMBNAIL || `https://picsum.photos/seed/error/400/400`;
+      if (url.startsWith('data:')) return url;
+      if (url.includes('/image/upload/')) {
+        return url.replace(
+          /\/image\/upload\/(?:(?:c_[^/]+|w_[^/]+|h_[^/]+|f_[^/]+|q_[^/]+|g_[^/]+|dpr_[^/]+|b_[^/]+|e_[^/]+|r_[^/]+|ar_[^/]+)[^/]*\/)?/,
+          `/image/upload/${transforms}/`
+        );
+      }
+      return url;
+    };
     const getPhotoThumb = (p) => {
       const url = p?.cloudinary_url || p?.cloudinaryUrl || p?.url;
-      if (url) return url;
+      if (url) return transformCloudinaryUrl(url, 'f_auto,q_auto,w_400,h_400,c_fill,g_auto');
       const pid = String(p?.public_id || p?.publicId || p?.id || '');
-      if (!pid) return `https://picsum.photos/seed/${encodeURIComponent(p?.id || 'photo')}/400/400`;
-      if (pid.startsWith('http://') || pid.startsWith('https://') || pid.startsWith('data:')) return pid;
+      if (!pid) return window.CUSTOM_ERROR_THUMBNAIL || `https://picsum.photos/seed/${encodeURIComponent(p?.id || 'photo')}/400/400`;
+      if (pid.startsWith('http://') || pid.startsWith('https://') || pid.startsWith('data:')) return transformCloudinaryUrl(pid, 'f_auto,q_auto,w_400,h_400,c_fill,g_auto');
       if (!CLOUD || CLOUD === 'your_cloud_name_here') {
-        const seed = pid.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-        return `https://picsum.photos/seed/${seed}/400/400`;
+        return window.CUSTOM_ERROR_THUMBNAIL || `https://picsum.photos/seed/${pid.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)}/400/400`;
       }
-      return `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400,h_400,c_fill/${pid.replace(/^\//, '')}`;
+      return `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400,h_400,c_fill,g_auto/${pid.replace(/^\//, '')}`;
     };
 
     document.getElementById('photos-grid').innerHTML = list.length === 0
@@ -1732,7 +1744,7 @@ if (Astro.request.method === 'POST') {
           <div class="card" id="photo-card-${pIdAttr}">
             <div class="card-thumb">
               <img src="${getPhotoThumb(p)}" alt="${titleSafe}" loading="lazy"
-                onerror="this.onerror=null;this.src='https://picsum.photos/seed/${encodeURIComponent(p.id)}/400/400';">
+                onerror="this.onerror=null;this.src=window.CUSTOM_ERROR_THUMBNAIL||'https://picsum.photos/seed/${encodeURIComponent(p.id)}/400/400';">
               <div class="card-thumb-ov"></div>
             </div>
             <div class="card-body">
@@ -2093,6 +2105,7 @@ if (Astro.request.method === 'POST') {
   // ─── Boot ─────────────────────────────────────────────────────────────
   // Inject Cloudinary cloud name from server (set via meta tag)
   window._cloudName = document.querySelector('meta[name="cf-cloud"]')?.content || '';
+  window.CUSTOM_ERROR_THUMBNAIL = document.querySelector('meta[name="cf-error-thumb"]')?.content || '';
 
   // Also try to find it in settings if not in env
   function resolveCloudName() {

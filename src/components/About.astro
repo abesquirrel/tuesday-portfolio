@@ -1,5 +1,5 @@
 ---
-import { cloudinaryUrl } from '../utils/cloudinary';
+import { cloudinaryUrl, CUSTOM_ERROR_THUMBNAIL } from '../utils/cloudinary';
 
 // Swap this public_id when you upload your portrait to Cloudinary
 interface Props {
@@ -29,6 +29,7 @@ const alsoShooting = settings.about_also_shooting || "Fujifilm X-T20 · Classic 
             width="400"
             height="400"
             loading="lazy"
+            onerror={`this.onerror=null;this.src='${CUSTOM_ERROR_THUMBNAIL}';`}
           />
         </div>
       </div>

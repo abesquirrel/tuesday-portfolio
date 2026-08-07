@@ -1,5 +1,5 @@
 ---
-import { cloudinaryFromRow } from '../utils/cloudinary';
+import { cloudinaryFromRow, CUSTOM_ERROR_THUMBNAIL } from '../utils/cloudinary';
 import type { Photo } from '../types/photo';
 
 interface Props {
@@ -34,6 +34,7 @@ const thumbUrl = cloudinaryFromRow(photo, 'f_auto,q_auto,w_900', cloudName);
             loading="eager"
             width="900"
             height="600"
+            onerror={`this.onerror=null;this.src='${CUSTOM_ERROR_THUMBNAIL}';`}
           />
         </div>
       </div>

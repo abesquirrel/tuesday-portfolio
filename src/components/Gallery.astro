@@ -1,5 +1,5 @@
 ---
-import { cloudinaryFromRow, cloudinaryThumb } from '../utils/cloudinary';
+import { cloudinaryFromRow, cloudinaryThumb, CUSTOM_ERROR_THUMBNAIL } from '../utils/cloudinary';
 import type { Photo, Album } from '../types/photo';
 
 interface Props {
@@ -41,9 +41,7 @@ const uncategorizedPhotos = getAlbumPhotos(null);
           
           <div class="gallery-grid">
             {getAlbumPhotos(album.id).map((photo) => {
-              const thumb = photo.cloudinary_url
-                ? cloudinaryFromRow(photo, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto', cloudName)
-                : cloudinaryThumb(photo.public_id, cloudName);
+              const thumb = cloudinaryThumb(photo, cloudName);
               const full  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1400', cloudName);
               return (
                 <div 
@@ -57,7 +55,7 @@ const uncategorizedPhotos = getAlbumPhotos(null);
                     alt={photo.title}
                     loading="lazy"
                     decoding="async"
-                    onerror={`this.onerror=null;this.src='https://picsum.photos/seed/${photo.id}/600/400';`}
+                    onerror={`this.onerror=null;this.src='${CUSTOM_ERROR_THUMBNAIL}';`}
                   />
                   <div class="gallery-cell-overlay">
                     <p class="cell-title">{photo.title}</p>
@@ -84,9 +82,7 @@ const uncategorizedPhotos = getAlbumPhotos(null);
           </div>
           <div class="gallery-grid">
             {uncategorizedPhotos.map((photo) => {
-              const thumb = photo.cloudinary_url
-                ? cloudinaryFromRow(photo, 'f_auto,q_auto,w_600,h_400,c_fill,g_auto', cloudName)
-                : cloudinaryThumb(photo.public_id, cloudName);
+              const thumb = cloudinaryThumb(photo, cloudName);
               const full  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1400', cloudName);
               return (
                 <div 
@@ -100,7 +96,7 @@ const uncategorizedPhotos = getAlbumPhotos(null);
                     alt={photo.title}
                     loading="lazy"
                     decoding="async"
-                    onerror={`this.onerror=null;this.src='https://picsum.photos/seed/${photo.id}/600/400';`}
+                    onerror={`this.onerror=null;this.src='${CUSTOM_ERROR_THUMBNAIL}';`}
                   />
                   <div class="gallery-cell-overlay">
                     <p class="cell-title">{photo.title}</p>

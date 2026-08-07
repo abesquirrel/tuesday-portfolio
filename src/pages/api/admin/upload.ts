@@ -55,6 +55,13 @@ function slugify(str: string): string {
     .slice(0, 60);
 }
 
+export const GET: APIRoute = async () => {
+  return json({
+    ok: true,
+    message: 'Upload endpoint ready. Send POST request with multipart/form-data to upload photos.',
+  });
+};
+
 export const POST: APIRoute = async ({ request, locals, cookies }) => {
   // ── Auth guard ────────────────────────────────────────────────────────────
   const session = cookies.get('admin_session')?.value;

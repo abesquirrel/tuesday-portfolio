@@ -1602,8 +1602,9 @@ if (Astro.request.method === 'POST') {
 
     switch(p) {
       case 'dashboard': renderDashboard(); break;
-      case 'photos':    renderPhotos(); break;
+      case 'photos':    renderPhotos(); populateAlbumSelects(); break;
       case 'albums':    renderAlbums(); break;
+      case 'upload':    populateAlbumSelects(); break;
       case 'about':     renderAbout(); break;
       case 'social':    renderSocial(); break;
     }
@@ -2148,6 +2149,7 @@ if (Astro.request.method === 'POST') {
   // ─── Modals ───────────────────────────────────────────────────────────
   function openModal(modalId, editId) {
     if (modalId === 'modal-photo') {
+      populateAlbumSelects();
       const p = editId ? state.photos.find(x => x.id === editId) : null;
       document.getElementById('modal-photo-ttl').textContent = p ? 'Edit Photo' : 'Add Photo Record';
       document.getElementById('ph-id').value           = p?.id || '';

@@ -449,6 +449,9 @@ body {
     margin-top: 2.5rem;
 
     a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
       font-family: 'Courier New', monospace;
       font-size: 0.72rem;
       letter-spacing: 0.2em;
@@ -462,6 +465,17 @@ body {
       &:hover {
         color: $accent-amber;
         border-color: $accent-amber;
+      }
+    }
+
+    .contact-icon {
+      display: inline-flex;
+      align-items: center;
+      color: $silver-dim;
+      transition: color 0.2s;
+
+      a:hover & {
+        color: $accent-amber;
       }
     }
   }

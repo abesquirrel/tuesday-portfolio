@@ -205,15 +205,15 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
     if (!parts[1] && method === 'POST') {
       const l = await request.json() as any;
       const { meta } = await db.prepare(
-        'INSERT INTO social_links (label, url, sort_order) VALUES (?,?,?)'
-      ).bind(l.label, l.url, l.sort_order ?? 0).run();
+        'INSERT INTO social_links (label, url, sort_order, icon) VALUES (?,?,?,?)'
+      ).bind(l.label, l.url, l.sort_order ?? 0, l.icon ?? null).run();
       return json({ ok: true, id: meta.last_row_id }, 201);
     }
     if (parts[1] && method === 'PUT') {
       const l = await request.json() as any;
       await db.prepare(
-        'UPDATE social_links SET label = ?, url = ?, sort_order = ? WHERE id = ?'
-      ).bind(l.label, l.url, l.sort_order ?? 0, parseInt(parts[1])).run();
+        'UPDATE social_links SET label = ?, url = ?, sort_order = ?, icon = ? WHERE id = ?'
+      ).bind(l.label, l.url, l.sort_order ?? 0, l.icon ?? null, parseInt(parts[1])).run();
       return json({ ok: true });
     }
     if (parts[1] && method === 'DELETE') {

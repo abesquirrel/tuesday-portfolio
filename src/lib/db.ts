@@ -1,23 +1,5 @@
 import type { Photo, SiteSetting, SocialLink, Album } from '../types/photo';
 
-const FALLBACK_PHOTO: Photo = {
-  id: 'welcome',
-  public_id: 'sample',
-  cloudinary_url: null,
-  title: 'Welcome to your Portfolio',
-  caption: 'Get started by uploading your first photo using the CLI tool.',
-  roll: 'None',
-  location: 'Everywhere',
-  medium: 'digital',
-  simulation: null,
-  camera: 'Nikkormat FTn',
-  lens: 'Nikkor 50mm f/1.4',
-  film_stock: null,
-  album_id: null,
-  sort_order: 0,
-  is_featured: 1,
-};
-
 /**
  * Unified data fetcher for the portfolio.
  * 
@@ -96,7 +78,7 @@ export async function getSocialLinks(db?: any): Promise<SocialLink[]> {
   if (db) {
     try {
       const result = await db
-        .prepare('SELECT * FROM social_links ORDER BY sort_order ASC')
+        .prepare('SELECT id, label, url, sort_order, icon FROM social_links ORDER BY sort_order ASC')
         .all();
       return result.results as SocialLink[];
     } catch (e) {

@@ -30,6 +30,7 @@ export interface SocialLink {
   label:      string;
   url:        string;
   sort_order: number;
+  icon?:      string;  // Optional icon identifier (e.g., 'instagram', 'twitter', 'email')
 }
 
 export interface Album {

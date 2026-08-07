@@ -582,46 +582,48 @@ if (Astro.request.method === 'POST') {
       border: 1px solid var(--border);
       border-radius: var(--r);
       overflow: hidden;
-      position: relative;
+      /* flex-column: square image on top, metadata body below — no overlap possible */
+      display: flex;
+      flex-direction: column;
       transition: border-color .25s ease, box-shadow .25s ease;
-      /* width is controlled by grid columns; aspect-ratio makes height = width → perfect square */
-      aspect-ratio: 1 / 1;
       min-width: 0;
     }
     .upload-card:hover {
       border-color: rgba(212,168,75,0.4);
       box-shadow: 0 6px 24px rgba(0,0,0,0.35);
     }
-    .upload-card.done { border-color: rgba(58,125,82,0.4); background: rgba(58,125,82,0.02); }
-    .upload-card.error { border-color: rgba(181,57,43,0.4); background: rgba(181,57,43,0.02); }
+    .upload-card.done { border-color: rgba(58,125,82,0.4); }
+    .upload-card.error { border-color: rgba(181,57,43,0.4); }
 
+    /* ── Image zone: always 1:1 square, all overlays live inside here ── */
     .upload-card-media {
-      position: absolute;
-      inset: 0;
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
       background: var(--rail);
       overflow: hidden;
-      z-index: 0;
+      flex-shrink: 0;
     }
     .upload-card-media img {
       width: 100%;
       height: 100%;
-      max-width: 100%;
-      max-height: 100%;
       object-fit: cover;
       object-position: center;
       display: block;
+      transition: transform .35s ease;
     }
     .upload-card:hover .upload-card-media img {
       transform: scale(1.04);
-      transition: transform .3s ease;
     }
 
+    /* Status badge — top-left inside media */
     .upload-card-badge {
       position: absolute;
       top: 6px;
       left: 6px;
       z-index: 2;
     }
+    /* Remove / Retry — top-right inside media */
     .upload-card-actions {
       position: absolute;
       top: 6px;
@@ -630,15 +632,15 @@ if (Astro.request.method === 'POST') {
       display: flex;
       gap: 4px;
     }
-
+    /* Progress bar — bottom of media zone */
     .upload-card-bar-wrap {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      height: 4px;
-      background: rgba(0,0,0,0.5);
-      z-index: 4; /* above card-body (z-index:1) and badge/actions (z-index:2) */
+      height: 3px;
+      background: rgba(0,0,0,0.4);
+      z-index: 3;
     }
     .upload-card-bar {
       height: 100%;
@@ -649,50 +651,49 @@ if (Astro.request.method === 'POST') {
     .upload-card.done .upload-card-bar { background: var(--green); }
     .upload-card.error .upload-card-bar { background: var(--red); }
 
+    /* ── Metadata body: normal flow below the image — zero overlap ── */
     .upload-card-body {
-      position: absolute;
-      bottom: 4px; /* sit above the 4px progress bar */
-      left: 0;
-      right: 0;
-      padding: 8px 10px;
+      padding: 10px 10px 8px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      background: rgba(15, 12, 8, 0.92); /* dark semi-transparent to let image show above */
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border-top: 1px solid rgba(212,168,75,0.15);
-      max-height: 55%;
-      overflow-y: auto;
-      z-index: 1;
+      gap: 7px;
+      background: var(--paper);
+      border-top: 2px solid transparent;
+      /* amber top accent line using gradient trick */
+      border-image: linear-gradient(90deg, rgba(212,168,75,0.5), rgba(212,168,75,0.1)) 1;
+      flex-shrink: 0;
     }
     .upload-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 6px;
-      padding-bottom: 6px;
+      min-width: 0;
     }
     .upload-card-title-text {
       font-family: var(--mono);
-      font-size: 10px;
-      font-weight: 500;
+      font-size: 9px;
+      font-weight: 600;
       color: var(--amber);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      letter-spacing: .04em;
+      flex: 1;
+      min-width: 0;
     }
     .upload-card-size-text {
       font-size: 8px;
       color: var(--muted);
       letter-spacing: .06em;
       flex-shrink: 0;
+      opacity: 0.7;
     }
 
     .upload-card-form {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
     .upload-card-form .fgroup {
       margin-bottom: 0;
@@ -700,33 +701,41 @@ if (Astro.request.method === 'POST') {
     .upload-card-form .frow {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px;
+      gap: 5px;
     }
     .upload-card-form .flabel {
-      font-size: 8px;
-      letter-spacing: .12em;
+      font-size: 7px;
+      letter-spacing: .14em;
       margin-bottom: 2px;
       display: block;
       color: var(--muted);
       text-transform: uppercase;
+      font-weight: 600;
+      opacity: 0.75;
     }
     .upload-card-form .finput,
     .upload-card-form .fselect {
       width: 100%;
-      padding: 5px 7px;
-      font-size: 10px;
-      background: var(--card);
-      border: 1px solid var(--border2);
+      padding: 4px 6px;
+      font-size: 9px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
       color: var(--text);
       font-family: var(--mono);
-      border-radius: var(--r);
+      border-radius: 4px;
       outline: none;
-      transition: border-color .2s, background-color .2s;
+      transition: border-color .2s ease, background .2s ease;
+      box-sizing: border-box;
     }
     .upload-card-form .finput:focus,
     .upload-card-form .fselect:focus {
-      border-color: var(--amber);
-      background: var(--rail);
+      border-color: rgba(212,168,75,0.5);
+      background: rgba(212,168,75,0.04);
+    }
+    .upload-card-form .finput:disabled,
+    .upload-card-form .fselect:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     .upload-status-badge {
@@ -1490,21 +1499,24 @@ if (Astro.request.method === 'POST') {
 
       return `
       <div class="upload-card ${item.status}" id="${item.id}">
-        <div class="upload-card-media">
-          <img src="${item.previewUrl}" alt="${item.file.name}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async" />
-        </div>
-        <div class="upload-card-badge">
-          <div class="upload-status-badge ${item.status}">
-            ${statusIcon}
-            <span>${statusLabel}</span>
-          </div>
-        </div>
-        <div class="upload-card-actions">
-          ${ item.status === 'pending' ? `<button class="btn btn-xs btn-danger" onclick="removeUploadItem('${item.id}')" title="Remove"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>` : '' }
-          ${ item.status === 'error'   ? `<button class="btn btn-xs" onclick="retrySingle('${item.id}')">Retry</button>` : '' }
-        </div>
-        <div class="upload-card-bar-wrap"><div class="upload-card-bar" id="bar-${item.id}" style="width:${item.progress}%"></div></div>
 
+        <!-- Square image zone: badge, actions & progress bar all live here -->
+        <div class="upload-card-media">
+          <img src="${item.previewUrl}" alt="${item.file.name}" loading="lazy" decoding="async" />
+          <div class="upload-card-badge">
+            <div class="upload-status-badge ${item.status}">
+              ${statusIcon}
+              <span>${statusLabel}</span>
+            </div>
+          </div>
+          <div class="upload-card-actions">
+            ${ item.status === 'pending' ? `<button class="btn btn-xs btn-danger" onclick="removeUploadItem('${item.id}')" title="Remove"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>` : '' }
+            ${ item.status === 'error'   ? `<button class="btn btn-xs" onclick="retrySingle('${item.id}')">Retry</button>` : '' }
+          </div>
+          <div class="upload-card-bar-wrap"><div class="upload-card-bar" id="bar-${item.id}" style="width:${item.progress}%"></div></div>
+        </div>
+
+        <!-- Metadata body: normal flow below the image — zero overlap -->
         <div class="upload-card-body">
           <div class="upload-card-header">
             <div class="upload-card-title-text" title="${item.file.name}">${item.file.name}</div>
@@ -1515,7 +1527,7 @@ if (Astro.request.method === 'POST') {
             <div class="fgroup">
               <label class="flabel">Title</label>
               <input class="finput" value="${item.title.replace(/"/g,'&quot;')}" ${isLocked?'disabled':''}
-                oninput="uploadQueue.find(q=>q.id==='${item.id}').title=this.value" placeholder="Photo Title" />
+                oninput="uploadQueue.find(q=>q.id==='${item.id}').title=this.value" placeholder="Photo title" />
             </div>
             <div class="frow">
               <div class="fgroup">
@@ -1524,7 +1536,7 @@ if (Astro.request.method === 'POST') {
                   oninput="uploadQueue.find(q=>q.id==='${item.id}').location=this.value" placeholder="Location" />
               </div>
               <div class="fgroup">
-                <label class="flabel">Roll / Date</label>
+                <label class="flabel">Roll</label>
                 <input class="finput" value="${item.roll}" ${isLocked?'disabled':''}
                   oninput="uploadQueue.find(q=>q.id==='${item.id}').roll=this.value" placeholder="Roll 01" />
               </div>

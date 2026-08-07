@@ -2309,24 +2309,80 @@ if (Astro.request.method === 'POST') {
     const title  = document.getElementById('al-title').value.trim();
     if (!id || !title) { toast('ID and title are required', true); return; }
 
+    const newSortOrder = parseInt(document.getElementById('al-sort_order').value) || 0;
     const payload = {
       id, title,
       description: document.getElementById('al-description').value,
-      sort_order:  parseInt(document.getElementById('al-sort_order').value) || 0,
+      sort_order: newSortOrder,
     };
 
+    // Auto-reorder: shift other albums when sort_order changes
+    const albumsToUpdate: any[] = [];
+    
+    if (editId) {
+      const oldAlbum = state.albums.find(a => a.id === editId);
+      if (oldAlbum && oldAlbum.sort_order !== newSortOrder) {
+        const oldOrder = oldAlbum.sort_order;
+        // If moving up (lower sort_order), push others down
+        if (newSortOrder < oldOrder) {
+          state.albums.forEach(a => {
+            if (a.id !== editId && a.sort_order >= newSortOrder && a.sort_order < oldOrder) {
+              a.sort_order += 1;
+              albumsToUpdate.push({ id: a.id, sort_order: a.sort_order });
+            }
+          });
+        }
+        // If moving down (higher sort_order), pull others up
+        else if (newSortOrder > oldOrder) {
+          state.albums.forEach(a => {
+            if (a.id !== editId && a.sort_order > oldOrder && a.sort_order <= newSortOrder) {
+              a.sort_order -= 1;
+              albumsToUpdate.push({ id: a.id, sort_order: a.sort_order });
+            }
+          });
+        }
+      }
+    } else {
+      // For new albums, shift existing albums with sort_order >= new one
+      state.albums.forEach(a => {
+        if (a.sort_order >= newSortOrder) {
+          a.sort_order += 1;
+          albumsToUpdate.push({ id: a.id, sort_order: a.sort_order });
+        }
+      });
+    }
+
+    // Save all affected albums in parallel
+    const savePromises: Promise<any>[] = [];
+    
     if (editId) {
       const idx = state.albums.findIndex(a => a.id === editId);
       if (idx >= 0) state.albums[idx] = payload;
-      await apiFetch(`albums/${editId}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-      });
+      savePromises.push(
+        apiFetch(`albums/${editId}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        })
+      );
     } else {
       state.albums.push(payload);
-      await apiFetch('albums', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-      });
+      savePromises.push(
+        apiFetch('albums', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        })
+      );
     }
+    
+    // Save all shifted albums
+    for (const album of albumsToUpdate) {
+      savePromises.push(
+        apiFetch(`albums/${album.id}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ id: album.id, title: state.albums.find(a => a.id === album.id)?.title || '', description: state.albums.find(a => a.id === album.id)?.description || '', sort_order: album.sort_order })
+        })
+      );
+    }
+    
+    await Promise.all(savePromises);
 
     closeModal('modal-album');
     populateAlbumSelects();
@@ -2334,6 +2390,10 @@ if (Astro.request.method === 'POST') {
     // Refresh photos and upload queue to pick up new album
     if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
     if (document.getElementById('panel-upload').classList.contains('active')) renderUploadQueue();
+    // Also refresh the photo modal dropdown if it's open
+    if (document.getElementById('modal-photo').classList.contains('open')) {
+      populateAlbumSelects();
+    }
     toast('Album saved!');
   }
 
@@ -2348,6 +2408,10 @@ if (Astro.request.method === 'POST') {
     // Refresh photos and upload queue to reflect album deletion
     if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
     if (document.getElementById('panel-upload').classList.contains('active')) renderUploadQueue();
+    // Also refresh the photo modal dropdown if it's open
+    if (document.getElementById('modal-photo').classList.contains('open')) {
+      populateAlbumSelects();
+    }
     toast('Album deleted.');
   }
 

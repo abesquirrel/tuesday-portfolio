@@ -1,18 +1,6 @@
-export const CUSTOM_ERROR_THUMBNAIL = `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600" fill="none">
-  <rect width="600" height="600" fill="#1a1916"/>
-  <rect x="20" y="20" width="560" height="560" stroke="#3a3935" stroke-width="2" stroke-dasharray="6 6"/>
-  <path d="M 30 50 L 30 30 L 50 30" stroke="#c8a96e" stroke-width="2" fill="none" opacity="0.7"/>
-  <path d="M 550 30 L 570 30 L 570 50" stroke="#c8a96e" stroke-width="2" fill="none" opacity="0.7"/>
-  <path d="M 570 550 L 570 570 L 550 570" stroke="#c8a96e" stroke-width="2" fill="none" opacity="0.7"/>
-  <path d="M 50 570 L 30 570 L 30 550" stroke="#c8a96e" stroke-width="2" fill="none" opacity="0.7"/>
-  <g transform="translate(268, 220)">
-    <path d="M 4 16 C 4 13.8 5.8 12 8 12 L 20 12 L 24 6 L 40 6 L 44 12 L 56 12 C 58.2 12 60 13.8 60 16 L 60 48 C 60 50.2 58.2 52 56 52 L 8 52 C 5.8 52 4 50.2 4 48 Z" stroke="#c8a96e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <circle cx="32" cy="32" r="12" stroke="#c8a96e" stroke-width="2.5" fill="none"/>
-    <line x1="8" y1="50" x2="56" y2="8" stroke="#c8a96e" stroke-width="2.5" stroke-linecap="round"/>
-  </g>
-  <text x="300" y="335" fill="#c8c4bc" font-family="'Courier New', Courier, monospace" font-size="14" font-weight="600" letter-spacing="3" text-anchor="middle">IMAGE UNAVAILABLE</text>
-  <text x="300" y="360" fill="#7a7671" font-family="'Courier New', Courier, monospace" font-size="11" letter-spacing="1.5" text-anchor="middle">ERROR LOADING ASSET</text>
-</svg>`)}`;
+// Custom error thumbnail — base64-encoded SVG matching the darkroom theme.
+// Base64 avoids any character-encoding or newline issues when embedded in JS attributes.
+export const CUSTOM_ERROR_THUMBNAIL = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgNjAwIDYwMCIgZmlsbD0ibm9uZSI+CiAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSI2MDAiIGZpbGw9IiMxYTE5MTYiLz4KICA8cmVjdCB4PSIyMCIgeT0iMjAiIHdpZHRoPSI1NjAiIGhlaWdodD0iNTYwIiBzdHJva2U9IiMzYTM5MzUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWRhc2hhcnJheT0iNiA2Ii8+CiAgPHBhdGggZD0iTSAzMCA1MCBMIDMwIDMwIEwgNTAgMzAiIHN0cm9rZT0iI2M4YTk2ZSIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIiBvcGFjaXR5PSIwLjciLz4KICA8cGF0aCBkPSJNIDU1MCAzMCBMIDU3MCAzMCBMIDU3MCA1MCIgc3Ryb2tlPSIjYzhhOTZlIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiIG9wYWNpdHk9IjAuNyIvPgogIDxwYXRoIGQ9Ik0gNTcwIDU1MCBMIDU3MCA1NzAgTCA1NTAgNTcwIiBzdHJva2U9IiNjOGE5NmUiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIgb3BhY2l0eT0iMC43Ii8+CiAgPHBhdGggZD0iTSA1MCA1NzAgTCAzMCA1NzAgTCAzMCA1NTAiIHN0cm9rZT0iI2M4YTk2ZSIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIiBvcGFjaXR5PSIwLjciLz4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNjgsIDIyMCkiPgogICAgPHBhdGggZD0iTSA0IDE2IEMgNCAxMy44IDUuOCAxMiA4IDEyIEwgMjAgMTIgTCAyNCA2IEwgNDAgNiBMIDQ0IDEyIEwgNTYgMTIgQyA1OC4yIDEyIDYwIDEzLjggNjAgMTYgTCA2MCA0OCBDIDYwIDUwLjIgNTguMiA1MiA1NiA1MiBMIDggNTIgQyA1LjggNTIgNCA1MC4yIDQgNDggWiIgc3Ryb2tlPSIjYzhhOTZlIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+CiAgICA8Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIxMiIgc3Ryb2tlPSIjYzhhOTZlIiBzdHJva2Utd2lkdGg9IjIuNSIgZmlsbD0ibm9uZSIvPgogICAgPGxpbmUgeDE9IjgiIHkxPSI1MCIgeDI9IjU2IiB5Mj0iOCIgc3Ryb2tlPSIjYzhhOTZlIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPC9nPgogIDx0ZXh0IHg9IjMwMCIgeT0iMzM1IiBmaWxsPSIjYzhjNGJjIiBmb250LWZhbWlseT0iJ0NvdXJpZXIgTmV3JywgQ291cmllciwgbW9ub3NwYWNlIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNjAwIiBsZXR0ZXItc3BhY2luZz0iMyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SU1BR0UgVU5BVkFJTEFCTEU8L3RleHQ+CiAgPHRleHQgeD0iMzAwIiB5PSIzNjAiIGZpbGw9IiM3YTc2NzEiIGZvbnQtZmFtaWx5PSInQ291cmllciBOZXcnLCBDb3VyaWVyLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGxldHRlci1zcGFjaW5nPSIxLjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVSUk9SIExPQURJTkcgQVNTRVQ8L3RleHQ+Cjwvc3ZnPg==';
 
 import type { Photo } from '../types/photo';
 

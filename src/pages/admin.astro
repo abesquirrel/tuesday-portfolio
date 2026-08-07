@@ -276,23 +276,30 @@ if (Astro.request.method === 'POST') {
     .frow3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
     .hint { font-size: 10px; color: var(--muted); margin-top: 4px; }
 
-    /* ─── Cards ─── */
-    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; margin-top: 22px; }
+    /* ─── Cards (Photos Grid) ─── */
+    .cards {
+      --photos-card-size: 200px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, var(--photos-card-size, 200px));
+      gap: 16px;
+      margin-top: 18px;
+    }
     .card {
-      background: var(--card); border: 1px solid var(--border);
+      background: var(--paper); border: 1px solid var(--border);
       border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column;
       transition: border-color .25s ease, box-shadow .25s ease;
+      min-width: 0;
     }
     .card:hover {
-      border-color: rgba(212,168,75,0.35);
+      border-color: rgba(212,168,75,0.4);
       box-shadow: 0 6px 24px rgba(0,0,0,0.35);
     }
     .card-thumb {
-      width: 100%; aspect-ratio: 4 / 3; height: auto; background: var(--rail);
+      width: 100%; aspect-ratio: 1 / 1; background: var(--rail);
       display: flex; align-items: center; justify-content: center;
-      position: relative; overflow: hidden;
+      position: relative; overflow: hidden; flex-shrink: 0;
     }
-    .card-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform .4s ease; }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform .3s ease; display: block; }
     .card:hover .card-thumb img { transform: scale(1.04); }
     .card-thumb-ov {
       position: absolute; inset: 0; background: rgba(0,0,0,.25);
@@ -300,14 +307,14 @@ if (Astro.request.method === 'POST') {
       opacity: 0; transition: opacity .2s; pointer-events: none;
     }
     .card-thumb:hover .card-thumb-ov { opacity: 1; }
-    .card-body { padding: 13px 16px 10px; }
-    .card-title { font-family: var(--serif); font-size: 14px; color: var(--amber); margin-bottom: 4px; }
-    .card-meta { font-size: 10px; color: var(--muted); line-height: 1.6; }
+    .card-body { padding: 10px 12px 8px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .card-title { font-family: var(--serif); font-size: 13px; color: var(--amber); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-meta { font-size: 10px; color: var(--muted); line-height: 1.5; }
     .card-foot {
-      padding: 10px 16px;
+      padding: 8px 12px;
       border-top: 1px solid var(--border);
       background: rgba(0,0,0,0.18);
-      display: flex; gap: 8px; align-items: center;
+      display: flex; gap: 6px; align-items: center;
     }
 
     /* ─── Table ─── */
@@ -457,9 +464,11 @@ if (Astro.request.method === 'POST') {
       .btn { padding: 12px 24px; font-size: 12px; } /* larger touch targets on mobile */
 
       /* Square grid on mobile - fluid, capped at ~2-3 columns */
-      .upload-queue {
+      .upload-queue, .cards {
         --upload-card-size: 130px;
-        grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--upload-card-size, 130px)), 1fr));
+        --photos-card-size: 130px;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr));
+        gap: 12px;
       }
 
       /* Ensure modals are properly centered and sized on small screens */
@@ -870,20 +879,31 @@ if (Astro.request.method === 'POST') {
           </div>
 
           <!-- filters -->
-          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-            <select class="fselect" id="filter-album" style="width:auto;min-width:160px" onchange="renderPhotos()">
-              <option value="">All Albums</option>
-            </select>
-            <select class="fselect" id="filter-medium" style="width:auto" onchange="renderPhotos()">
-              <option value="">All Media</option>
-              <option value="film">Film</option>
-              <option value="digital">Digital</option>
-            </select>
-            <select class="fselect" id="filter-featured" style="width:auto" onchange="renderPhotos()">
-              <option value="">All</option>
-              <option value="1">Featured only</option>
-              <option value="0">Grid only</option>
-            </select>
+          <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <select class="fselect" id="filter-album" style="width:auto;min-width:160px" onchange="renderPhotos()">
+                <option value="">All Albums</option>
+              </select>
+              <select class="fselect" id="filter-medium" style="width:auto" onchange="renderPhotos()">
+                <option value="">All Media</option>
+                <option value="film">Film</option>
+                <option value="digital">Digital</option>
+              </select>
+              <select class="fselect" id="filter-featured" style="width:auto" onchange="renderPhotos()">
+                <option value="">All</option>
+                <option value="1">Featured only</option>
+                <option value="0">Grid only</option>
+              </select>
+            </div>
+
+            <div class="grid-size-control">
+              <label for="photos-grid-size" class="grid-size-label">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Thumbnail Size: <span id="photos-size-val">200px</span>
+              </label>
+              <input type="range" id="photos-grid-size" class="grid-size-slider" min="100" max="400" value="200" step="10"
+                oninput="updatePhotosGridSize(this.value)" />
+            </div>
           </div>
 
           <div class="cards" id="photos-grid"></div>
@@ -1623,6 +1643,16 @@ if (Astro.request.method === 'POST') {
   }
 
   // ─── Photos ───────────────────────────────────────────────────────────
+  function updatePhotosGridSize(val) {
+    const container = document.getElementById('photos-grid');
+    if (container) {
+      container.style.setProperty('--photos-card-size', val + 'px');
+    }
+    const label = document.getElementById('photos-size-val');
+    if (label) label.textContent = val + 'px';
+    try { localStorage.setItem('photos_grid_size', val); } catch(e){}
+  }
+
   function renderPhotos() {
     const albumFilter   = document.getElementById('filter-album')?.value || '';
     const mediumFilter  = document.getElementById('filter-medium')?.value || '';
@@ -1636,13 +1666,13 @@ if (Astro.request.method === 'POST') {
     const CLOUD = window._cloudName || '';
     const thumbUrl = (pid, url) => {
       if (url) return url;
-      if (!pid) return 'https://picsum.photos/400/260';
+      if (!pid) return 'https://picsum.photos/400/400';
       if (pid.startsWith('http://') || pid.startsWith('https://') || pid.startsWith('data:')) return pid;
       if (!CLOUD || CLOUD === 'clueless' || CLOUD === 'your_cloud_name_here') {
         const seed = pid.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-        return `https://picsum.photos/seed/${seed}/400/260`;
+        return `https://picsum.photos/seed/${seed}/400/400`;
       }
-      return `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400,h_260,c_fill/${pid.replace(/^\//, '')}`;
+      return `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400,h_400,c_fill/${pid.replace(/^\//, '')}`;
     };
 
     document.getElementById('photos-grid').innerHTML = list.length === 0
@@ -1653,7 +1683,7 @@ if (Astro.request.method === 'POST') {
           <div class="card" id="photo-card-${p.id}">
             <div class="card-thumb">
               <img src="${thumbUrl(p.public_id, p.cloudinary_url)}" alt="${p.title.replace(/"/g, '&quot;')}" loading="lazy"
-                onerror="this.onerror=null;this.src='https://picsum.photos/seed/${p.id}/400/260';">
+                onerror="this.onerror=null;this.src='https://picsum.photos/seed/${p.id}/400/400';">
               <div class="card-thumb-ov"></div>
             </div>
             <div class="card-body">
@@ -1671,6 +1701,11 @@ if (Astro.request.method === 'POST') {
             </div>
           </div>`;
         }).join('');
+
+    const savedSize = localStorage.getItem('photos_grid_size') || '200';
+    updatePhotosGridSize(savedSize);
+    const slider = document.getElementById('photos-grid-size');
+    if (slider) slider.value = savedSize;
   }
 
 

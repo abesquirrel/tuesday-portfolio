@@ -280,7 +280,7 @@ if (Astro.request.method === 'POST') {
     .cards {
       --photos-card-size: 200px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(var(--photos-card-size, 200px), 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--photos-card-size, 200px)), 1fr));
       gap: 16px;
       margin-top: 18px;
     }
@@ -291,6 +291,17 @@ if (Astro.request.method === 'POST') {
       aspect-ratio: 1 / 1;
       width: 100%;
       min-width: 0;
+      container-type: inline-size;
+    }
+    @container (max-width: 175px) {
+      .card-foot .btn-xs {
+        padding: 6px 8px;
+        font-size: 0;
+        letter-spacing: 0;
+      }
+      .card-foot .btn-xs svg {
+        margin: 0;
+      }
     }
     .card:hover {
       border-color: rgba(212,168,75,0.4);
@@ -469,15 +480,13 @@ if (Astro.request.method === 'POST') {
 
       .btn { padding: 12px 24px; font-size: 12px; } /* larger touch targets on mobile */
 
-      /* Square grid on mobile - fluid, capped at ~2-3 columns */
+      /* Square grid on mobile - fluid, resizable via slider */
       .cards {
-        --photos-card-size: 130px;
-        grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--photos-card-size, 150px)), 1fr));
         gap: 12px;
       }
       .upload-queue {
-        --upload-card-size: 130px;
-        grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--upload-card-size, 150px)), 1fr));
         gap: 12px;
       }
 
@@ -591,7 +600,7 @@ if (Astro.request.method === 'POST') {
       --upload-card-size: 200px;
       margin-top: 18px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(var(--upload-card-size, 200px), 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--upload-card-size, 200px)), 1fr));
       gap: 16px;
     }
 
@@ -605,6 +614,24 @@ if (Astro.request.method === 'POST') {
       transition: border-color .25s ease, box-shadow .25s ease;
       width: 100%;
       min-width: 0;
+      container-type: inline-size;
+    }
+    @container (max-width: 175px) {
+      .upload-card-form .frow {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+      .upload-card-body {
+        padding: 6px;
+        gap: 4px;
+      }
+      .upload-card-header {
+        padding-bottom: 2px;
+      }
+      .upload-card-form .finput, .upload-card-form .fselect {
+        padding: 4px 6px;
+        font-size: 9px;
+      }
     }
     .upload-card:hover {
       border-color: rgba(212,168,75,0.4);
@@ -912,7 +939,7 @@ if (Astro.request.method === 'POST') {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 Thumbnail Size: <span id="photos-size-val">200px</span>
               </label>
-              <input type="range" id="photos-grid-size" class="grid-size-slider" min="100" max="400" value="200" step="10"
+              <input type="range" id="photos-grid-size" class="grid-size-slider" min="150" max="400" value="200" step="10"
                 oninput="updatePhotosGridSize(this.value)" />
             </div>
           </div>
@@ -953,7 +980,7 @@ if (Astro.request.method === 'POST') {
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                   Thumbnail Size: <span id="upload-size-val">200px</span>
                 </label>
-                <input type="range" id="upload-grid-size" class="grid-size-slider" min="100" max="400" value="200" step="10"
+                <input type="range" id="upload-grid-size" class="grid-size-slider" min="150" max="400" value="200" step="10"
                   oninput="updateUploadGridSize(this.value)" />
               </div>
               <button class="btn btn-xs btn-danger" onclick="clearCompletedUploads()"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Clear Completed</button>
@@ -1426,13 +1453,15 @@ if (Astro.request.method === 'POST') {
   }
 
   function updateUploadGridSize(val) {
+    let num = parseInt(val) || 200;
+    if (num < 150) num = 150;
     const container = document.getElementById('upload-queue');
     if (container) {
-      container.style.setProperty('--upload-card-size', val + 'px');
+      container.style.setProperty('--upload-card-size', num + 'px');
     }
     const label = document.getElementById('upload-size-val');
-    if (label) label.textContent = val + 'px';
-    try { localStorage.setItem('upload_grid_size', val); } catch(e){}
+    if (label) label.textContent = num + 'px';
+    try { localStorage.setItem('upload_grid_size', num); } catch(e){}
   }
 
   function clearCompletedUploads() {
@@ -1577,7 +1606,8 @@ if (Astro.request.method === 'POST') {
       </div>`;
     }).join('');
 
-    const savedSize = localStorage.getItem('upload_grid_size') || '200';
+    let savedSize = localStorage.getItem('upload_grid_size') || '200';
+    if (parseInt(savedSize) < 150) savedSize = '150';
     updateUploadGridSize(savedSize);
     const slider = document.getElementById('upload-grid-size');
     if (slider) slider.value = savedSize;
@@ -1656,13 +1686,15 @@ if (Astro.request.method === 'POST') {
 
   // ─── Photos ───────────────────────────────────────────────────────────
   function updatePhotosGridSize(val) {
+    let num = parseInt(val) || 200;
+    if (num < 150) num = 150;
     const container = document.getElementById('photos-grid');
     if (container) {
-      container.style.setProperty('--photos-card-size', val + 'px');
+      container.style.setProperty('--photos-card-size', num + 'px');
     }
     const label = document.getElementById('photos-size-val');
-    if (label) label.textContent = val + 'px';
-    try { localStorage.setItem('photos_grid_size', val); } catch(e){}
+    if (label) label.textContent = num + 'px';
+    try { localStorage.setItem('photos_grid_size', num); } catch(e){}
   }
 
   function renderPhotos() {
@@ -1719,7 +1751,8 @@ if (Astro.request.method === 'POST') {
           </div>`;
         }).join('');
 
-    const savedSize = localStorage.getItem('photos_grid_size') || '200';
+    let savedSize = localStorage.getItem('photos_grid_size') || '200';
+    if (parseInt(savedSize) < 150) savedSize = '150';
     updatePhotosGridSize(savedSize);
     const slider = document.getElementById('photos-grid-size');
     if (slider) slider.value = savedSize;

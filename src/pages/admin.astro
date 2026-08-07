@@ -2374,10 +2374,17 @@ if (Astro.request.method === 'POST') {
     
     // Save all shifted albums
     for (const album of albumsToUpdate) {
+      const albumToUpdate = state.albums.find(a => a.id === album.id);
       savePromises.push(
         apiFetch(`albums/${album.id}`, {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify({ id: album.id, title: state.albums.find(a => a.id === album.id)?.title || '', description: state.albums.find(a => a.id === album.id)?.description || '', sort_order: album.sort_order })
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: album.id,
+            title: albumToUpdate?.title || '',
+            description: albumToUpdate?.description || '',
+            sort_order: album.sort_order
+          })
         })
       );
     }

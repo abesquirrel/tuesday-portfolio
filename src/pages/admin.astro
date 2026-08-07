@@ -281,6 +281,7 @@ if (Astro.request.method === 'POST') {
       --photos-card-size: 200px;
       display: grid;
       grid-template-columns: repeat(auto-fill, var(--photos-card-size, 200px));
+      grid-auto-rows: var(--photos-card-size, 200px); /* Force square rows — more reliable than aspect-ratio on grid items */
       gap: 16px;
       margin-top: 18px;
     }
@@ -288,7 +289,7 @@ if (Astro.request.method === 'POST') {
       background: var(--paper); border: 1px solid var(--border);
       border-radius: var(--r); overflow: hidden; position: relative;
       transition: border-color .25s ease, box-shadow .25s ease;
-      aspect-ratio: 1 / 1; /* Entire Card is a Perfect 1:1 Square */
+      width: 100%; height: 100%; /* Fill the explicit square grid cell */
       min-width: 0;
     }
     .card:hover {
@@ -469,9 +470,14 @@ if (Astro.request.method === 'POST') {
       .btn { padding: 12px 24px; font-size: 12px; } /* larger touch targets on mobile */
 
       /* Square grid on mobile - fluid, capped at ~2-3 columns */
-      .upload-queue, .cards {
-        --upload-card-size: 130px;
+      .cards {
         --photos-card-size: 130px;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr));
+        grid-auto-rows: 130px;
+        gap: 12px;
+      }
+      .upload-queue {
+        --upload-card-size: 130px;
         grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr));
         gap: 12px;
       }
@@ -1652,6 +1658,7 @@ if (Astro.request.method === 'POST') {
     const container = document.getElementById('photos-grid');
     if (container) {
       container.style.setProperty('--photos-card-size', val + 'px');
+      container.style.gridAutoRows = val + 'px'; // Keep rows square to match column width
     }
     const label = document.getElementById('photos-size-val');
     if (label) label.textContent = val + 'px';

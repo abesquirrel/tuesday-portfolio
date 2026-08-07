@@ -2317,7 +2317,7 @@ if (Astro.request.method === 'POST') {
     };
 
     // Auto-reorder: shift other albums when sort_order changes
-    const albumsToUpdate: any[] = [];
+    const albumsToUpdate = [];
     
     if (editId) {
       const oldAlbum = state.albums.find(a => a.id === editId);
@@ -2353,7 +2353,7 @@ if (Astro.request.method === 'POST') {
     }
 
     // Save all affected albums in parallel
-    const savePromises: Promise<any>[] = [];
+    const savePromises = [];
     
     if (editId) {
       const idx = state.albums.findIndex(a => a.id === editId);

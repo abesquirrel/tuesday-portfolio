@@ -456,10 +456,14 @@ if (Astro.request.method === 'POST') {
 
       .btn { padding: 12px 24px; font-size: 12px; } /* larger touch targets on mobile */
 
-      /* Square grid on mobile - 2 columns minimum */
+      /* Square grid on mobile */
       .upload-queue {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        --upload-card-size: 140px;
+        grid-template-columns: repeat(auto-fit, 120px);
+        --upload-card-size: 120px;
+      }
+      .upload-card {
+        width: 120px;
+        height: 120px;
       }
 
       /* Ensure modals are properly centered and sized on small screens */
@@ -572,7 +576,7 @@ if (Astro.request.method === 'POST') {
       --upload-card-size: 200px;
       margin-top: 18px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(var(--upload-card-size), 1fr));
+      grid-template-columns: repeat(auto-fit, var(--upload-card-size));
       gap: 14px;
     }
 
@@ -583,13 +587,9 @@ if (Astro.request.method === 'POST') {
       overflow: hidden;
       position: relative;
       transition: border-color .25s ease, box-shadow .25s ease;
+      width: var(--upload-card-size);
+      height: var(--upload-card-size);
       min-width: 0;
-      width: 100%;
-    }
-    .upload-card::before {
-      content: '';
-      display: block;
-      padding-bottom: 100%;
     }
     .upload-card:hover {
       border-color: rgba(212,168,75,0.4);
@@ -600,10 +600,7 @@ if (Astro.request.method === 'POST') {
 
     .upload-card-media {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background: var(--rail);
       overflow: hidden;
       z-index: 0;
@@ -934,7 +931,7 @@ if (Astro.request.method === 'POST') {
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                   Thumbnail Size: <span id="upload-size-val">200px</span>
                 </label>
-                <input type="range" id="upload-grid-size" class="grid-size-slider" min="140" max="360" value="200" step="10"
+                <input type="range" id="upload-grid-size" class="grid-size-slider" min="100" max="400" value="200" step="10"
                   oninput="updateUploadGridSize(this.value)" />
               </div>
               <button class="btn btn-xs btn-danger" onclick="clearCompletedUploads()"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> Clear Completed</button>
@@ -1495,7 +1492,7 @@ if (Astro.request.method === 'POST') {
       return `
       <div class="upload-card ${item.status}" id="${item.id}">
         <div class="upload-card-media">
-          <img src="${item.previewUrl}" alt="${item.file.name}" loading="lazy" decoding="async" />
+          <img src="${item.previewUrl}" alt="${item.file.name}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async" />
         </div>
         <div class="upload-card-badge">
           <div class="upload-status-badge ${item.status}">

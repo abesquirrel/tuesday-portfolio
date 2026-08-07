@@ -459,7 +459,7 @@ if (Astro.request.method === 'POST') {
       /* Square grid on mobile - 2 columns minimum */
       .upload-queue {
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        --upload-card-min-width: 140px;
+        --upload-card-size: 140px;
       }
 
       /* Ensure modals are properly centered and sized on small screens */
@@ -569,10 +569,10 @@ if (Astro.request.method === 'POST') {
     }
 
     .upload-queue {
-      --upload-card-min-width: 200px;
+      --upload-card-size: 200px;
       margin-top: 18px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(var(--upload-card-min-width, 200px), 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(var(--upload-card-size), 1fr));
       gap: 14px;
     }
 
@@ -583,8 +583,13 @@ if (Astro.request.method === 'POST') {
       overflow: hidden;
       position: relative;
       transition: border-color .25s ease, box-shadow .25s ease;
-      aspect-ratio: 1 / 1;
       min-width: 0;
+      width: 100%;
+    }
+    .upload-card::before {
+      content: '';
+      display: block;
+      padding-bottom: 100%;
     }
     .upload-card:hover {
       border-color: rgba(212,168,75,0.4);
@@ -595,13 +600,19 @@ if (Astro.request.method === 'POST') {
 
     .upload-card-media {
       position: absolute;
-      inset: 0;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: var(--rail);
       overflow: hidden;
+      z-index: 0;
     }
     .upload-card-media img {
       width: 100%;
       height: 100%;
+      max-width: 100%;
+      max-height: 100%;
       object-fit: cover;
       object-position: center;
       display: block;
@@ -633,7 +644,7 @@ if (Astro.request.method === 'POST') {
       right: 0;
       height: 4px;
       background: rgba(0,0,0,0.5);
-      z-index: 3;
+      z-index: 2;
     }
     .upload-card-bar {
       height: 100%;
@@ -655,9 +666,9 @@ if (Astro.request.method === 'POST') {
       gap: 8px;
       background: var(--paper);
       border-top: 1px solid var(--border);
-      max-height: 60%;
+      max-height: 50%;
       overflow-y: auto;
-      z-index: 1; /* Below progress bar (z-index: 3) */
+      z-index: 1;
     }
     .upload-card-header {
       display: flex;
@@ -1396,7 +1407,9 @@ if (Astro.request.method === 'POST') {
 
   function updateUploadGridSize(val) {
     const container = document.getElementById('upload-queue');
-    if (container) container.style.setProperty('--upload-card-min-width', val + 'px');
+    if (container) {
+      container.style.setProperty('--upload-card-size', val + 'px');
+    }
     const label = document.getElementById('upload-size-val');
     if (label) label.textContent = val + 'px';
     try { localStorage.setItem('upload_grid_size', val); } catch(e){}
@@ -1482,19 +1495,19 @@ if (Astro.request.method === 'POST') {
       return `
       <div class="upload-card ${item.status}" id="${item.id}">
         <div class="upload-card-media">
-          <img src="${item.previewUrl}" alt="${item.file.name}" />
-          <div class="upload-card-badge">
-            <div class="upload-status-badge ${item.status}">
-              ${statusIcon}
-              <span>${statusLabel}</span>
-            </div>
-          </div>
-          <div class="upload-card-actions">
-            ${ item.status === 'pending' ? `<button class="btn btn-xs btn-danger" onclick="removeUploadItem('${item.id}')" title="Remove"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>` : '' }
-            ${ item.status === 'error'   ? `<button class="btn btn-xs" onclick="retrySingle('${item.id}')">Retry</button>` : '' }
-          </div>
-          <div class="upload-card-bar-wrap"><div class="upload-card-bar" id="bar-${item.id}" style="width:${item.progress}%"></div></div>
+          <img src="${item.previewUrl}" alt="${item.file.name}" loading="lazy" decoding="async" />
         </div>
+        <div class="upload-card-badge">
+          <div class="upload-status-badge ${item.status}">
+            ${statusIcon}
+            <span>${statusLabel}</span>
+          </div>
+        </div>
+        <div class="upload-card-actions">
+          ${ item.status === 'pending' ? `<button class="btn btn-xs btn-danger" onclick="removeUploadItem('${item.id}')" title="Remove"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>` : '' }
+          ${ item.status === 'error'   ? `<button class="btn btn-xs" onclick="retrySingle('${item.id}')">Retry</button>` : '' }
+        </div>
+        <div class="upload-card-bar-wrap"><div class="upload-card-bar" id="bar-${item.id}" style="width:${item.progress}%"></div></div>
 
         <div class="upload-card-body">
           <div class="upload-card-header">
@@ -1544,7 +1557,7 @@ if (Astro.request.method === 'POST') {
       </div>`;
     }).join('');
 
-    const savedSize = localStorage.getItem('upload_grid_size') || '240';
+    const savedSize = localStorage.getItem('upload_grid_size') || '200';
     updateUploadGridSize(savedSize);
     const slider = document.getElementById('upload-grid-size');
     if (slider) slider.value = savedSize;

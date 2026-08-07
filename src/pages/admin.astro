@@ -286,8 +286,9 @@ if (Astro.request.method === 'POST') {
     }
     .card {
       background: var(--paper); border: 1px solid var(--border);
-      border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column;
+      border-radius: var(--r); overflow: hidden; position: relative;
       transition: border-color .25s ease, box-shadow .25s ease;
+      aspect-ratio: 1 / 1; /* Entire Card is a Perfect 1:1 Square */
       min-width: 0;
     }
     .card:hover {
@@ -295,9 +296,8 @@ if (Astro.request.method === 'POST') {
       box-shadow: 0 6px 24px rgba(0,0,0,0.35);
     }
     .card-thumb {
-      width: 100%; aspect-ratio: 1 / 1; background: var(--rail);
-      display: flex; align-items: center; justify-content: center;
-      position: relative; overflow: hidden; flex-shrink: 0;
+      position: absolute; inset: 0; background: var(--rail);
+      overflow: hidden; z-index: 0;
     }
     .card-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform .3s ease; display: block; }
     .card:hover .card-thumb img { transform: scale(1.04); }
@@ -307,14 +307,19 @@ if (Astro.request.method === 'POST') {
       opacity: 0; transition: opacity .2s; pointer-events: none;
     }
     .card-thumb:hover .card-thumb-ov { opacity: 1; }
-    .card-body { padding: 10px 12px 8px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-    .card-title { font-family: var(--serif); font-size: 13px; color: var(--amber); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-meta { font-size: 10px; color: var(--muted); line-height: 1.5; }
+    .card-body {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 8px 10px; display: flex; flex-direction: column; gap: 4px;
+      background: rgba(15, 12, 8, 0.88);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border-top: 1px solid rgba(212,168,75,0.15);
+      z-index: 1; max-height: 65%; overflow-y: auto;
+    }
+    .card-title { font-family: var(--serif); font-size: 12px; color: var(--amber); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-meta { font-size: 9px; color: var(--muted); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .card-foot {
-      padding: 8px 12px;
-      border-top: 1px solid var(--border);
-      background: rgba(0,0,0,0.18);
-      display: flex; gap: 6px; align-items: center;
+      padding-top: 4px; border-top: none; background: transparent;
+      display: flex; gap: 4px; align-items: center;
     }
 
     /* ─── Table ─── */

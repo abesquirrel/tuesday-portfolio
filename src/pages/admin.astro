@@ -1664,9 +1664,11 @@ if (Astro.request.method === 'POST') {
     if (featuredFilter !== '') list = list.filter(p => String(p.is_featured) === featuredFilter);
 
     const CLOUD = window._cloudName || '';
-    const thumbUrl = (pid, url) => {
+    const getPhotoThumb = (p) => {
+      const url = p?.cloudinary_url || p?.cloudinaryUrl || p?.url;
       if (url) return url;
-      if (!pid) return 'https://picsum.photos/400/400';
+      const pid = String(p?.public_id || p?.publicId || p?.id || '');
+      if (!pid) return `https://picsum.photos/seed/${p?.id || 'photo'}/400/400`;
       if (pid.startsWith('http://') || pid.startsWith('https://') || pid.startsWith('data:')) return pid;
       if (!CLOUD || CLOUD === 'clueless' || CLOUD === 'your_cloud_name_here') {
         const seed = pid.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
@@ -1679,18 +1681,19 @@ if (Astro.request.method === 'POST') {
       ? `<p style="color:var(--muted);margin-top:16px;grid-column:1/-1">No photos match the current filter.</p>`
       : list.map(p => {
           const album = state.albums.find(a => a.id === p.album_id);
+          const titleSafe = (p?.title || 'Untitled').replace(/"/g, '&quot;');
           return `
           <div class="card" id="photo-card-${p.id}">
             <div class="card-thumb">
-              <img src="${thumbUrl(p.public_id, p.cloudinary_url)}" alt="${p.title.replace(/"/g, '&quot;')}" loading="lazy"
+              <img src="${getPhotoThumb(p)}" alt="${titleSafe}" loading="lazy"
                 onerror="this.onerror=null;this.src='https://picsum.photos/seed/${p.id}/400/400';">
               <div class="card-thumb-ov"></div>
             </div>
             <div class="card-body">
-              <div class="card-title">${p.title}${p.is_featured?` <span class="badge badge-feat">featured</span>`:''}</div>
+              <div class="card-title">${p.title || 'Untitled'}${p.is_featured?` <span class="badge badge-feat">featured</span>`:''}</div>
               <div class="card-meta">
                 ${p.location || '—'} &nbsp;·&nbsp; ${p.roll || '—'}<br>
-                <span class="badge badge-${p.medium}">${p.medium}</span>
+                <span class="badge badge-${p.medium || 'film'}">${p.medium || 'film'}</span>
                 ${album?`<span class="badge">${album.title}</span>`:''}
               </div>
             </div>
@@ -1707,8 +1710,6 @@ if (Astro.request.method === 'POST') {
     const slider = document.getElementById('photos-grid-size');
     if (slider) slider.value = savedSize;
   }
-
-
 
   async function setFeatured(id) {
     // Un-feature all, then feature this one

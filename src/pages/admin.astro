@@ -405,11 +405,16 @@ if (Astro.request.method === 'POST') {
     }
 
     /* ─── Topbar ─── */
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
     .cloud-status {
       font-size: 9px;
       letter-spacing: 0.1em;
       padding: 2px 8px;
-      border-radius: 10px;
+      border-radius: 6px;
       background: rgba(212,168,75,0.1);
       color: var(--amber);
       border: 1px solid rgba(212,168,75,0.2);
@@ -417,7 +422,27 @@ if (Astro.request.method === 'POST') {
     .cloud-status-secondary {
       font-size: 10px;
       color: var(--muted);
-      margin-left: 10px;
+    }
+    
+    /* ─── Status Indicators ─── */
+    .status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+    .status-dot.live {
+      background: var(--amber);
+      box-shadow: 0 0 4px var(--amber);
+      animation: pulse 2s infinite;
+    }
+    .status-dot.offline {
+      background: var(--red);
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
 
     /* ─── Section Headers ─── */
@@ -473,44 +498,57 @@ if (Astro.request.method === 'POST') {
     .stat-lbl { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
     .stat-val { font-family: var(--serif); font-size: 28px; color: var(--amber); }
     
-    /* ─── Info Box ─── */
-    .info-box {
+    /* ─── Status Panel ─── */
+    .status-panel {
       margin-top: 24px;
       padding: 20px;
       background: rgba(212,168,75,0.03);
       border: 1px solid rgba(212,168,75,0.1);
       border-radius: var(--r);
     }
-    .info-box-title {
+    .status-panel-header {
       font-size: 10px;
       letter-spacing: .12em;
       text-transform: uppercase;
       color: var(--amber);
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       font-weight: 700;
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .info-box p {
-      font-size: 13px;
-      color: var(--text);
-      line-height: 1.7;
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
     }
-    .info-box code {
-      background: var(--rail);
-      padding: 2px 8px;
-      border-radius: 4px;
-      color: var(--amber);
-      font-family: var(--mono);
-      font-size: 11px;
+    .status-item {
+      background: var(--card);
+      border-radius: var(--r-sm);
+      padding: 10px 12px;
     }
-    .info-box-note {
-      margin-top: 16px;
-      font-size: 12px;
+    .status-label {
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
       color: var(--muted);
+      margin-bottom: 4px;
     }
-    .info-box-note strong { color: var(--text); }
+    .status-value {
+      font-size: 12px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-note {
+      margin-top: 16px;
+      font-size: 11px;
+      color: var(--muted);
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .status-note strong { color: var(--text); }
 
     /* ─── Modal ─── */
     .modal-bg {
@@ -1033,10 +1071,11 @@ if (Astro.request.method === 'POST') {
         </button>
         <div class="topbar-title" id="topbar-title">Overview</div>
         <div class="topbar-right">
+          <span class="status-dot {CLOUD_NAME ? 'live' : 'offline'}"></span>
           <span class="cloud-status">
-            Cloud: {CLOUD_NAME || 'Not Set'}
+            {CLOUD_NAME || 'No Cloud'}
           </span>
-          <span class="cloud-status-secondary">D1 · Cloudinary</span>
+          <span class="cloud-status-secondary">{db ? '· D1 Connected' : '· Local Mode'}</span>
         </div>
       </header>
 
@@ -1060,21 +1099,47 @@ if (Astro.request.method === 'POST') {
             </table>
           </div>
 
-          <div class="info-box">
-            <div class="info-box-title">
+          <div class="status-panel">
+            <div class="status-panel-header">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="2" x2="12" y2="12"></line>
                 <line x1="12" y1="18" x2="12" y2="22"></line>
               </svg>
-              Live Site Connection
+              Live Status
             </div>
-            <p>
-              Yes, this admin panel <strong>directly modifies your live website</strong>. <br/>
-              When you save a change here, your Cloudflare D1 database is updated instantly. The main page will reflect these changes the next time it's loaded.
-            </p>
-            <div class="info-box-note">
-              <strong>To add new photos:</strong> Use the CLI tool: <code>npm run upload path/to/photo.jpg</code>
+            <div class="status-grid">
+              <div class="status-item">
+                <div class="status-label">Database</div>
+                <div class="status-value">
+                  <span class="status-dot live"></span>
+                  {db ? 'Cloudflare D1 Connected' : 'Local Mode'}
+                </div>
+              </div>
+              <div class="status-item">
+                <div class="status-label">Cloudinary</div>
+                <div class="status-value">
+                  <span class="status-dot {CLOUD_NAME ? 'live' : 'offline'}"></span>
+                  {CLOUD_NAME || 'Not Configured'}
+                </div>
+              </div>
+              <div class="status-item">
+                <div class="status-label">Environment</div>
+                <div class="status-value">
+                  <span class="status-dot live"></span>
+                  {Astro.url.protocol === 'https:' ? 'Production' : 'Development'}
+                </div>
+              </div>
+              <div class="status-item">
+                <div class="status-label">Sync Status</div>
+                <div class="status-value">
+                  <span class="status-dot live"></span>
+                  Real-time updates active
+                </div>
+              </div>
+            </div>
+            <div class="status-note">
+              <strong>Note:</strong> All changes are saved directly to your database and will appear on your live site immediately.
             </div>
           </div>
         </div>

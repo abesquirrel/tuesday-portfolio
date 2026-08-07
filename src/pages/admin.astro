@@ -572,9 +572,8 @@ if (Astro.request.method === 'POST') {
       --upload-card-size: 200px;
       margin-top: 18px;
       display: grid;
-      /* fluid responsive: auto-fill columns, each at least --upload-card-size wide, stretching to fill */
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--upload-card-size, 200px)), 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, var(--upload-card-size, 200px));
+      gap: 16px;
     }
 
     .upload-card {
@@ -582,10 +581,9 @@ if (Astro.request.method === 'POST') {
       border: 1px solid var(--border);
       border-radius: var(--r);
       overflow: hidden;
-      position: relative;
+      display: flex;
+      flex-direction: column;
       transition: border-color .25s ease, box-shadow .25s ease;
-      /* width is controlled by grid columns; aspect-ratio makes height = width → perfect square */
-      aspect-ratio: 1 / 1;
       min-width: 0;
     }
     .upload-card:hover {
@@ -596,24 +594,23 @@ if (Astro.request.method === 'POST') {
     .upload-card.error { border-color: rgba(181,57,43,0.4); background: rgba(181,57,43,0.02); }
 
     .upload-card-media {
-      position: absolute;
-      inset: 0;
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1; /* Crisp 1:1 Square Thumbnail */
       background: var(--rail);
       overflow: hidden;
-      z-index: 0;
+      flex-shrink: 0;
     }
     .upload-card-media img {
       width: 100%;
       height: 100%;
-      max-width: 100%;
-      max-height: 100%;
       object-fit: cover;
       object-position: center;
       display: block;
+      transition: transform .3s ease;
     }
     .upload-card:hover .upload-card-media img {
       transform: scale(1.04);
-      transition: transform .3s ease;
     }
 
     .upload-card-badge {
@@ -638,7 +635,7 @@ if (Astro.request.method === 'POST') {
       right: 0;
       height: 4px;
       background: rgba(0,0,0,0.5);
-      z-index: 4; /* above card-body (z-index:1) and badge/actions (z-index:2) */
+      z-index: 3;
     }
     .upload-card-bar {
       height: 100%;
@@ -650,28 +647,20 @@ if (Astro.request.method === 'POST') {
     .upload-card.error .upload-card-bar { background: var(--red); }
 
     .upload-card-body {
-      position: absolute;
-      bottom: 4px; /* sit above the 4px progress bar */
-      left: 0;
-      right: 0;
-      padding: 8px 10px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      background: rgba(15, 12, 8, 0.92); /* dark semi-transparent to let image show above */
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border-top: 1px solid rgba(212,168,75,0.15);
-      max-height: 55%;
-      overflow-y: auto;
-      z-index: 1;
+      background: var(--paper);
+      border-top: 1px solid var(--border);
     }
     .upload-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 6px;
-      padding-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
     }
     .upload-card-title-text {
       font-family: var(--mono);
@@ -696,11 +685,13 @@ if (Astro.request.method === 'POST') {
     }
     .upload-card-form .fgroup {
       margin-bottom: 0;
+      min-width: 0;
     }
     .upload-card-form .frow {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
+      min-width: 0;
     }
     .upload-card-form .flabel {
       font-size: 8px;
@@ -713,6 +704,7 @@ if (Astro.request.method === 'POST') {
     .upload-card-form .finput,
     .upload-card-form .fselect {
       width: 100%;
+      box-sizing: border-box;
       padding: 5px 7px;
       font-size: 10px;
       background: var(--card);

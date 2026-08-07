@@ -12,5 +12,7 @@ database_name = "tuesday-photos"
 database_id   = "b1d28fad-85e0-4d18-944c-eb042560f898"
 
 [vars]
-# For local wrangler pages dev tests, specify the Cloudinary name here as well
+# For local wrangler pages dev tests, specify Cloudinary credentials here
 PUBLIC_CLOUDINARY_CLOUD_NAME = "clueless"
+CLOUDINARY_API_KEY = "884851462147581"
+CLOUDINARY_API_SECRET = "xM0jmbkxywWdGRjdwGGJWmD0pG0"

@@ -20,6 +20,7 @@
 // Inserts into D1 on success.
 
 import type { APIRoute } from 'astro';
+import { CUSTOM_ERROR_THUMBNAIL } from '../../../utils/cloudinary';
 
 export const prerender = false;
 
@@ -118,7 +119,7 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
     // Demo / Local Fallback mode when Cloudinary credentials are not configured or using placeholder cloud
     uploadResult = {
       public_id: publicId,
-      secure_url: `https://picsum.photos/seed/${publicId}/1200/800`,
+      secure_url: CUSTOM_ERROR_THUMBNAIL,
     };
   } else {
     // ── Sign and Upload to Cloudinary ──────────────────────────────────────────
@@ -149,14 +150,14 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
         // Fallback to demo mode if Cloudinary rejected the upload (e.g. invalid cloud name)
         uploadResult = {
           public_id: publicId,
-          secure_url: `https://picsum.photos/seed/${publicId}/1200/800`,
+          secure_url: CUSTOM_ERROR_THUMBNAIL,
         };
       }
     } catch {
       // Fallback on network failure
       uploadResult = {
         public_id: publicId,
-        secure_url: `https://picsum.photos/seed/${publicId}/1200/800`,
+        secure_url: CUSTOM_ERROR_THUMBNAIL,
       };
     }
   }

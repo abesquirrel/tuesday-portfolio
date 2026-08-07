@@ -28,7 +28,7 @@ export function transformCloudinaryUrl(url: string, transforms: string): string 
   if (url.startsWith('data:')) return url;
   if (url.includes('/image/upload/')) {
     return url.replace(
-      /\/image\/upload\/(?:(?:c_[^/]+|w_[^/]+|h_[^/]+|f_[^/]+|q_[^/]+|g_[^/]+|dpr_[^/]+|b_[^/]+|e_[^/]+|r_[^/]+|ar_[^/]+)[^/]*\/)?/,
+      /\/image\/upload\/(?:(?:v_[^/]+|s_[^/]+|c_[^/]+|w_[^/]+|h_[^/]+|f_[^/]+|q_[^/]+|g_[^/]+|dpr_[^/]+|b_[^/]+|e_[^/]+|r_[^/]+|ar_[^/]+)[^/]*\/)*/,
       `/image/upload/${transforms}/`
     );
   }

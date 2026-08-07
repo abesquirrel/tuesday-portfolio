@@ -1083,6 +1083,7 @@ if (Astro.request.method === 'POST') {
       </div>
       <div class="modal-body">
         <input type="hidden" id="ph-id" />
+        <input type="hidden" id="ph-cloudinary_url" />
 
         <div class="fgroup">
           <label class="flabel">Cloudinary public_id *</label>
@@ -1850,8 +1851,9 @@ if (Astro.request.method === 'POST') {
     if (modalId === 'modal-photo') {
       const p = editId ? state.photos.find(x => x.id === editId) : null;
       document.getElementById('modal-photo-ttl').textContent = p ? 'Edit Photo' : 'Add Photo Record';
-      document.getElementById('ph-id').value        = p?.id || '';
-      document.getElementById('ph-public_id').value = p?.public_id || '';
+      document.getElementById('ph-id').value           = p?.id || '';
+      document.getElementById('ph-cloudinary_url').value = p?.cloudinary_url || p?.cloudinaryUrl || '';
+      document.getElementById('ph-public_id').value     = p?.public_id || '';
       document.getElementById('ph-title').value     = p?.title || '';
       document.getElementById('ph-location').value  = p?.location || '';
       document.getElementById('ph-caption').value   = p?.caption || '';
@@ -1901,7 +1903,7 @@ if (Astro.request.method === 'POST') {
     const cn = window._cloudName || '';
     const preview = document.getElementById('ph-url-preview');
     if (!pid) { preview.textContent = '—'; return; }
-    preview.textContent = `res.cloudinary.com/${cn || 'clueless'}/image/upload/…/${pid}`;
+    preview.textContent = `res.cloudinary.com/${cn}/image/upload/…/${pid}`;
   }
 
   // ─── Save: Photo ───────────────────────────────────────────────────────
@@ -1928,7 +1930,7 @@ if (Astro.request.method === 'POST') {
       film_stock:  document.getElementById('ph-film_stock').value || null,
       sort_order:  parseInt(document.getElementById('ph-sort_order').value) || 99,
       is_featured: isFeatured,
-      cloudinary_url: null,
+      cloudinary_url: document.getElementById('ph-cloudinary_url').value || null,
     };
 
     if (isFeatured) state.photos.forEach(p => p.is_featured = 0);

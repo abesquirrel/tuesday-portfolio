@@ -1928,6 +1928,10 @@ if (Astro.request.method === 'POST') {
     // Refresh photos grid so new images appear
     const res = await apiFetch('photos');
     if (res?.photos) state.photos = res.photos;
+    // Refresh displays if panels are active
+    if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
+    if (document.getElementById('panel-albums').classList.contains('active')) renderAlbums();
+    if (document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
     toast(`${pending.length} photo${pending.length > 1 ? 's' : ''} uploaded successfully.`);
   }
 
@@ -2037,6 +2041,9 @@ if (Astro.request.method === 'POST') {
     });
     toast(`"${target.title}" is now the featured photo.`);
     renderPhotos();
+    // Refresh albums table and dashboard if active
+    if (document.getElementById('panel-albums').classList.contains('active')) renderAlbums();
+    if (document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
   }
 
   // ─── Albums ───────────────────────────────────────────────────────────
@@ -2111,10 +2118,12 @@ if (Astro.request.method === 'POST') {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates)
     });
-    // Update local cloud name if it was empty
-    if (!window._cloudName && updates.PUBLIC_CLOUDINARY_CLOUD_NAME) {
+    // Update local cloud name if changed
+    if (updates.PUBLIC_CLOUDINARY_CLOUD_NAME) {
       window._cloudName = updates.PUBLIC_CLOUDINARY_CLOUD_NAME;
     }
+    // Refresh photos if active to update thumbnails with new cloud name
+    if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
     toast('Settings saved!');
   }
 
@@ -2255,6 +2264,8 @@ if (Astro.request.method === 'POST') {
 
     closeModal('modal-photo');
     renderPhotos();
+    // Refresh albums table to update photo counts
+    if (document.getElementById('panel-albums').classList.contains('active')) renderAlbums();
     toast(editId ? 'Photo updated!' : 'Photo added!');
   }
 
@@ -2263,6 +2274,8 @@ if (Astro.request.method === 'POST') {
     state.photos = state.photos.filter(p => p.id !== id);
     await apiFetch(`photos/${id}`, { method: 'DELETE' });
     renderPhotos();
+    // Refresh albums table to update photo counts
+    if (document.getElementById('panel-albums').classList.contains('active')) renderAlbums();
     toast('Photo deleted.');
   }
 
@@ -2295,6 +2308,9 @@ if (Astro.request.method === 'POST') {
     closeModal('modal-album');
     populateAlbumSelects();
     renderAlbums();
+    // Refresh photos and upload queue to pick up new album
+    if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
+    if (document.getElementById('panel-upload').classList.contains('active')) renderUploadQueue();
     toast('Album saved!');
   }
 
@@ -2306,6 +2322,9 @@ if (Astro.request.method === 'POST') {
     await apiFetch(`albums/${id}`, { method: 'DELETE' });
     populateAlbumSelects();
     renderAlbums();
+    // Refresh photos and upload queue to reflect album deletion
+    if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
+    if (document.getElementById('panel-upload').classList.contains('active')) renderUploadQueue();
     toast('Album deleted.');
   }
 
@@ -2337,6 +2356,8 @@ if (Astro.request.method === 'POST') {
 
     closeModal('modal-social');
     renderSocial();
+    // Refresh dashboard stats if active
+    if (document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
     toast('Social link saved!');
   }
 
@@ -2345,6 +2366,8 @@ if (Astro.request.method === 'POST') {
     state.social = state.social.filter(l => l.id !== id);
     await apiFetch(`social/${id}`, { method: 'DELETE' });
     renderSocial();
+    // Refresh dashboard stats if active
+    if (document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
     toast('Link deleted.');
   }
 

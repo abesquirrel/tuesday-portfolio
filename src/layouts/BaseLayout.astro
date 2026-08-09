@@ -1,14 +1,29 @@
----
+interface NavSections {
+  showFeatured?: boolean;
+  showGallery?: boolean;
+  showPrints?: boolean;
+  showAbout?: boolean;
+  showContact?: boolean;
+}
+
 interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
+  navSections?: NavSections;
 }
 
 const {
   title = 'I Think It Was Tuesday — Photography Portfolio',
   description = 'A film photography portfolio by Paul Rojas. Shot on Nikkormat and Fujifilm simulations. Unremarkable moments worth keeping.',
   ogImage = 'https://tuesday.paulrojas.quest/favicon.svg',
+  navSections = {
+    showFeatured: true,
+    showGallery: true,
+    showPrints: true,
+    showAbout: true,
+    showContact: true,
+  },
 } = Astro.props;
 ---
 
@@ -84,11 +99,11 @@ const {
 
         <div class="collapse navbar-collapse" id="navbarContent">
           <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="#featured">Featured</a></li>
-            <li class="nav-item"><a class="nav-link" href="#gallery">Gallery</a></li>
-            <li class="nav-item"><a class="nav-link" href="#prints">Prints</a></li>
-            <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-            <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+            {navSections.showFeatured !== false && <li class="nav-item"><a class="nav-link" href="#featured">Featured</a></li>}
+            {navSections.showGallery  !== false && <li class="nav-item"><a class="nav-link" href="#gallery">Gallery</a></li>}
+            {navSections.showPrints   !== false && <li class="nav-item"><a class="nav-link" href="#prints">Prints</a></li>}
+            {navSections.showAbout    !== false && <li class="nav-item"><a class="nav-link" href="#about">About</a></li>}
+            {navSections.showContact  !== false && <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>}
           </ul>
         </div>
       </div>

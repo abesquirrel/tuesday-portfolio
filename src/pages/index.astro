@@ -11,37 +11,51 @@ import '../styles/global.scss';
 import { getPhotos, getSettings, getSocialLinks, getAlbums } from '../lib/db';
 import type { Photo, SocialLink, Album } from '../types/photo';
 
-// Server-rendered so D1 bindings are available at request time
 export const prerender = false;
 
 const env = (Astro.locals as any).runtime?.env;
 const db  = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
-const photosData: Photo[] = await getPhotos(db);
+const photosData: Photo[]         = await getPhotos(db);
 const settings: Record<string, string> = await getSettings(db);
-const socialLinks: SocialLink[] = await getSocialLinks(db);
-const albums: Album[] = await getAlbums(db);
+const socialLinks: SocialLink[]   = await getSocialLinks(db);
+const albums: Album[]             = await getAlbums(db);
 
-const featuredPhoto: Photo | undefined = photosData.find((p) => Number(p.is_featured) === 1) || photosData[0];
+const featuredPhoto: Photo | undefined =
+  photosData.find((p) => Number(p.is_featured) === 1) || photosData[0];
 const heroImageId = settings.hero_image_id || featuredPhoto?.public_id || '';
+
+// ── Section visibility (toggled from admin panel) ──────────────────────────
+// Defaults to true if the setting has never been explicitly set.
+const showFeatured = settings.section_featured !== 'false';
+const showGallery  = settings.section_gallery  !== 'false';
+const showPrints   = settings.section_prints   !== 'false';
+const showAbout    = settings.section_about    !== 'false';
+const showContact  = settings.section_contact  !== 'false';
 ---
 
-<BaseLayout>
+<BaseLayout
+  navSections={{ showFeatured, showGallery, showPrints, showAbout, showContact }}
+>
   <Masthead heroPublicId={heroImageId} />
 
-  <FeaturedPhoto
-    photo={featuredPhoto}
-    cloudName={settings.PUBLIC_CLOUDINARY_CLOUD_NAME}
-  />
+  {showFeatured && (
+    <FeaturedPhoto
+      photo={featuredPhoto}
+      cloudName={settings.PUBLIC_CLOUDINARY_CLOUD_NAME}
+    />
+  )}
 
-  <Gallery 
-    photos={photosData} 
-    albums={albums} 
-    cloudName={settings.PUBLIC_CLOUDINARY_CLOUD_NAME} 
-  />
+  {showGallery && (
+    <Gallery
+      photos={photosData}
+      albums={albums}
+      cloudName={settings.PUBLIC_CLOUDINARY_CLOUD_NAME}
+    />
+  )}
 
-  <Prints settings={settings} />
+  {showPrints && <Prints settings={settings} />}
 
-  <About settings={settings} />
+  {showAbout && <About settings={settings} />}
 
-  <Contact links={socialLinks} />
+  {showContact && <Contact links={socialLinks} />}
 </BaseLayout>

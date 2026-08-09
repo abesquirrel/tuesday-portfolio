@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Masthead from '../components/Masthead.astro';
 import FeaturedPhoto from '../components/FeaturedPhoto.astro';
 import Gallery from '../components/Gallery.astro';
+import Prints from '../components/Prints.astro';
 import About from '../components/About.astro';
 import Contact from '../components/Contact.astro';
 import '../styles/global.scss';
@@ -37,6 +38,8 @@ const heroImageId = settings.hero_image_id || featuredPhoto?.public_id || '';
     albums={albums} 
     cloudName={settings.PUBLIC_CLOUDINARY_CLOUD_NAME} 
   />
+
+  <Prints settings={settings} />
 
   <About settings={settings} />
 

@@ -1312,6 +1312,29 @@ if (Astro.request.method === 'POST') {
           </div>
 
           <div class="section-header">
+            <div class="section-header-title">🖼️ Prints &amp; Licensing Section</div>
+            <div class="frow">
+              <div class="fgroup">
+                <label class="flabel">Section Title</label>
+                <input class="finput" id="conf-prints-title" type="text" placeholder="Archival Darkroom Prints">
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Direct Inquiry Email</label>
+                <input class="finput" id="conf-prints-email" type="email" placeholder="you@example.com">
+                <div class="hint">Leave blank to link directly to the contact section.</div>
+              </div>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Section Subtitle</label>
+              <input class="finput" id="conf-prints-subtitle" type="text" placeholder="Fine art silver gelatin &amp; pigment prints...">
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Prints Policy / Notice Text</label>
+              <textarea class="ftextarea" id="conf-prints-body" rows="3" placeholder="Selected photographs from the portfolio are available in small limited editions..."></textarea>
+            </div>
+          </div>
+
+          <div class="section-header">
             <div class="section-header-title">⚙️ Site Configuration</div>
             <div class="frow">
               <div class="fgroup">
@@ -2137,6 +2160,10 @@ state.social   = social?.social     || social   || [];
     document.getElementById('about-also').value      = also;
     document.getElementById('about-hero-image').value = heroImage;
     document.getElementById('about-image').value     = aboutImage;
+    document.getElementById('conf-prints-title').value = s.prints_title || '';
+    document.getElementById('conf-prints-subtitle').value = s.prints_subtitle || '';
+    document.getElementById('conf-prints-body').value = s.prints_body || '';
+    document.getElementById('conf-prints-email').value = s.prints_email || '';
     document.getElementById('conf-cloud-name').value = s.PUBLIC_CLOUDINARY_CLOUD_NAME || '';
     document.getElementById('conf-admin-name').value = s.SITE_TITLE || '';
     document.getElementById('prev-bio').textContent  = bio;
@@ -2161,6 +2188,10 @@ state.social   = social?.social     || social   || [];
       about_also_shooting:       document.getElementById('about-also').value,
       hero_image_id:             document.getElementById('about-hero-image').value,
       about_image_id:            document.getElementById('about-image').value,
+      prints_title:              document.getElementById('conf-prints-title').value.trim(),
+      prints_subtitle:           document.getElementById('conf-prints-subtitle').value.trim(),
+      prints_body:               document.getElementById('conf-prints-body').value.trim(),
+      prints_email:              document.getElementById('conf-prints-email').value.trim(),
       PUBLIC_CLOUDINARY_CLOUD_NAME: document.getElementById('conf-cloud-name').value.trim(),
       SITE_TITLE:                document.getElementById('conf-admin-name').value.trim(),
     };

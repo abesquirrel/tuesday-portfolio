@@ -1,0 +1,170 @@
+---
+interface Props {
+  settings: Record<string, string>;
+}
+
+const { settings } = Astro.props;
+
+const title = settings.prints_title || 'Archival Darkroom Prints';
+const subtitle = settings.prints_subtitle || 'Fine art silver gelatin & pigment prints, hand-numbered and signed.';
+const body = settings.prints_body || 'Selected photographs from the portfolio are available in small limited editions. Printed on heavy 100% cotton rag archival paper or traditional silver gelatin darkroom papers.';
+const inquiryEmail = settings.prints_email || '';
+
+/*
+  TODO: Future Extensions
+  - Option 2: Add <GearBag /> component below Prints to showcase camera bodies, Nikkor lenses, and film developing recipes.
+  - Option 3: Integrate direct Stripe Checkout / E-commerce cart for automated print orders.
+*/
+---
+
+<section id="prints">
+  <div class="container">
+    <div class="row justify-content-center mb-5 reveal">
+      <div class="col-lg-8 text-center">
+        <p class="section-eyebrow">Editions &amp; Licensing</p>
+        <h2 class="section-title mb-3" style="font-size:clamp(1.6rem,3vw,2.2rem);">
+          {title}
+        </h2>
+        <p class="prints-subtitle">{subtitle}</p>
+      </div>
+    </div>
+
+    <div class="row g-4 justify-content-center mb-5">
+      <div class="col-md-4 reveal">
+        <div class="prints-card">
+          <div class="prints-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          </div>
+          <h3 class="prints-card-title">Archival Quality</h3>
+          <p class="prints-card-text">
+            Printed on heavy museum-grade cotton rag paper or hand-processed silver gelatin fiber paper for archival longevity.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4 reveal">
+        <div class="prints-card">
+          <div class="prints-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </div>
+          <h3 class="prints-card-title">Numbered &amp; Signed</h3>
+          <p class="prints-card-text">
+            Every print is personally inspected, hand-titled, numbered, and signed on the reverse with a certificate of authenticity.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4 reveal">
+        <div class="prints-card">
+          <div class="prints-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <h3 class="prints-card-title">Commercial Rights</h3>
+          <p class="prints-card-text">
+            Editorial and commercial image licensing rights are available for digital publishing, press, and brand projects.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row justify-content-center reveal">
+      <div class="col-lg-8 text-center">
+        <div class="prints-notice">
+          <p class="prints-body">{body}</p>
+          <div class="mt-4">
+            {inquiryEmail ? (
+              <a href={`mailto:${inquiryEmail}?subject=Print%20Inquiry%20—%20Tuesday%20Portfolio`} class="btn btn-outline-light btn-sm px-4 py-2 prints-btn">
+                Inquire About Prints &amp; Licensing →
+              </a>
+            ) : (
+              <a href="#contact" class="btn btn-outline-light btn-sm px-4 py-2 prints-btn">
+                Inquire via Contact Section →
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  #prints {
+    background-color: #1a1916;
+    padding: 5rem 0;
+    border-top: 1px solid #2c2b28;
+    border-bottom: 1px solid #2c2b28;
+  }
+
+  .prints-subtitle {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: clamp(0.9rem, 2vw, 1.05rem);
+    color: rgba(200, 196, 188, 0.7);
+    line-height: 1.7;
+    margin: 0 auto;
+  }
+
+  .prints-card {
+    background: #0e0d0b;
+    border: 1px solid #2c2b28;
+    padding: 2rem 1.5rem;
+    height: 100%;
+    transition: border-color 0.3s ease, transform 0.3s ease;
+
+    &:hover {
+      border-color: rgba(200, 169, 110, 0.5);
+      transform: translateY(-3px);
+    }
+  }
+
+  .prints-card-icon {
+    color: #c8a96e;
+    margin-bottom: 1.25rem;
+  }
+
+  .prints-card-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.15rem;
+    font-style: italic;
+    color: #c8c4bc;
+    margin-bottom: 0.75rem;
+  }
+
+  .prints-card-text {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: #7a7671;
+    line-height: 1.7;
+    margin-bottom: 0;
+  }
+
+  .prints-notice {
+    background: #0e0d0b;
+    border: 1px dashed rgba(200, 169, 110, 0.3);
+    padding: 2rem 2.5rem;
+  }
+
+  .prints-body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 0.95rem;
+    color: rgba(200, 196, 188, 0.8);
+    line-height: 1.8;
+    margin-bottom: 0;
+  }
+
+  .prints-btn {
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #c8a96e;
+    border-color: rgba(200, 169, 110, 0.4);
+    border-radius: 0;
+
+    &:hover {
+      background-color: #c8a96e;
+      color: #0e0d0b;
+      border-color: #c8a96e;
+    }
+  }
+</style>

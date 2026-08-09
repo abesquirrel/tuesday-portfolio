@@ -2290,19 +2290,27 @@ state.social   = social?.social     || social   || [];
     const heroImage = s.hero_image_id || '';
     const aboutImage = s.about_image_id || '';
 
-    document.getElementById('about-bio').value       = bio;
-    document.getElementById('about-shooting').value  = shooting;
+    document.getElementById('about-bio').value        = bio;
+    document.getElementById('about-shooting').value   = shooting;
     document.getElementById('about-developing').value = developing;
-    document.getElementById('about-also').value      = also;
+    document.getElementById('about-also').value       = also;
     document.getElementById('about-hero-image').value = heroImage;
-    document.getElementById('about-image').value     = aboutImage;
-    document.getElementById('conf-prints-title').value = s.prints_title || '';
+    document.getElementById('about-image').value      = aboutImage;
+    document.getElementById('conf-prints-title').value    = s.prints_title || '';
     document.getElementById('conf-prints-subtitle').value = s.prints_subtitle || '';
-    document.getElementById('conf-prints-body').value = s.prints_body || '';
-    document.getElementById('conf-prints-email').value = s.prints_email || '';
-    document.getElementById('conf-cloud-name').value = s.PUBLIC_CLOUDINARY_CLOUD_NAME || '';
-    document.getElementById('conf-admin-name').value = s.SITE_TITLE || '';
-    document.getElementById('prev-bio').textContent  = bio;
+    document.getElementById('conf-prints-body').value     = s.prints_body || '';
+    document.getElementById('conf-prints-email').value    = s.prints_email || '';
+    document.getElementById('conf-cloud-name').value  = s.PUBLIC_CLOUDINARY_CLOUD_NAME || '';
+    document.getElementById('conf-admin-name').value  = s.SITE_TITLE || '';
+    document.getElementById('prev-bio').textContent   = bio;
+
+    // Section visibility — defaults to ON if never set
+    document.getElementById('section-featured').checked = s.section_featured !== 'false';
+    document.getElementById('section-gallery').checked  = s.section_gallery  !== 'false';
+    document.getElementById('section-prints').checked   = s.section_prints   !== 'false';
+    document.getElementById('section-about').checked    = s.section_about    !== 'false';
+    document.getElementById('section-contact').checked  = s.section_contact  !== 'false';
+
     updateGearPreview();
   }
 
@@ -2330,22 +2338,38 @@ state.social   = social?.social     || social   || [];
       prints_email:              document.getElementById('conf-prints-email').value.trim(),
       PUBLIC_CLOUDINARY_CLOUD_NAME: document.getElementById('conf-cloud-name').value.trim(),
       SITE_TITLE:                document.getElementById('conf-admin-name').value.trim(),
+      // Section visibility — stored as string 'true' / 'false'
+      section_featured: document.getElementById('section-featured').checked ? 'true' : 'false',
+      section_gallery:  document.getElementById('section-gallery').checked  ? 'true' : 'false',
+      section_prints:   document.getElementById('section-prints').checked   ? 'true' : 'false',
+      section_about:    document.getElementById('section-about').checked    ? 'true' : 'false',
+      section_contact:  document.getElementById('section-contact').checked  ? 'true' : 'false',
     };
+
+    // Snapshot for rollback
+    const backup = { ...state.settings };
     for (const [key, value] of Object.entries(updates)) {
       state.settings[key] = value;
     }
-    await apiFetch('settings', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates)
-    });
-    // Update local cloud name if changed
-    if (updates.PUBLIC_CLOUDINARY_CLOUD_NAME) {
-      window._cloudName = updates.PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+    try {
+      await apiFetch('settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      // Update local cloud name if changed
+      if (updates.PUBLIC_CLOUDINARY_CLOUD_NAME) {
+        window._cloudName = updates.PUBLIC_CLOUDINARY_CLOUD_NAME;
+      }
+      // Refresh photos panel if visible (cloud name may have changed)
+      if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
+      toast('Settings saved!');
+    } catch (err) {
+      state.settings = backup;
+      renderAbout(); // re-populate form from snapshot
+      toast(`Failed to save settings: ${err.message}`, true);
     }
-    // Refresh photos if active to update thumbnails with new cloud name
-    if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
-    toast('Settings saved!');
   }
 
   // ─── Social ───────────────────────────────────────────────────────────

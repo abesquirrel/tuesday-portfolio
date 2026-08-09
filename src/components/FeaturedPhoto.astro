@@ -3,13 +3,13 @@ import { cloudinaryFromRow, CUSTOM_ERROR_THUMBNAIL } from '../utils/cloudinary';
 import type { Photo } from '../types/photo';
 
 interface Props {
-  photo: Photo;
-  cloudName?: string;
+  photo?: Photo | undefined;
+  cloudName?: string | undefined;
 }
 const { photo, cloudName } = Astro.props;
 
-const fullUrl  = cloudinaryFromRow(photo, 'f_auto,q_auto,w_1600', cloudName);
-const thumbUrl = cloudinaryFromRow(photo, 'f_auto,q_auto,w_900', cloudName);
+const fullUrl  = photo ? cloudinaryFromRow(photo, 'f_auto,q_auto,w_1600', cloudName) : CUSTOM_ERROR_THUMBNAIL;
+const thumbUrl = photo ? cloudinaryFromRow(photo, 'f_auto,q_auto,w_900', cloudName) : CUSTOM_ERROR_THUMBNAIL;
 ---
 
 <section id="featured">
@@ -21,60 +21,68 @@ const thumbUrl = cloudinaryFromRow(photo, 'f_auto,q_auto,w_900', cloudName);
       </div>
     </div>
 
-    <div class="row align-items-center g-5">
-      <div class="col-lg-8 reveal">
-        <div class="featured-frame">
-          <div class="featured-badge">Featured</div>
-          <img
-            src={thumbUrl}
-            alt={photo.title}
-            class="lightbox-trigger"
-            data-full={fullUrl}
-            data-meta={`${photo.location}${photo.camera ? ` · ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}${photo.roll ? ` · ${photo.roll}` : ''}`}
-            loading="eager"
-            width="900"
-            height="600"
-            onerror={`this.onerror=null;this.src='${CUSTOM_ERROR_THUMBNAIL}';`}
-          />
+    {photo ? (
+      <div class="row align-items-center g-5">
+        <div class="col-lg-8 reveal">
+          <div class="featured-frame">
+            <div class="featured-badge">Featured</div>
+            <img
+              src={thumbUrl}
+              alt={photo.title || 'Featured Photograph'}
+              class="lightbox-trigger"
+              data-full={fullUrl}
+              data-meta={`${photo.location || ''}${photo.camera ? ` · ${photo.camera}` : ''}${photo.film_stock ? ` · ${photo.film_stock}` : ''}${photo.roll ? ` · ${photo.roll}` : ''}`}
+              loading="eager"
+              width="900"
+              height="600"
+              onerror={`this.onerror=null;this.src='${CUSTOM_ERROR_THUMBNAIL}';`}
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="col-lg-4 reveal">
-        <div class="featured-meta">
-          <h3 class="featured-title">{photo.title}</h3>
-          <p class="featured-caption">{photo.caption}</p>
-          {photo.roll && (
-            <p class="featured-detail">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              {photo.roll}
-            </p>
-          )}
-          {photo.location && (
-            <p class="featured-detail">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              {photo.location}
-            </p>
-          )}
-          {photo.camera && (
-            <p class="featured-detail">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-              {photo.camera} {photo.lens && `· ${photo.lens}`}
-            </p>
-          )}
-          {photo.film_stock && (
-            <p class="featured-detail">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
-              {photo.film_stock}
-            </p>
-          )}
-          {photo.simulation && (
-            <p class="featured-detail">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
-              {photo.simulation}
-            </p>
-          )}
+        <div class="col-lg-4 reveal">
+          <div class="featured-meta">
+            <h3 class="featured-title">{photo.title}</h3>
+            {photo.caption && <p class="featured-caption">{photo.caption}</p>}
+            {photo.roll && (
+              <p class="featured-detail">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                {photo.roll}
+              </p>
+            )}
+            {photo.location && (
+              <p class="featured-detail">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                {photo.location}
+              </p>
+            )}
+            {photo.camera && (
+              <p class="featured-detail">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                {photo.camera} {photo.lens && `· ${photo.lens}`}
+              </p>
+            )}
+            {photo.film_stock && (
+              <p class="featured-detail">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+                {photo.film_stock}
+              </p>
+            )}
+            {photo.simulation && (
+              <p class="featured-detail">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                {photo.simulation}
+              </p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    ) : (
+      <div class="row text-center py-5">
+        <div class="col-12 text-muted">
+          <p>No featured photo selected yet. Upload photos in the admin panel to get started.</p>
+        </div>
+      </div>
+    )}
   </div>
 </section>

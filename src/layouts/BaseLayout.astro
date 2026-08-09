@@ -182,6 +182,7 @@ const {
         if (index < 0 || index >= currentTriggers.length) return;
         currentIndex = index;
         const el = currentTriggers[currentIndex];
+        if (!el) return;
         const src   = el.getAttribute('data-full') || (el as HTMLImageElement).src;
         const title = el.getAttribute('data-title') || el.getAttribute('alt') || '';
         const meta  = el.getAttribute('data-meta') || '';
@@ -221,13 +222,9 @@ const {
             openLightbox(idx, groupTriggers);
           });
         });
-
-
       };
 
       initLightbox();
-
-
 
       const closeLightbox = () => {
         lightbox?.classList.remove('open');
@@ -272,12 +269,16 @@ const {
       const swipeArea = document.getElementById('lightboxSwipeArea');
 
       swipeArea?.addEventListener('touchstart', (e: TouchEvent) => {
-        touchStartX = e.changedTouches[0].screenX;
+        if (e.changedTouches && e.changedTouches[0]) {
+          touchStartX = e.changedTouches[0].screenX;
+        }
       }, { passive: true });
 
       swipeArea?.addEventListener('touchend', (e: TouchEvent) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
+        if (e.changedTouches && e.changedTouches[0]) {
+          touchEndX = e.changedTouches[0].screenX;
+          handleSwipe();
+        }
       }, { passive: true });
 
       const handleSwipe = () => {

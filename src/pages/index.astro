@@ -20,7 +20,7 @@ const settings: Record<string, string> = await getSettings(db);
 const socialLinks: SocialLink[] = await getSocialLinks(db);
 const albums: Album[] = await getAlbums(db);
 
-const featuredPhoto = photosData.find((p) => p.is_featured === 1) || photosData[0];
+const featuredPhoto: Photo | undefined = photosData.find((p) => Number(p.is_featured) === 1) || photosData[0];
 const heroImageId = settings.hero_image_id || featuredPhoto?.public_id || '';
 ---
 

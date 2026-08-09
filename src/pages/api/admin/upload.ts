@@ -20,6 +20,7 @@
 // Inserts into D1 on success.
 
 import type { APIRoute } from 'astro';
+import { isValidSession } from '../../../lib/db';
 import { CUSTOM_ERROR_THUMBNAIL } from '../../../utils/cloudinary';
 
 export const prerender = false;
@@ -64,13 +65,19 @@ export const GET: APIRoute = async () => {
 };
 
 export const POST: APIRoute = async ({ request, locals, cookies }) => {
-  // ── Auth guard ────────────────────────────────────────────────────────────
-  const session = cookies.get('admin_session')?.value;
-  if (!session || session.length === 0) return unauthorized();
-
   // ── Environment bindings ──────────────────────────────────────────────────
   const env = (locals as any).runtime?.env;
   const db = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
+
+  if (!db) {
+    return json({ error: 'D1 database binding not available' }, 503);
+  }
+
+  // ── Auth guard: validate against sessions table ────────────────────────────
+  const session = cookies.get('admin_session')?.value;
+  if (!session || !(await isValidSession(db, session))) {
+    return unauthorized();
+  }
 
   // Cloudinary credentials — check Workers env, process.env, and import.meta.env
   const cloudName  = env?.PUBLIC_CLOUDINARY_CLOUD_NAME  ?? (typeof process !== 'undefined' ? process.env?.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined) ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -147,56 +154,51 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
           secure_url: cloudData.secure_url,
         };
       } else {
-        // Fallback to demo mode if Cloudinary rejected the upload (e.g. invalid cloud name)
-        uploadResult = {
-          public_id: publicId,
-          secure_url: CUSTOM_ERROR_THUMBNAIL,
-        };
+        const errMsg = cloudData?.error?.message || `Cloudinary API returned HTTP ${uploadRes.status}`;
+        return json({ error: `Cloudinary upload failed: ${errMsg}` }, 400);
       }
-    } catch {
-      // Fallback on network failure
-      uploadResult = {
-        public_id: publicId,
-        secure_url: CUSTOM_ERROR_THUMBNAIL,
-      };
+    } catch (err: any) {
+      return json({ error: `Network error uploading to Cloudinary: ${err?.message || 'Upload failed'}` }, 502);
     }
   }
 
   // ── Insert into D1 ───────────────────────────────────────────────────────
-  const dbId = slugify(title) + '-' + suffix;
+  const dbId = `${slug}-${suffix}`;
 
-  if (db) {
-    try {
-      if (isFeatured) {
-        await db.prepare('UPDATE photos SET is_featured = 0').run();
-      }
-      const countRow = await db.prepare('SELECT COUNT(*) as count FROM photos').first() as any;
-      const sortOrder = countRow?.count ?? 99;
-
-      await db.prepare(`
-        INSERT OR REPLACE INTO photos
-          (id, public_id, cloudinary_url, title, caption, roll, location, medium,
-           simulation, camera, lens, film_stock, album_id, sort_order, is_featured)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-      `).bind(
-        dbId,
-        uploadResult.public_id,
-        uploadResult.secure_url,
-        title, caption, roll, location, medium,
-        simulation, camera, lens, filmStock,
-        albumId, sortOrder, isFeatured
-      ).run();
-    } catch (dbErr: any) {
-      // Cloudinary succeeded — warn about DB but don't fail
-      return json({
-        ok: true,
-        warning: `Photo uploaded to Cloudinary but DB insert failed: ${dbErr?.message}. Use "Add Photo Record" with public_id "${uploadResult.public_id}" to save it manually.`,
-        id: dbId,
-        public_id: uploadResult.public_id,
-        secure_url: uploadResult.secure_url,
-        title,
-      });
+  try {
+    const existing = await db.prepare('SELECT id FROM photos WHERE id = ?').bind(dbId).first();
+    if (existing) {
+      return json({ error: `Photo ID conflict: "${dbId}" already exists.` }, 409);
     }
+
+    if (isFeatured) {
+      await db.prepare('UPDATE photos SET is_featured = 0').run();
+    }
+    const countRow = await db.prepare('SELECT COUNT(*) as count FROM photos').first() as any;
+    const sortOrder = countRow?.count ?? 99;
+
+    await db.prepare(`
+      INSERT INTO photos
+        (id, public_id, cloudinary_url, title, caption, roll, location, medium,
+         simulation, camera, lens, film_stock, album_id, sort_order, is_featured)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    `).bind(
+      dbId,
+      uploadResult.public_id,
+      uploadResult.secure_url,
+      title, caption, roll, location, medium,
+      simulation, camera, lens, filmStock,
+      albumId, sortOrder, isFeatured
+    ).run();
+  } catch (dbErr: any) {
+    return json({
+      ok: true,
+      warning: `Photo uploaded to Cloudinary but DB insert failed: ${dbErr?.message}. Use "Add Photo Record" with public_id "${uploadResult.public_id}" to save it manually.`,
+      id: dbId,
+      public_id: uploadResult.public_id,
+      secure_url: uploadResult.secure_url,
+      title,
+    });
   }
 
   return json({

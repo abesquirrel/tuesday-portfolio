@@ -53,7 +53,7 @@ export async function getPhotos(db?: any): Promise<Photo[]> {
 }
 
 /**
- * Fetches site settings (bio, gear notes, etc.)
+ * Fetches site settings (bio, gear notes, etc.) as a flat key→value object.
  */
 export async function getSettings(db?: any): Promise<Record<string, string>> {
   if (db) {
@@ -69,6 +69,24 @@ export async function getSettings(db?: any): Promise<Record<string, string>> {
     }
   }
   return {};
+}
+
+/**
+ * Upserts one site_settings row per key.
+ * null values are coerced to '' (the row is kept, not deleted).
+ */
+export async function setSettings(db: any, updates: Record<string, string | null>): Promise<void> {
+  if (!db) return;
+  const stmts = Object.entries(updates).map(([key, value]) =>
+    db
+      .prepare(
+        `INSERT INTO site_settings (key, value)
+         VALUES (?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+      )
+      .bind(key, value == null ? '' : String(value))
+  );
+  if (stmts.length > 0) await db.batch(stmts);
 }
 
 /**
@@ -103,4 +121,59 @@ export async function getAlbums(db?: any): Promise<Album[]> {
     }
   }
   return [];
+}
+
+// ─── Session management ───────────────────────────────────────────────────────
+
+/**
+ * Persists a new session token with a TTL.
+ * Called immediately after a successful password check on login.
+ */
+export async function createSession(
+  db: any,
+  token: string,
+  ttlSeconds = 60 * 60 * 24 * 7 // 7 days
+): Promise<void> {
+  const expiresAt = Date.now() + ttlSeconds * 1000;
+  await db
+    .prepare('INSERT INTO sessions (token, expires_at) VALUES (?, ?)')
+    .bind(token, expiresAt)
+    .run();
+}
+
+/**
+ * Returns true if the token exists in the sessions table and has not expired.
+ * Fails closed (returns false) on any DB error.
+ */
+export async function isValidSession(db: any, token: string): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const row = await db
+      .prepare('SELECT expires_at FROM sessions WHERE token = ?')
+      .bind(token)
+      .first();
+    if (!row) return false;
+    return (row.expires_at as number) > Date.now();
+  } catch (e) {
+    console.error('isValidSession failed:', e);
+    return false; // fail closed
+  }
+}
+
+/**
+ * Deletes a session token. Called on logout.
+ */
+export async function deleteSession(db: any, token: string): Promise<void> {
+  if (!token) return;
+  await db.prepare('DELETE FROM sessions WHERE token = ?').bind(token).run();
+}
+
+/**
+ * Deletes all expired sessions. Run opportunistically (e.g., on login).
+ */
+export async function pruneExpiredSessions(db: any): Promise<void> {
+  await db
+    .prepare('DELETE FROM sessions WHERE expires_at <= ?')
+    .bind(Date.now())
+    .run();
 }

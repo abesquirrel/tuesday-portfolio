@@ -50,3 +50,14 @@ CREATE TABLE IF NOT EXISTS social_links (
 
 CREATE INDEX IF NOT EXISTS idx_photos_featured   ON photos (is_featured);
 CREATE INDEX IF NOT EXISTS idx_photos_sort_order ON photos (sort_order);
+
+-- ─── Sessions table ───────────────────────────────────────────────────────────
+-- Backs server-side session validation (isValidSession / createSession / deleteSession).
+-- Added via migration 002_add_sessions.sql.
+CREATE TABLE IF NOT EXISTS sessions (
+  token       TEXT     PRIMARY KEY,
+  expires_at  INTEGER  NOT NULL,
+  created_at  INTEGER  NOT NULL DEFAULT (unixepoch() * 1000)
+);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);

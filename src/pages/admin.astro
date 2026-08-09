@@ -3,7 +3,7 @@
 // ─── Server-side: auth guard + security ──────────────────────────────────
 export const prerender = false;
 
-import { getSettings } from '../lib/db';
+import { getSettings, setSettings, isValidSession, createSession, deleteSession, pruneExpiredSessions } from '../lib/db';
 import bcrypt from 'bcryptjs';
 import { CUSTOM_ERROR_THUMBNAIL } from '../utils/cloudinary';
 
@@ -31,41 +31,47 @@ if (!csrfToken) {
   });
 }
 
-// Session management
+// Session management — validate token against DB, not just cookie presence
 const sessionCookie = Astro.cookies.get('admin_session')?.value;
-const isAuthed = !!sessionCookie;
-
-// Initialize bcrypt
-
-// Get hashed password from env or DB
-let ADMIN_PASSWORD_HASH = env?.ADMIN_PASSWORD_HASH ?? import.meta.env.ADMIN_PASSWORD_HASH;
-if (!ADMIN_PASSWORD_HASH && db) {
+let isAuthed = false;
+if (db && sessionCookie) {
   try {
-    const settings = await getSettings(db);
-    ADMIN_PASSWORD_HASH = settings.ADMIN_PASSWORD_HASH;
+    isAuthed = await isValidSession(db, sessionCookie);
+  } catch (e) {
+    console.error('Session validation failed:', e);
+    isAuthed = false; // fail closed
+  }
+}
+
+// Fetch all DB settings once and reuse throughout the page
+let dbSettings: Record<string, string> = {};
+if (db) {
+  try {
+    dbSettings = await getSettings(db);
   } catch (e) {
     console.error('Failed to fetch settings:', e);
   }
 }
 
-// Migration: hash ADMIN_SECRET if it exists and no hash exists
-if (!ADMIN_PASSWORD_HASH && env?.ADMIN_SECRET) {
-  ADMIN_PASSWORD_HASH = await bcrypt.hash(env.ADMIN_SECRET, 10);
-  console.warn('⚠️ Created password hash from ADMIN_SECRET. Set ADMIN_PASSWORD_HASH in your environment variables.');
-}
+// Get hashed password (env takes priority over DB)
+let ADMIN_PASSWORD_HASH = env?.ADMIN_PASSWORD_HASH ?? import.meta.env.ADMIN_PASSWORD_HASH ?? dbSettings.ADMIN_PASSWORD_HASH;
 
-// Cloud name logic
-let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME
-              ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
-              ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined);
-if (!CLOUD_NAME && db) {
+// Migration: hash ADMIN_SECRET once and persist so this only ever runs once
+if (!ADMIN_PASSWORD_HASH && env?.ADMIN_SECRET && db) {
+  ADMIN_PASSWORD_HASH = await bcrypt.hash(env.ADMIN_SECRET, 10);
   try {
-    const settings = await getSettings(db);
-    CLOUD_NAME = settings.PUBLIC_CLOUDINARY_CLOUD_NAME;
+    await setSettings(db, { ADMIN_PASSWORD_HASH });
+    console.warn('⚠️ Hashed ADMIN_SECRET and persisted as ADMIN_PASSWORD_HASH in site_settings. You can remove ADMIN_SECRET now.');
   } catch (e) {
-    console.error('Failed to fetch settings from DB:', e);
+    console.error('Failed to persist ADMIN_PASSWORD_HASH:', e);
   }
 }
+
+// Cloud name
+let CLOUD_NAME = env?.PUBLIC_CLOUDINARY_CLOUD_NAME
+              ?? import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
+              ?? (typeof process !== 'undefined' ? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME : undefined)
+              ?? dbSettings.PUBLIC_CLOUDINARY_CLOUD_NAME;
 if (!CLOUD_NAME) CLOUD_NAME = '';
 else if (CLOUD_NAME === 'your_cloud_name_here') CLOUD_NAME = '';
 
@@ -88,16 +94,28 @@ if (Astro.request.method === 'POST') {
       } else if (ADMIN_PASSWORD_HASH) {
         const isValid = await bcrypt.compare(String(pw), ADMIN_PASSWORD_HASH);
         if (isValid) {
-          // Generate random session token (not the password)
           const sessionToken = generateSecureToken();
-          Astro.cookies.set('admin_session', sessionToken, {
-            httpOnly: true,
-            secure: Astro.url.protocol === 'https:',
-            sameSite: 'strict',
-            path: '/',
-            maxAge: 60 * 60 * 24 * 7, // 7 days
-          });
-          return Astro.redirect('/admin');
+          // Persist session in DB before setting cookie
+          if (db) {
+            try {
+              await createSession(db, sessionToken, 60 * 60 * 24 * 7);
+              // Opportunistically clean up old sessions
+              pruneExpiredSessions(db).catch(() => {});
+            } catch (e) {
+              console.error('Failed to create session:', e);
+              loginError = 'Session error. Please try again.';
+            }
+          }
+          if (!loginError) {
+            Astro.cookies.set('admin_session', sessionToken, {
+              httpOnly: true,
+              secure: Astro.url.protocol === 'https:',
+              sameSite: 'strict',
+              path: '/',
+              maxAge: 60 * 60 * 24 * 7, // 7 days
+            });
+            return Astro.redirect('/admin');
+          }
         } else {
           loginError = 'Incorrect password. Please try again.';
         }
@@ -108,6 +126,9 @@ if (Astro.request.method === 'POST') {
 
     // ── Logout ─────────────────────────────────────────────────────────
     if (action === 'logout') {
+      if (db && sessionCookie) {
+        deleteSession(db, sessionCookie).catch(() => {});
+      }
       Astro.cookies.delete('admin_session', { path: '/' });
       Astro.cookies.delete('csrf_token', { path: '/' });
       return Astro.redirect('/admin');
@@ -1515,6 +1536,18 @@ if (Astro.request.method === 'POST') {
 
   <script>
   // @ts-nocheck
+
+  // ─── HTML escape helper (prevents stored XSS via innerHTML) ───────────────
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   // ─── State ──────────────────────────────────────────────────────────────
   const API = '/api/admin';
   let state = { photos: [], albums: [], settings: {}, social: [] };
@@ -2002,7 +2035,11 @@ state.social   = social?.social     || social   || [];
       ? `<p style="color:var(--muted);margin-top:16px;grid-column:1/-1">No photos match the current filter.</p>`
       : list.map(p => {
           const album = state.albums.find(a => a.id === p.album_id);
-          const titleSafe = (p?.title || 'Untitled').replace(/"/g, '&quot;');
+          const titleSafe  = escapeHtml(p?.title || 'Untitled');
+          const locationSafe = escapeHtml(p?.location || '—');
+          const rollSafe   = escapeHtml(p?.roll || '—');
+          const mediumSafe = escapeHtml(p?.medium || 'film');
+          const albumTitleSafe = album ? escapeHtml(album.title) : '';
           const pIdJs = String(p?.id || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
           const pIdAttr = String(p?.id || '').replace(/[^a-zA-Z0-9_-]/g, '_');
           return `
@@ -2013,11 +2050,11 @@ state.social   = social?.social     || social   || [];
               <div class="card-thumb-ov"></div>
             </div>
             <div class="card-body">
-              <div class="card-title">${p.title || 'Untitled'}${p.is_featured?` <span class="badge badge-feat">featured</span>`:''}</div>
+              <div class="card-title">${titleSafe}${p.is_featured?` <span class="badge badge-feat">featured</span>`:''}</div>
               <div class="card-meta">
-                ${p.location || '—'} &nbsp;·&nbsp; ${p.roll || '—'}<br>
-                <span class="badge badge-${p.medium || 'film'}">${p.medium || 'film'}</span>
-                ${album?`<span class="badge">${album.title}</span>`:''}
+                ${locationSafe} &nbsp;·&nbsp; ${rollSafe}<br>
+                <span class="badge badge-${mediumSafe}">${mediumSafe}</span>
+                ${album?`<span class="badge">${albumTitleSafe}</span>`:''}
               </div>
               <div class="card-foot">
                 <button class="btn btn-xs" onclick="openModal('modal-photo','${pIdJs}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
@@ -2036,21 +2073,28 @@ state.social   = social?.social     || social   || [];
   }
 
   async function setFeatured(id) {
-    // Un-feature all, then feature this one
-    for (const p of state.photos) p.is_featured = 0;
     const target = state.photos.find(p => p.id === id);
     if (!target) return;
+    // Snapshot for rollback
+    const backup = state.photos.map(p => ({ ...p }));
+    // Optimistic update
+    for (const p of state.photos) p.is_featured = 0;
     target.is_featured = 1;
-    await apiFetch('photos/feature', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
-    });
-    toast(`"${target.title}" is now the featured photo.`);
     renderPhotos();
-    // Refresh albums table and dashboard if active
-    if (document.getElementById('panel-albums').classList.contains('active')) renderAlbums();
-    if (document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
+    try {
+      await apiFetch('photos/feature', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      toast(`"${escapeHtml(target.title)}" is now the featured photo.`);
+      if (document.getElementById('panel-albums').classList.contains('active')) renderAlbums();
+      if (document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
+    } catch (err) {
+      state.photos = backup;
+      renderPhotos();
+      toast(`Failed to set featured: ${err.message}`, true);
+    }
   }
 
   // ─── Albums ───────────────────────────────────────────────────────────
@@ -2059,16 +2103,19 @@ state.social   = social?.social     || social   || [];
       .sort((a,b) => a.sort_order - b.sort_order)
       .map(a => {
         const count = state.photos.filter(p => p.album_id === a.id).length;
+        const titleSafe = escapeHtml(a.title);
+        const descSafe  = escapeHtml(a.description || '—');
+        const idJs = String(a.id).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         return `
           <tr>
             <td class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></td>
-            <td style="color:var(--amber)">${a.title}</td>
-            <td style="color:var(--muted);font-size:11px;max-width:240px">${a.description||'—'}</td>
+            <td style="color:var(--amber)">${titleSafe}</td>
+            <td style="color:var(--muted);font-size:11px;max-width:240px">${descSafe}</td>
             <td><span class="badge">${count}</span></td>
             <td style="color:var(--muted)">${a.sort_order}</td>
             <td>
-              <button class="btn btn-xs" onclick="openModal('modal-album','${a.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
-              <button class="btn btn-danger btn-xs" onclick="deleteAlbum('${a.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+              <button class="btn btn-xs" onclick="openModal('modal-album','${idJs}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
+              <button class="btn btn-danger btn-xs" onclick="deleteAlbum('${idJs}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </td>
           </tr>`;
       }).join('');
@@ -2097,9 +2144,9 @@ state.social   = social?.social     || social   || [];
   }
 
   function updateGearPreview() {
-    const s = document.getElementById('about-shooting').value;
-    const d = document.getElementById('about-developing').value;
-    const a = document.getElementById('about-also').value;
+    const s = escapeHtml(document.getElementById('about-shooting').value);
+    const d = escapeHtml(document.getElementById('about-developing').value);
+    const a = escapeHtml(document.getElementById('about-also').value);
     document.getElementById('prev-gear').innerHTML =
       (s ? `<strong>Currently shooting:</strong> ${s}<br>` : '') +
       (d ? `<strong>Developing:</strong> ${d}<br>` : '') +
@@ -2151,12 +2198,14 @@ state.social   = social?.social     || social   || [];
     document.getElementById('social-table').innerHTML = state.social
       .sort((a,b) => a.sort_order - b.sort_order)
       .map(l => {
-        const iconSvg = l.icon && socialIcons[l.icon] ? socialIcons[l.icon] : '';
+        const iconSvg   = l.icon && socialIcons[l.icon] ? socialIcons[l.icon] : '';
+        const labelSafe = escapeHtml(l.label);
+        const urlSafe   = escapeHtml(l.url);
         return `
         <tr>
           <td class="drag-handle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></td>
-          <td style="color:var(--amber)">${iconSvg ? iconSvg + ' ' : ''}${l.label}</td>
-          <td style="font-size:11px"><a href="${l.url}" target="_blank" style="color:var(--muted);word-break:break-all">${l.url}</a></td>
+          <td style="color:var(--amber)">${iconSvg ? iconSvg + ' ' : ''}${labelSafe}</td>
+          <td style="font-size:11px"><a href="${urlSafe}" target="_blank" style="color:var(--muted);word-break:break-all">${urlSafe}</a></td>
           <td style="color:var(--muted)">${l.sort_order}</td>
           <td>
             <button class="btn btn-xs" onclick="openModal('modal-social',${l.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit</button>
@@ -2252,8 +2301,18 @@ state.social   = social?.social     || social   || [];
     const editId = document.getElementById('ph-id').value;
     const isFeatured = document.getElementById('ph-is_featured').checked ? 1 : 0;
 
+    // Generate slug and deduplicate locally before hitting the server
+    let slug = editId || title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    if (!editId) {
+      let suffix = 2;
+      const base = slug;
+      while (state.photos.some(p => p.id === slug)) {
+        slug = `${base}-${suffix++}`;
+      }
+    }
+
     const payload = {
-      id:          editId || title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
+      id:          slug,
       public_id:   pid,
       title,
       location:    document.getElementById('ph-location').value,
@@ -2270,40 +2329,57 @@ state.social   = social?.social     || social   || [];
       cloudinary_url: document.getElementById('ph-cloudinary_url').value || null,
     };
 
-    if (isFeatured) state.photos.forEach(p => p.is_featured = 0);
+    // Snapshot for rollback
+    const backup = state.photos.map(p => ({ ...p }));
 
+    // Optimistic update
+    if (isFeatured) state.photos.forEach(p => p.is_featured = 0);
     if (editId) {
       const idx = state.photos.findIndex(p => p.id === editId);
       if (idx >= 0) state.photos[idx] = { ...state.photos[idx], ...payload };
-      await apiFetch(`photos/${editId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
     } else {
       state.photos.push(payload);
-      await apiFetch('photos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
     }
 
-    closeModal('modal-photo');
-    renderPhotos();
-    // Refresh albums table to update photo counts
-    if (document.getElementById('panel-albums').classList.contains('active')) renderAlbums();
-    toast(editId ? 'Photo updated!' : 'Photo added!');
+    try {
+      if (editId) {
+        await apiFetch(`photos/${editId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        await apiFetch('photos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+      closeModal('modal-photo');
+      renderPhotos();
+      if (document.getElementById('panel-albums').classList.contains('active')) renderAlbums();
+      toast(editId ? 'Photo updated!' : 'Photo added!');
+    } catch (err) {
+      state.photos = backup;
+      renderPhotos();
+      toast(`Failed to save photo: ${err.message}`, true);
+    }
   }
 
   async function deletePhoto(id) {
     if (!confirm('Delete this photo record? (Cloudinary asset is NOT deleted)')) return;
+    const backup = state.photos.slice();
     state.photos = state.photos.filter(p => p.id !== id);
-    await apiFetch(`photos/${id}`, { method: 'DELETE' });
     renderPhotos();
-    // Refresh albums table to update photo counts
-    if (document.getElementById('panel-albums').classList.contains('active')) renderAlbums();
-    toast('Photo deleted.');
+    try {
+      await apiFetch(`photos/${id}`, { method: 'DELETE' });
+      if (document.getElementById('panel-albums').classList.contains('active')) renderAlbums();
+      toast('Photo deleted.');
+    } catch (err) {
+      state.photos = backup;
+      renderPhotos();
+      toast(`Failed to delete photo: ${err.message}`, true);
+    }
   }
 
   // ─── Save: Album ───────────────────────────────────────────────────────
@@ -2393,37 +2469,49 @@ state.social   = social?.social     || social   || [];
       );
     }
     
-    await Promise.all(savePromises);
-
-    closeModal('modal-album');
-    populateAlbumSelects();
-    renderAlbums();
-    // Refresh photos and upload queue to pick up new album
-    if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
-    if (document.getElementById('panel-upload').classList.contains('active')) renderUploadQueue();
-    // Also refresh the photo modal dropdown if it's open
-    if (document.getElementById('modal-photo').classList.contains('open')) {
+    try {
+      await Promise.all(savePromises);
+      closeModal('modal-album');
       populateAlbumSelects();
+      renderAlbums();
+      if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
+      if (document.getElementById('panel-upload').classList.contains('active')) renderUploadQueue();
+      if (document.getElementById('modal-photo').classList.contains('open')) populateAlbumSelects();
+      toast('Album saved!');
+    } catch (err) {
+      // Re-fetch albums from server to get back to a consistent state
+      try {
+        const res = await fetch(`${API}/albums`);
+        if (res.ok) state.albums = await res.json();
+      } catch (_) {}
+      populateAlbumSelects();
+      renderAlbums();
+      toast(`Failed to save album: ${err.message}`, true);
     }
-    toast('Album saved!');
   }
 
   async function deleteAlbum(id) {
     const count = state.photos.filter(p => p.album_id === id).length;
     if (!confirm(`Delete album? ${count > 0 ? count+' photos will become uncategorised.' : ''}`)) return;
+    const albumBackup = state.albums.slice();
+    const photosBackup = state.photos.map(p => ({ ...p }));
     state.albums = state.albums.filter(a => a.id !== id);
     state.photos.forEach(p => { if(p.album_id === id) p.album_id = null; });
-    await apiFetch(`albums/${id}`, { method: 'DELETE' });
     populateAlbumSelects();
     renderAlbums();
-    // Refresh photos and upload queue to reflect album deletion
-    if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
-    if (document.getElementById('panel-upload').classList.contains('active')) renderUploadQueue();
-    // Also refresh the photo modal dropdown if it's open
-    if (document.getElementById('modal-photo').classList.contains('open')) {
+    try {
+      await apiFetch(`albums/${id}`, { method: 'DELETE' });
+      if (document.getElementById('panel-photos').classList.contains('active')) renderPhotos();
+      if (document.getElementById('panel-upload').classList.contains('active')) renderUploadQueue();
+      if (document.getElementById('modal-photo').classList.contains('open')) populateAlbumSelects();
+      toast('Album deleted.');
+    } catch (err) {
+      state.albums = albumBackup;
+      state.photos = photosBackup;
       populateAlbumSelects();
+      renderAlbums();
+      toast(`Failed to delete album: ${err.message}`, true);
     }
-    toast('Album deleted.');
   }
 
   // ─── Save: Social ─────────────────────────────────────────────────────
@@ -2450,35 +2538,56 @@ state.social   = social?.social     || social   || [];
       sort_order: parseInt(document.getElementById('sl-sort_order').value) || 0
     };
 
+    const backup = state.social.map(l => ({ ...l }));
+
     if (editId) {
       const id = parseInt(editId);
       const idx = state.social.findIndex(l => l.id === id);
       if (idx >= 0) state.social[idx] = { ...state.social[idx], ...payload };
-      await apiFetch(`social/${editId}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-      });
     } else {
-      const res = await apiFetch('social', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-      });
-      state.social.push({ ...payload, id: res.id });
+      // Temp placeholder — server will assign the real id
+      state.social.push({ ...payload, id: -1 });
     }
-
-    closeModal('modal-social');
     renderSocial();
-    // Refresh dashboard stats if active
-    if (document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
-    toast('Social link saved!');
+
+    try {
+      if (editId) {
+        await apiFetch(`social/${editId}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+      } else {
+        const res = await apiFetch('social', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+        // Replace temp placeholder with real server-assigned id
+        const tmp = state.social.find(l => l.id === -1);
+        if (tmp) tmp.id = res.id;
+      }
+      closeModal('modal-social');
+      renderSocial();
+      if (document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
+      toast('Social link saved!');
+    } catch (err) {
+      state.social = backup;
+      renderSocial();
+      toast(`Failed to save link: ${err.message}`, true);
+    }
   }
 
   async function deleteSocial(id) {
     if (!confirm('Delete this social link?')) return;
+    const backup = state.social.slice();
     state.social = state.social.filter(l => l.id !== id);
-    await apiFetch(`social/${id}`, { method: 'DELETE' });
     renderSocial();
-    // Refresh dashboard stats if active
-    if (document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
-    toast('Link deleted.');
+    try {
+      await apiFetch(`social/${id}`, { method: 'DELETE' });
+      if (document.getElementById('panel-dashboard').classList.contains('active')) renderDashboard();
+      toast('Link deleted.');
+    } catch (err) {
+      state.social = backup;
+      renderSocial();
+      toast(`Failed to delete link: ${err.message}`, true);
+    }
   }
 
   // ─── Toast ────────────────────────────────────────────────────────────

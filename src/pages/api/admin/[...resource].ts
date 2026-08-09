@@ -269,6 +269,39 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
       }
     }
 
+    // --- journal ---
+    if (parts[0] === 'journal') {
+      if (!parts[1] && method === 'GET') {
+        const { getJournalEntries } = await import('../../../lib/db');
+        const entries = await getJournalEntries(db, false);
+        return json(entries);
+      }
+
+      if (!parts[1] && method === 'POST') {
+        const entry = await request.json() as any;
+        if (!entry.id || !entry.title) {
+          return json({ error: 'id and title are required' }, 400);
+        }
+        const { saveJournalEntry } = await import('../../../lib/db');
+        await saveJournalEntry(db, entry);
+        return json({ ok: true, id: entry.id }, 201);
+      }
+
+      if (parts[1] && method === 'PUT') {
+        const entry = await request.json() as any;
+        entry.id = parts[1];
+        const { saveJournalEntry } = await import('../../../lib/db');
+        await saveJournalEntry(db, entry);
+        return json({ ok: true });
+      }
+
+      if (parts[1] && method === 'DELETE') {
+        const { deleteJournalEntry } = await import('../../../lib/db');
+        await deleteJournalEntry(db, parts[1]);
+        return json({ ok: true });
+      }
+    }
+
     return json({ error: 'Not found' }, 404);
   } catch (e: any) {
     console.error(`API error on ${request.method} ${params.resource}:`, e);

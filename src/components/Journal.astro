@@ -1,0 +1,165 @@
+---
+import type { JournalEntry } from '../types/photo';
+import { cloudinaryUrl } from '../utils/cloudinary';
+
+interface Props {
+  entries: JournalEntry[];
+  settings: Record<string, string>;
+}
+
+const { entries = [], settings } = Astro.props;
+
+const title    = settings.journal_title || 'Field Journal';
+const subtitle = settings.journal_subtitle || 'Notes, technical logs, and thoughts on film photography.';
+const cloudName = settings.PUBLIC_CLOUDINARY_CLOUD_NAME || '';
+
+const publishedEntries = entries.filter((e) => e.status !== 'draft');
+---
+
+<section id="journal">
+  <div class="container">
+    <div class="row justify-content-center mb-5 reveal">
+      <div class="col-lg-8 text-center">
+        <p class="section-eyebrow">Field Journal</p>
+        <h2 class="section-title mb-3" style="font-size:clamp(1.6rem,3vw,2.2rem);">
+          {title}
+        </h2>
+        {subtitle && <p class="journal-subtitle">{subtitle}</p>}
+      </div>
+    </div>
+
+    {publishedEntries.length > 0 ? (
+      <div class="row g-4 justify-content-center">
+        {publishedEntries.map((entry) => {
+          const coverUrl = entry.cover_public_id
+            ? cloudinaryUrl(entry.cover_public_id, 'f_auto,q_auto,w_600,h_340,c_fill,g_auto', cloudName)
+            : null;
+
+          return (
+            <div class="col-md-6 col-lg-4 reveal">
+              <article class="journal-card">
+                {coverUrl && (
+                  <div class="journal-cover-wrap">
+                    <img src={coverUrl} alt={entry.title} class="journal-cover-img" loading="lazy" />
+                  </div>
+                )}
+                <div class="journal-card-body">
+                  <div class="journal-meta">
+                    {entry.shoot_date && <span class="journal-date">{entry.shoot_date}</span>}
+                    {entry.shoot_date && entry.location && <span class="journal-sep">•</span>}
+                    {entry.location && <span class="journal-location">{entry.location}</span>}
+                  </div>
+                  <h3 class="journal-entry-title">{entry.title}</h3>
+                  <p class="journal-entry-text">{entry.body}</p>
+                </div>
+              </article>
+            </div>
+          );
+        })}
+      </div>
+    ) : (
+      <div class="row justify-content-center">
+        <div class="col-lg-6 text-center reveal">
+          <p class="journal-placeholder">No journal entries published yet.</p>
+        </div>
+      </div>
+    )}
+  </div>
+</section>
+
+<style lang="scss">
+  #journal {
+    background-color: #1a1916;
+    padding: 5rem 0;
+    border-top: 1px solid #2c2b28;
+    border-bottom: 1px solid #2c2b28;
+  }
+
+  .journal-subtitle {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: clamp(0.9rem, 2vw, 1.05rem);
+    color: rgba(200, 196, 188, 0.7);
+    line-height: 1.7;
+    margin: 0 auto;
+  }
+
+  .journal-card {
+    background: #0e0d0b;
+    border: 1px solid #2c2b28;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: border-color 0.3s ease, transform 0.3s ease;
+
+    &:hover {
+      border-color: rgba(200, 169, 110, 0.5);
+      transform: translateY(-3px);
+    }
+  }
+
+  .journal-cover-wrap {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #1a1916;
+  }
+
+  .journal-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+
+    .journal-card:hover & {
+      transform: scale(1.03);
+    }
+  }
+
+  .journal-card-body {
+    padding: 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .journal-meta {
+    font-family: 'Courier New', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #c8a96e;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .journal-sep {
+    color: #4a4742;
+  }
+
+  .journal-entry-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #c8c4bc;
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+  }
+
+  .journal-entry-text {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 0.85rem;
+    color: rgba(200, 196, 188, 0.75);
+    line-height: 1.8;
+    margin-bottom: 0;
+    white-space: pre-line;
+  }
+
+  .journal-placeholder {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: #4a4742;
+    letter-spacing: 0.1em;
+  }
+</style>

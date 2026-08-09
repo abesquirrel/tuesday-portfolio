@@ -1,0 +1,160 @@
+---
+interface Props {
+  settings: Record<string, string>;
+}
+
+const { settings } = Astro.props;
+
+const title       = settings.film_title       || 'On The Roll Right Now';
+const simName     = settings.film_name        || '';
+const description = settings.film_description || '';
+const ratingRaw   = parseInt(settings.film_rating || '0', 10);
+const rating      = Math.max(0, Math.min(5, ratingRaw));
+---
+
+<section id="film">
+  <div class="container">
+    <div class="row justify-content-center reveal">
+      <div class="col-lg-8 text-center">
+        <p class="section-eyebrow">Currently In Use</p>
+        <h2 class="section-title mb-4" style="font-size:clamp(1.6rem,3vw,2.2rem);">
+          {title}
+        </h2>
+      </div>
+    </div>
+
+    {simName ? (
+      <div class="row justify-content-center">
+        <div class="col-lg-9 reveal">
+          <div class="film-frame">
+            <div class="film-frame-inner">
+              <p class="film-name">{simName}</p>
+
+              {rating > 0 && (
+                <div class="film-rating" aria-label={`Grain feel rating: ${rating} of 5`}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span class={`film-dot ${i < rating ? 'film-dot--on' : ''}`}></span>
+                  ))}
+                  <span class="film-rating-label">Grain feel</span>
+                </div>
+              )}
+
+              {description && (
+                <p class="film-description">{description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div class="row justify-content-center">
+        <div class="col-lg-6 text-center reveal">
+          <p class="film-placeholder">No film simulation set yet — add one from the admin panel.</p>
+        </div>
+      </div>
+    )}
+  </div>
+</section>
+
+<style lang="scss">
+  #film {
+    background-color: #1a1916;
+    padding: 5rem 0;
+    border-top: 1px solid #2c2b28;
+    border-bottom: 1px solid #2c2b28;
+  }
+
+  .film-frame {
+    border: 1px solid rgba(200, 169, 110, 0.2);
+    padding: 3rem 3.5rem;
+    position: relative;
+    text-align: center;
+
+    // corner sprocket marks
+    &::before, &::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-color: rgba(200, 169, 110, 0.35);
+      border-style: solid;
+    }
+    &::before {
+      top: -1px;
+      left: -1px;
+      border-width: 2px 0 0 2px;
+    }
+    &::after {
+      bottom: -1px;
+      right: -1px;
+      border-width: 0 2px 2px 0;
+    }
+
+    @media (max-width: 600px) {
+      padding: 2rem 1.5rem;
+    }
+  }
+
+  .film-frame-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .film-name {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-style: italic;
+    color: #c8c4bc;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    margin: 0;
+  }
+
+  .film-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .film-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2c2b28;
+    border: 1px solid rgba(200, 169, 110, 0.3);
+    transition: background 0.2s;
+
+    &--on {
+      background: #c8a96e;
+      border-color: #c8a96e;
+    }
+  }
+
+  .film-rating-label {
+    font-family: 'Courier New', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #5a5750;
+    margin-left: 6px;
+  }
+
+  .film-description {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 0.95rem;
+    color: rgba(200, 196, 188, 0.7);
+    line-height: 1.8;
+    max-width: 52ch;
+    margin: 0 auto;
+  }
+
+  .film-placeholder {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: #4a4742;
+    letter-spacing: 0.1em;
+  }
+</style>

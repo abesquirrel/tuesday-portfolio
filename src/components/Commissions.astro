@@ -1,0 +1,149 @@
+---
+interface Props {
+  settings: Record<string, string>;
+}
+
+const { settings } = Astro.props;
+
+const title    = settings.commissions_title || 'Client Work & Commissions';
+const intro    = settings.commissions_intro || 'Available for editorial, documentary, portrait, and event photography. All work is shot on film and digital depending on project needs.';
+const ctaLabel = settings.commissions_cta_label || 'Get In Touch';
+const ctaEmail = settings.commissions_cta_email || '';
+
+interface ServiceCard {
+  title: string;
+  body: string;
+  icon: string;
+}
+
+const cards: ServiceCard[] = [
+  {
+    title: settings.commissions_card1_title || 'Documentary & Editorial',
+    body:  settings.commissions_card1_body  || 'Reportage and long-form documentary projects for magazines, books, and online publications. Available for assignments requiring a film aesthetic.',
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`,
+  },
+  {
+    title: settings.commissions_card2_title || 'Portrait & People',
+    body:  settings.commissions_card2_body  || 'Environmental portraits and character studies. Film preferred. Sessions can take place on location or in available light. Limited slots per season.',
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
+  },
+  {
+    title: settings.commissions_card3_title || 'Brand & Product',
+    body:  settings.commissions_card3_body  || 'Still-life and atmospheric brand work for independent makers, restaurants, and small businesses. Film grain and analogue textures included at no extra charge.',
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`,
+  },
+];
+---
+
+<section id="commissions">
+  <div class="container">
+    <div class="row justify-content-center mb-5 reveal">
+      <div class="col-lg-8 text-center">
+        <p class="section-eyebrow">For Hire</p>
+        <h2 class="section-title mb-3" style="font-size:clamp(1.6rem,3vw,2.2rem);">
+          {title}
+        </h2>
+        {intro && <p class="commissions-intro">{intro}</p>}
+      </div>
+    </div>
+
+    <div class="row g-4 justify-content-center mb-5">
+      {cards.map((card) => (
+        <div class="col-md-4 reveal">
+          <div class="commissions-card">
+            <div class="commissions-card-icon" set:html={card.icon} />
+            <h3 class="commissions-card-title">{card.title}</h3>
+            <p class="commissions-card-text">{card.body}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="row justify-content-center reveal">
+      <div class="col-auto text-center">
+        {ctaEmail ? (
+          <a
+            href={`mailto:${ctaEmail}?subject=Commission%20Enquiry%20—%20Tuesday%20Portfolio`}
+            class="commissions-btn"
+          >
+            {ctaLabel} →
+          </a>
+        ) : (
+          <a href="#contact" class="commissions-btn">
+            {ctaLabel} →
+          </a>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  #commissions {
+    background-color: #0e0d0b;
+    padding: 5rem 0;
+    border-top: 1px solid #2c2b28;
+    border-bottom: 1px solid #2c2b28;
+  }
+
+  .commissions-intro {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: clamp(0.9rem, 2vw, 1.05rem);
+    color: rgba(200, 196, 188, 0.7);
+    line-height: 1.7;
+    margin: 0 auto;
+  }
+
+  .commissions-card {
+    background: #1a1916;
+    border: 1px solid #2c2b28;
+    padding: 2rem 1.5rem;
+    height: 100%;
+    transition: border-color 0.3s ease, transform 0.3s ease;
+
+    &:hover {
+      border-color: rgba(200, 169, 110, 0.5);
+      transform: translateY(-3px);
+    }
+  }
+
+  .commissions-card-icon {
+    color: #c8a96e;
+    margin-bottom: 1.25rem;
+  }
+
+  .commissions-card-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.15rem;
+    font-style: italic;
+    color: #c8c4bc;
+    margin-bottom: 0.75rem;
+  }
+
+  .commissions-card-text {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: #7a7671;
+    line-height: 1.7;
+    margin-bottom: 0;
+  }
+
+  .commissions-btn {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #c8a96e;
+    border: 1px solid rgba(200, 169, 110, 0.4);
+    padding: 0.65rem 1.75rem;
+    text-decoration: none;
+    transition: background 0.25s, color 0.25s, border-color 0.25s;
+
+    &:hover {
+      background: #c8a96e;
+      color: #0e0d0b;
+      border-color: #c8a96e;
+    }
+  }
+</style>

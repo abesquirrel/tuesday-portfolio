@@ -39,3 +39,16 @@ export interface Album {
   description: string;
   sort_order:  number;
 }
+
+export interface JournalEntry {
+  id:              string;
+  title:           string;
+  body:            string;
+  location:        string;
+  shoot_date:      string;
+  cover_public_id: string;
+  status:          'draft' | 'published';
+  sort_order:      number;
+  created_at?:     number;
+}
+

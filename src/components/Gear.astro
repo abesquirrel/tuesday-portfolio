@@ -1,0 +1,157 @@
+---
+interface Props {
+  settings: Record<string, string>;
+}
+
+const { settings } = Astro.props;
+
+const title    = settings.gear_title    || 'Gear & Darkroom Notes';
+const kitRaw   = settings.gear_kit      || '';
+const darkroom = settings.gear_darkroom || '';
+
+// Each non-empty line in gear_kit becomes one kit item
+const kitItems = kitRaw
+  .split('\n')
+  .map((l) => l.trim())
+  .filter(Boolean);
+---
+
+<section id="gear">
+  <div class="container">
+    <div class="row justify-content-center mb-5 reveal">
+      <div class="col-lg-8 text-center">
+        <p class="section-eyebrow">What I Carry</p>
+        <h2 class="section-title mb-3" style="font-size:clamp(1.6rem,3vw,2.2rem);">
+          {title}
+        </h2>
+      </div>
+    </div>
+
+    <div class="row g-5 justify-content-center">
+      {/* Camera Bag column */}
+      {kitItems.length > 0 && (
+        <div class="col-lg-5 reveal">
+          <div class="gear-card">
+            <div class="gear-card-header">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+              </svg>
+              <span>Camera Bag</span>
+            </div>
+            <ul class="gear-list">
+              {kitItems.map((item) => (
+                <li class="gear-item">{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Darkroom Notes column */}
+      {darkroom && (
+        <div class="col-lg-5 reveal">
+          <div class="gear-card">
+            <div class="gear-card-header">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"></path>
+              </svg>
+              <span>Darkroom Notes</span>
+            </div>
+            <p class="gear-notes">{darkroom}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Fallback if nothing is set */}
+      {kitItems.length === 0 && !darkroom && (
+        <div class="col-lg-8 text-center reveal">
+          <p class="gear-placeholder">Gear notes will appear here once added from the admin panel.</p>
+        </div>
+      )}
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  #gear {
+    background-color: #0e0d0b;
+    padding: 5rem 0;
+    border-top: 1px solid #2c2b28;
+    border-bottom: 1px solid #2c2b28;
+  }
+
+  .gear-card {
+    background: #1a1916;
+    border: 1px solid #2c2b28;
+    padding: 2rem 1.75rem;
+    height: 100%;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(to bottom, #c8a96e 0%, transparent 100%);
+    }
+  }
+
+  .gear-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #c8a96e;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed rgba(200, 169, 110, 0.25);
+  }
+
+  .gear-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .gear-item {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: #c8c4bc;
+    padding-left: 1.25rem;
+    position: relative;
+    line-height: 1.5;
+
+    &::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: #c8a96e;
+      font-size: 0.7rem;
+    }
+  }
+
+  .gear-notes {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 0.88rem;
+    color: rgba(200, 196, 188, 0.75);
+    line-height: 1.85;
+    white-space: pre-line;
+    margin: 0;
+  }
+
+  .gear-placeholder {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: #4a4742;
+    letter-spacing: 0.1em;
+  }
+</style>

@@ -1133,6 +1133,9 @@ if (Astro.request.method === 'POST') {
           <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg></span>
           <span>Upload Photos<span class="upload-count-badge" id="upload-badge">0</span></span>
         </div>
+        <div class="sb-item" data-panel="journal" onclick="nav(this)">
+          <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span><span>Journal</span>
+        </div>
 
         <div class="sb-section">Site</div>
         <div class="sb-item" data-panel="about" onclick="nav(this)">
@@ -1344,6 +1347,29 @@ if (Astro.request.method === 'POST') {
           </div>
         </div>
 
+        <!-- ── JOURNAL ── -->
+        <div id="panel-journal" class="panel">
+          <div class="sec-hdr">
+            <div class="sec-sub">Field notes, shoot logs, and blog entries</div>
+            <button class="btn btn-primary" onclick="openModal('modal-journal', null)">+ New Entry</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Date</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                  <th>Order</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="journal-table"></tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- ── ABOUT ── -->
         <div id="panel-about" class="panel">
           <div class="sec-hdr">
@@ -1378,11 +1404,51 @@ if (Astro.request.method === 'POST') {
               </label>
               <label class="section-toggle-row">
                 <span class="section-toggle-label">
+                  <span class="section-toggle-name">Gear &amp; Darkroom Notes</span>
+                  <span class="section-toggle-desc">Camera bag list and developer/darkroom notes</span>
+                </span>
+                <span class="toggle-switch">
+                  <input type="checkbox" id="section-gear" class="toggle-input">
+                  <span class="toggle-track"></span>
+                </span>
+              </label>
+              <label class="section-toggle-row">
+                <span class="section-toggle-label">
+                  <span class="section-toggle-name">Film Simulation / Currently Shooting</span>
+                  <span class="section-toggle-desc">Featured film stock or Fujifilm simulation highlight</span>
+                </span>
+                <span class="toggle-switch">
+                  <input type="checkbox" id="section-film" class="toggle-input">
+                  <span class="toggle-track"></span>
+                </span>
+              </label>
+              <label class="section-toggle-row">
+                <span class="section-toggle-label">
                   <span class="section-toggle-name">Prints &amp; Licensing</span>
                   <span class="section-toggle-desc">Archival print inquiries and licensing section</span>
                 </span>
                 <span class="toggle-switch">
                   <input type="checkbox" id="section-prints" class="toggle-input">
+                  <span class="toggle-track"></span>
+                </span>
+              </label>
+              <label class="section-toggle-row">
+                <span class="section-toggle-label">
+                  <span class="section-toggle-name">Client Work &amp; Commissions</span>
+                  <span class="section-toggle-desc">Services offered, package cards and commission inquiry CTA</span>
+                </span>
+                <span class="toggle-switch">
+                  <input type="checkbox" id="section-commissions" class="toggle-input">
+                  <span class="toggle-track"></span>
+                </span>
+              </label>
+              <label class="section-toggle-row">
+                <span class="section-toggle-label">
+                  <span class="section-toggle-name">Field Journal</span>
+                  <span class="section-toggle-desc">Blog posts, field notes and shoot logs</span>
+                </span>
+                <span class="toggle-switch">
+                  <input type="checkbox" id="section-journal" class="toggle-input">
                   <span class="toggle-track"></span>
                 </span>
               </label>
@@ -1467,6 +1533,107 @@ if (Astro.request.method === 'POST') {
             <div class="fgroup">
               <label class="flabel">Prints Policy / Notice Text</label>
               <textarea class="ftextarea" id="conf-prints-body" rows="3" placeholder="Selected photographs from the portfolio are available in small limited editions..."></textarea>
+            </div>
+          </div>
+
+          <!-- ── Gear & Darkroom Notes Section ────────────────────── -->
+          <div class="section-header">
+            <div class="section-header-title">📷 Gear &amp; Darkroom Notes Section</div>
+            <div class="fgroup">
+              <label class="flabel">Section Title</label>
+              <input class="finput" id="conf-gear-title" type="text" placeholder="Gear &amp; Darkroom Notes">
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Camera Bag &amp; Kit (1 item per line)</label>
+              <textarea class="ftextarea" id="conf-gear-kit" rows="5" placeholder="Nikkormat FT2 (1975)&#10;Nikkor 50mm f/1.4 AI&#10;Fujifilm X-Pro3&#10;Kodak Tri-X 400"></textarea>
+              <div class="hint">Each line will be rendered as a bulleted kit item.</div>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Darkroom / Processing Notes</label>
+              <textarea class="ftextarea" id="conf-gear-darkroom" rows="4" placeholder="Standard developer recipe: D-76 1:1 at 20°C for 9.5 mins..."></textarea>
+            </div>
+          </div>
+
+          <!-- ── Film Simulation Section ───────────────────────────── -->
+          <div class="section-header">
+            <div class="section-header-title">🎞️ Film Simulation / Current Stock Section</div>
+            <div class="frow">
+              <div class="fgroup">
+                <label class="flabel">Section Title</label>
+                <input class="finput" id="conf-film-title" type="text" placeholder="On The Roll Right Now">
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Simulation / Stock Name</label>
+                <input class="finput" id="conf-film-name" type="text" placeholder="Classic Chrome / Kodak Color 200">
+              </div>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Grain Feel Rating (0 to 5)</label>
+              <input class="finput" id="conf-film-rating" type="number" min="0" max="5" placeholder="3">
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Simulation / Film Stock Description</label>
+              <textarea class="ftextarea" id="conf-film-description" rows="3" placeholder="Soft contrast with muted greens and rich shadows..."></textarea>
+            </div>
+          </div>
+
+          <!-- ── Commissions Section ──────────────────────────────── -->
+          <div class="section-header">
+            <div class="section-header-title">💼 Client Work &amp; Commissions Section</div>
+            <div class="frow">
+              <div class="fgroup">
+                <label class="flabel">Section Title</label>
+                <input class="finput" id="conf-commissions-title" type="text" placeholder="Client Work &amp; Commissions">
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Inquiry Email</label>
+                <input class="finput" id="conf-commissions-email" type="email" placeholder="you@example.com">
+              </div>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Introductory Paragraph</label>
+              <textarea class="ftextarea" id="conf-commissions-intro" rows="2" placeholder="Available for editorial, documentary, portrait, and event photography..."></textarea>
+            </div>
+
+            <!-- Card 1 -->
+            <div class="frow" style="margin-top: 10px;">
+              <div class="fgroup">
+                <label class="flabel">Card 1 Title</label>
+                <input class="finput" id="conf-commissions-c1-title" type="text" placeholder="Documentary &amp; Editorial">
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Card 1 Description</label>
+                <input class="finput" id="conf-commissions-c1-body" type="text" placeholder="Reportage and long-form documentary projects...">
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="frow">
+              <div class="fgroup">
+                <label class="flabel">Card 2 Title</label>
+                <input class="finput" id="conf-commissions-c2-title" type="text" placeholder="Portrait &amp; People">
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Card 2 Description</label>
+                <input class="finput" id="conf-commissions-c2-body" type="text" placeholder="Environmental portraits and character studies...">
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="frow">
+              <div class="fgroup">
+                <label class="flabel">Card 3 Title</label>
+                <input class="finput" id="conf-commissions-c3-title" type="text" placeholder="Brand &amp; Product">
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Card 3 Description</label>
+                <input class="finput" id="conf-commissions-c3-body" type="text" placeholder="Still-life and atmospheric brand work...">
+              </div>
+            </div>
+
+            <div class="fgroup">
+              <label class="flabel">CTA Button Label</label>
+              <input class="finput" id="conf-commissions-cta" type="text" placeholder="Get In Touch">
             </div>
           </div>
 
@@ -1642,7 +1809,59 @@ if (Astro.request.method === 'POST') {
     </div>
   </div>
 
-  <!-- Social modal -->
+  <!-- Journal modal -->
+  <div class="modal-bg" id="modal-journal">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title" id="modal-journal-ttl">New Journal Entry</div>
+        <button class="modal-x" onclick="closeModal('modal-journal')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="jn-id" />
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Title *</label>
+            <input class="finput" id="jn-title" type="text" placeholder="Shooting Expired Tri-X 400 in Tokyo">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Status</label>
+            <select class="fselect" id="jn-status">
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Shoot Date / Display Date</label>
+            <input class="finput" id="jn-shoot_date" type="text" placeholder="March 2024">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Location</label>
+            <input class="finput" id="jn-location" type="text" placeholder="Shinjuku, Tokyo">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fgroup">
+            <label class="flabel">Cover Image (Cloudinary public_id)</label>
+            <input class="finput" id="jn-cover_public_id" type="text" placeholder="journal/tokyo-night">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Sort Order</label>
+            <input class="finput" id="jn-sort_order" type="number" value="0" style="width:100px">
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Content / Body *</label>
+          <textarea class="ftextarea" id="jn-body" rows="6" placeholder="Write your field notes, developer times, or entry here..."></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('modal-journal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveJournalEntry()">Save Entry</button>
+      </div>
+    </div>
+  </div>
   <div class="modal-bg" id="modal-social">
     <div class="modal">
       <div class="modal-head">
@@ -1670,9 +1889,6 @@ if (Astro.request.method === 'POST') {
               <option value="github">GitHub</option>
               <option value="website">Website</option>
             </select>
-            <div class="hint">Select an icon to display with your link</div>
-          </div>
-          <div class="fgroup">
             <label class="flabel">Sort Order</label>
             <input class="finput" id="sl-sort_order" type="number" value="0" style="width:100px">
           </div>
@@ -1709,14 +1925,15 @@ if (Astro.request.method === 'POST') {
 
   // ─── State ──────────────────────────────────────────────────────────────
   const API = '/api/admin';
-  let state = { photos: [], albums: [], settings: {}, social: [] };
+  let state = { photos: [], albums: [], settings: {}, social: [], journal: [] };
 
   // ─── Bootstrap: load all data ─────────────────────────────────────────
   async function boot() {
     try {
-      const [photosRes, albumsRes, settingsRes, socialRes] = await Promise.all([
+      const [photosRes, albumsRes, settingsRes, socialRes, journalRes] = await Promise.all([
         fetch(`${API}/photos`), fetch(`${API}/albums`),
-        fetch(`${API}/settings`), fetch(`${API}/social`)
+        fetch(`${API}/settings`), fetch(`${API}/social`),
+        fetch(`${API}/journal`)
       ]);
 
       // Check for auth or DB errors on first response
@@ -1738,11 +1955,13 @@ if (Astro.request.method === 'POST') {
       const albums   = await albumsRes.json().catch(() => []);
       const settings = await settingsRes.json().catch(() => ({}));
       const social   = await socialRes.json().catch(() => []);
+      const journal  = await journalRes.json().catch(() => []);
 
-state.photos   = photos?.photos     || photos   || [];
-state.albums   = albums?.albums     || albums   || [];
-state.settings = settings?.settings || settings || {};
-state.social   = social?.social     || social   || [];
+      state.photos   = photos?.photos     || photos   || [];
+      state.albums   = albums?.albums     || albums   || [];
+      state.settings = settings?.settings || settings || {};
+      state.social   = social?.social     || social   || [];
+      state.journal  = journal?.journal    || journal  || [];
     } catch(e) {
       showBootError('Connection failed', 'Could not reach the API. Are you running the dev server correctly?', 'dev');
       console.error(e);
@@ -1784,6 +2003,7 @@ state.social   = social?.social     || social   || [];
   // ─── Nav ─────────────────────────────────────────────────────────────
   const panelTitles = {
     dashboard: 'Overview', photos: 'Photos', albums: 'Albums',
+    upload: 'Upload Photos', journal: 'Field Journal',
     about: 'About / Bio', social: 'Social Links'
   };
   function nav(el) {
@@ -1792,7 +2012,7 @@ state.social   = social?.social     || social   || [];
     document.querySelectorAll('.sb-item').forEach(x => x.classList.remove('active'));
     document.getElementById('panel-'+p).classList.add('active');
     el.classList.add('active');
-    document.getElementById('topbar-title').textContent = panelTitles[p];
+    document.getElementById('topbar-title').textContent = panelTitles[p] || 'Admin';
 
     // Auto-close sidebar on mobile after selection
     if (window.innerWidth <= 768) {
@@ -1804,6 +2024,7 @@ state.social   = social?.social     || social   || [];
       case 'photos':    renderPhotos(); populateAlbumSelects(); break;
       case 'albums':    renderAlbums(); break;
       case 'upload':    populateAlbumSelects(); break;
+      case 'journal':   renderJournal(); break;
       case 'about':     renderAbout(); break;
       case 'social':    renderSocial(); break;
     }
@@ -1850,10 +2071,11 @@ state.social   = social?.social     || social   || [];
     document.getElementById('s-albums').textContent   = state.albums.length;
     document.getElementById('s-social').textContent   = state.social.length;
     document.getElementById('dash-rows').innerHTML = [
-      ['Photos',       state.photos.length,   'photos'],
-      ['Albums',       state.albums.length,   'albums'],
-      ['About / Bio',  '4 settings',          'about'],
-      ['Social Links', state.social.length,   'social'],
+      ['Photos',        state.photos.length,   'photos'],
+      ['Albums',        state.albums.length,   'albums'],
+      ['Field Journal', state.journal.length,  'journal'],
+      ['About / Bio',   'Settings & Toggles',  'about'],
+      ['Social Links',  state.social.length,   'social'],
     ].map(([label, count, panel]) => `
       <tr>
         <td style="color:var(--amber)">${label}</td>
@@ -2280,7 +2502,7 @@ state.social   = social?.social     || social   || [];
       }).join('');
   }
 
-  // ─── About ────────────────────────────────────────────────────────────
+  // ─── About & Settings ──────────────────────────────────────────────────
   function renderAbout() {
     const s = state.settings;
     const bio = s.about_bio || '';
@@ -2296,20 +2518,51 @@ state.social   = social?.social     || social   || [];
     document.getElementById('about-also').value       = also;
     document.getElementById('about-hero-image').value = heroImage;
     document.getElementById('about-image').value      = aboutImage;
+
+    // Prints & Licensing
     document.getElementById('conf-prints-title').value    = s.prints_title || '';
     document.getElementById('conf-prints-subtitle').value = s.prints_subtitle || '';
     document.getElementById('conf-prints-body').value     = s.prints_body || '';
     document.getElementById('conf-prints-email').value    = s.prints_email || '';
+
+    // Gear & Darkroom Notes
+    if (document.getElementById('conf-gear-title')) document.getElementById('conf-gear-title').value = s.gear_title || '';
+    if (document.getElementById('conf-gear-kit')) document.getElementById('conf-gear-kit').value = s.gear_kit || '';
+    if (document.getElementById('conf-gear-darkroom')) document.getElementById('conf-gear-darkroom').value = s.gear_darkroom || '';
+
+    // Film Simulation
+    if (document.getElementById('conf-film-title')) document.getElementById('conf-film-title').value = s.film_title || '';
+    if (document.getElementById('conf-film-name')) document.getElementById('conf-film-name').value = s.film_name || '';
+    if (document.getElementById('conf-film-rating')) document.getElementById('conf-film-rating').value = s.film_rating || '3';
+    if (document.getElementById('conf-film-description')) document.getElementById('conf-film-description').value = s.film_description || '';
+
+    // Commissions
+    if (document.getElementById('conf-commissions-title')) document.getElementById('conf-commissions-title').value = s.commissions_title || '';
+    if (document.getElementById('conf-commissions-email')) document.getElementById('conf-commissions-email').value = s.commissions_email || s.commissions_cta_email || '';
+    if (document.getElementById('conf-commissions-intro')) document.getElementById('conf-commissions-intro').value = s.commissions_intro || '';
+    if (document.getElementById('conf-commissions-c1-title')) document.getElementById('conf-commissions-c1-title').value = s.commissions_card1_title || '';
+    if (document.getElementById('conf-commissions-c1-body')) document.getElementById('conf-commissions-c1-body').value = s.commissions_card1_body || '';
+    if (document.getElementById('conf-commissions-c2-title')) document.getElementById('conf-commissions-c2-title').value = s.commissions_card2_title || '';
+    if (document.getElementById('conf-commissions-c2-body')) document.getElementById('conf-commissions-c2-body').value = s.commissions_card2_body || '';
+    if (document.getElementById('conf-commissions-c3-title')) document.getElementById('conf-commissions-c3-title').value = s.commissions_card3_title || '';
+    if (document.getElementById('conf-commissions-c3-body')) document.getElementById('conf-commissions-c3-body').value = s.commissions_card3_body || '';
+    if (document.getElementById('conf-commissions-cta')) document.getElementById('conf-commissions-cta').value = s.commissions_cta_label || '';
+
+    // Site configuration
     document.getElementById('conf-cloud-name').value  = s.PUBLIC_CLOUDINARY_CLOUD_NAME || '';
     document.getElementById('conf-admin-name').value  = s.SITE_TITLE || '';
     document.getElementById('prev-bio').textContent   = bio;
 
     // Section visibility — defaults to ON if never set
-    document.getElementById('section-featured').checked = s.section_featured !== 'false';
-    document.getElementById('section-gallery').checked  = s.section_gallery  !== 'false';
-    document.getElementById('section-prints').checked   = s.section_prints   !== 'false';
-    document.getElementById('section-about').checked    = s.section_about    !== 'false';
-    document.getElementById('section-contact').checked  = s.section_contact  !== 'false';
+    document.getElementById('section-featured').checked    = s.section_featured !== 'false';
+    document.getElementById('section-gallery').checked     = s.section_gallery  !== 'false';
+    if (document.getElementById('section-gear')) document.getElementById('section-gear').checked = s.section_gear !== 'false';
+    if (document.getElementById('section-film')) document.getElementById('section-film').checked = s.section_film !== 'false';
+    document.getElementById('section-prints').checked      = s.section_prints   !== 'false';
+    if (document.getElementById('section-commissions')) document.getElementById('section-commissions').checked = s.section_commissions !== 'false';
+    if (document.getElementById('section-journal')) document.getElementById('section-journal').checked = s.section_journal !== 'false';
+    document.getElementById('section-about').checked       = s.section_about    !== 'false';
+    document.getElementById('section-contact').checked     = s.section_contact  !== 'false';
 
     updateGearPreview();
   }
@@ -2332,18 +2585,51 @@ state.social   = social?.social     || social   || [];
       about_also_shooting:       document.getElementById('about-also').value,
       hero_image_id:             document.getElementById('about-hero-image').value,
       about_image_id:            document.getElementById('about-image').value,
+
+      // Prints
       prints_title:              document.getElementById('conf-prints-title').value.trim(),
       prints_subtitle:           document.getElementById('conf-prints-subtitle').value.trim(),
       prints_body:               document.getElementById('conf-prints-body').value.trim(),
       prints_email:              document.getElementById('conf-prints-email').value.trim(),
+
+      // Gear
+      gear_title:                document.getElementById('conf-gear-title')?.value.trim() || '',
+      gear_kit:                  document.getElementById('conf-gear-kit')?.value || '',
+      gear_darkroom:             document.getElementById('conf-gear-darkroom')?.value || '',
+
+      // Film
+      film_title:                document.getElementById('conf-film-title')?.value.trim() || '',
+      film_name:                 document.getElementById('conf-film-name')?.value.trim() || '',
+      film_rating:               document.getElementById('conf-film-rating')?.value.trim() || '3',
+      film_description:          document.getElementById('conf-film-description')?.value || '',
+
+      // Commissions
+      commissions_title:         document.getElementById('conf-commissions-title')?.value.trim() || '',
+      commissions_email:         document.getElementById('conf-commissions-email')?.value.trim() || '',
+      commissions_cta_email:     document.getElementById('conf-commissions-email')?.value.trim() || '',
+      commissions_intro:         document.getElementById('conf-commissions-intro')?.value || '',
+      commissions_card1_title:   document.getElementById('conf-commissions-c1-title')?.value.trim() || '',
+      commissions_card1_body:    document.getElementById('conf-commissions-c1-body')?.value || '',
+      commissions_card2_title:   document.getElementById('conf-commissions-c2-title')?.value.trim() || '',
+      commissions_card2_body:    document.getElementById('conf-commissions-c2-body')?.value || '',
+      commissions_card3_title:   document.getElementById('conf-commissions-c3-title')?.value.trim() || '',
+      commissions_card3_body:    document.getElementById('conf-commissions-c3-body')?.value || '',
+      commissions_cta_label:     document.getElementById('conf-commissions-cta')?.value.trim() || '',
+
+      // Site Config
       PUBLIC_CLOUDINARY_CLOUD_NAME: document.getElementById('conf-cloud-name').value.trim(),
       SITE_TITLE:                document.getElementById('conf-admin-name').value.trim(),
+
       // Section visibility — stored as string 'true' / 'false'
-      section_featured: document.getElementById('section-featured').checked ? 'true' : 'false',
-      section_gallery:  document.getElementById('section-gallery').checked  ? 'true' : 'false',
-      section_prints:   document.getElementById('section-prints').checked   ? 'true' : 'false',
-      section_about:    document.getElementById('section-about').checked    ? 'true' : 'false',
-      section_contact:  document.getElementById('section-contact').checked  ? 'true' : 'false',
+      section_featured:    document.getElementById('section-featured').checked ? 'true' : 'false',
+      section_gallery:     document.getElementById('section-gallery').checked  ? 'true' : 'false',
+      section_gear:        document.getElementById('section-gear')?.checked ? 'true' : 'false',
+      section_film:        document.getElementById('section-film')?.checked ? 'true' : 'false',
+      section_prints:      document.getElementById('section-prints').checked   ? 'true' : 'false',
+      section_commissions: document.getElementById('section-commissions')?.checked ? 'true' : 'false',
+      section_journal:     document.getElementById('section-journal')?.checked ? 'true' : 'false',
+      section_about:       document.getElementById('section-about').checked    ? 'true' : 'false',
+      section_contact:     document.getElementById('section-contact').checked  ? 'true' : 'false',
     };
 
     // Snapshot for rollback
@@ -2369,6 +2655,91 @@ state.social   = social?.social     || social   || [];
       state.settings = backup;
       renderAbout(); // re-populate form from snapshot
       toast(`Failed to save settings: ${err.message}`, true);
+    }
+  }
+
+  // ─── Field Journal ─────────────────────────────────────────────────────
+  function renderJournal() {
+    const list = [...state.journal].sort((a,b) => (a.sort_order || 0) - (b.sort_order || 0));
+    document.getElementById('journal-table').innerHTML = list.length === 0
+      ? `<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px">No journal entries yet. Click "+ New Entry" to create one.</td></tr>`
+      : list.map(j => {
+          const titleSafe = escapeHtml(j.title || 'Untitled');
+          const dateSafe = escapeHtml(j.shoot_date || '—');
+          const locSafe = escapeHtml(j.location || '—');
+          const statusBadge = j.status === 'draft'
+            ? `<span style="padding:2px 6px;border-radius:3px;font-size:10px;background:rgba(255,255,255,0.08);color:var(--muted)">Draft</span>`
+            : `<span style="padding:2px 6px;border-radius:3px;font-size:10px;background:rgba(200,169,110,0.15);color:var(--amber)">Published</span>`;
+          const jIdJs = String(j.id).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+          return `<tr>
+            <td style="font-weight:500;color:var(--fg)">${titleSafe}</td>
+            <td style="color:var(--muted);font-size:12px">${dateSafe}</td>
+            <td style="color:var(--muted);font-size:12px">${locSafe}</td>
+            <td>${statusBadge}</td>
+            <td style="color:var(--muted);font-size:12px">${j.sort_order || 0}</td>
+            <td style="text-align:right">
+              <button class="btn btn-xs" onclick="openModal('modal-journal','${jIdJs}')">Edit</button>
+              <button class="btn btn-xs btn-danger" onclick="deleteJournalEntry('${jIdJs}')">Delete</button>
+            </td>
+          </tr>`;
+        }).join('');
+  }
+
+  async function saveJournalEntry() {
+    const id = document.getElementById('jn-id').value || 'jn-' + Date.now();
+    const title = document.getElementById('jn-title').value.trim();
+    if (!title) { toast('Title is required', true); return; }
+
+    const entry = {
+      id,
+      title,
+      status: document.getElementById('jn-status').value,
+      shoot_date: document.getElementById('jn-shoot_date').value.trim(),
+      location: document.getElementById('jn-location').value.trim(),
+      cover_public_id: document.getElementById('jn-cover_public_id').value.trim(),
+      sort_order: parseInt(document.getElementById('jn-sort_order').value) || 0,
+      body: document.getElementById('jn-body').value
+    };
+
+    const isEdit = state.journal.some(j => j.id === id);
+    const backup = [...state.journal];
+
+    if (isEdit) {
+      state.journal = state.journal.map(j => j.id === id ? entry : j);
+    } else {
+      state.journal.push(entry);
+    }
+    renderJournal();
+    closeModal('modal-journal');
+
+    try {
+      await apiFetch(`journal/${id}`, {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entry)
+      });
+      toast(`Journal entry ${isEdit ? 'updated' : 'created'}!`);
+    } catch (err) {
+      state.journal = backup;
+      renderJournal();
+      toast(`Failed to save journal entry: ${err.message}`, true);
+    }
+  }
+
+  async function deleteJournalEntry(id) {
+    if (!confirm('Are you sure you want to delete this journal entry?')) return;
+    const backup = [...state.journal];
+    state.journal = state.journal.filter(j => j.id !== id);
+    renderJournal();
+
+    try {
+      await apiFetch(`journal/${id}`, { method: 'DELETE' });
+      toast('Journal entry deleted');
+    } catch (err) {
+      state.journal = backup;
+      renderJournal();
+      toast(`Failed to delete entry: ${err.message}`, true);
     }
   }
 
@@ -2463,6 +2834,18 @@ state.social   = social?.social     || social   || [];
       document.getElementById('sl-url').value        = l?.url || '';
       document.getElementById('sl-icon').value        = l?.icon || '';
       document.getElementById('sl-sort_order').value = l?.sort_order ?? state.social.length;
+    }
+    if (modalId === 'modal-journal') {
+      const j = editId ? state.journal.find(x => x.id === editId) : null;
+      document.getElementById('modal-journal-ttl').textContent = j ? 'Edit Journal Entry' : 'New Journal Entry';
+      document.getElementById('jn-id').value              = j?.id || '';
+      document.getElementById('jn-title').value           = j?.title || '';
+      document.getElementById('jn-status').value          = j?.status || 'published';
+      document.getElementById('jn-shoot_date').value      = j?.shoot_date || '';
+      document.getElementById('jn-location').value        = j?.location || '';
+      document.getElementById('jn-cover_public_id').value = j?.cover_public_id || '';
+      document.getElementById('jn-sort_order').value      = j?.sort_order ?? (state.journal.length + 1);
+      document.getElementById('jn-body').value            = j?.body || '';
     }
     document.getElementById(modalId).classList.add('open');
   }

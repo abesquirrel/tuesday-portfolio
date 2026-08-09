@@ -177,3 +177,81 @@ export async function pruneExpiredSessions(db: any): Promise<void> {
     .bind(Date.now())
     .run();
 }
+
+// ─── Journal Entries ──────────────────────────────────────────────────────────
+
+/**
+ * Fetches journal entries from D1 database.
+ * If publishedOnly is true, only returns status = 'published'.
+ */
+export async function getJournalEntries(db: any, publishedOnly = false): Promise<any[]> {
+  if (!db) return [];
+  try {
+    const query = publishedOnly
+      ? 'SELECT * FROM journal_entries WHERE status = "published" ORDER BY sort_order ASC, created_at DESC'
+      : 'SELECT * FROM journal_entries ORDER BY sort_order ASC, created_at DESC';
+    const { results } = await db.prepare(query).all();
+    return results || [];
+  } catch (e) {
+    console.error('getJournalEntries failed:', e);
+    return [];
+  }
+}
+
+/**
+ * Creates or updates a journal entry in D1.
+ */
+export async function saveJournalEntry(db: any, entry: any): Promise<void> {
+  if (!db || !entry.id) return;
+  const existing = await db
+    .prepare('SELECT id FROM journal_entries WHERE id = ?')
+    .bind(entry.id)
+    .first();
+
+  if (existing) {
+    await db
+      .prepare(`
+        UPDATE journal_entries
+        SET title = ?, body = ?, location = ?, shoot_date = ?, cover_public_id = ?, status = ?, sort_order = ?
+        WHERE id = ?
+      `)
+      .bind(
+        entry.title || '',
+        entry.body || '',
+        entry.location || '',
+        entry.shoot_date || '',
+        entry.cover_public_id || '',
+        entry.status || 'published',
+        Number(entry.sort_order) || 0,
+        entry.id
+      )
+      .run();
+  } else {
+    await db
+      .prepare(`
+        INSERT INTO journal_entries (id, title, body, location, shoot_date, cover_public_id, status, sort_order, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `)
+      .bind(
+        entry.id,
+        entry.title || '',
+        entry.body || '',
+        entry.location || '',
+        entry.shoot_date || '',
+        entry.cover_public_id || '',
+        entry.status || 'published',
+        Number(entry.sort_order) || 0,
+        Date.now()
+      )
+      .run();
+  }
+}
+
+/**
+ * Deletes a journal entry by ID.
+ */
+export async function deleteJournalEntry(db: any, id: string): Promise<void> {
+  if (!db || !id) return;
+  await db.prepare('DELETE FROM journal_entries WHERE id = ?').bind(id).run();
+}
+

@@ -3,22 +3,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Masthead from '../components/Masthead.astro';
 import FeaturedPhoto from '../components/FeaturedPhoto.astro';
 import Gallery from '../components/Gallery.astro';
+import Gear from '../components/Gear.astro';
+import FilmSimulation from '../components/FilmSimulation.astro';
 import Prints from '../components/Prints.astro';
+import Commissions from '../components/Commissions.astro';
+import Journal from '../components/Journal.astro';
 import About from '../components/About.astro';
 import Contact from '../components/Contact.astro';
 import '../styles/global.scss';
 
-import { getPhotos, getSettings, getSocialLinks, getAlbums } from '../lib/db';
-import type { Photo, SocialLink, Album } from '../types/photo';
+import { getPhotos, getSettings, getSocialLinks, getAlbums, getJournalEntries } from '../lib/db';
+import type { Photo, SocialLink, Album, JournalEntry } from '../types/photo';
 
 export const prerender = false;
 
 const env = (Astro.locals as any).runtime?.env;
 const db  = env?.DB || env?.tuesday_photos || env?.['tuesday-photos'];
-const photosData: Photo[]         = await getPhotos(db);
-const settings: Record<string, string> = await getSettings(db);
-const socialLinks: SocialLink[]   = await getSocialLinks(db);
-const albums: Album[]             = await getAlbums(db);
+const photosData: Photo[]                 = await getPhotos(db);
+const settings: Record<string, string>         = await getSettings(db);
+const socialLinks: SocialLink[]           = await getSocialLinks(db);
+const albums: Album[]                     = await getAlbums(db);
+const journalEntries: JournalEntry[]      = await getJournalEntries(db, true);
 
 const featuredPhoto: Photo | undefined =
   photosData.find((p) => Number(p.is_featured) === 1) || photosData[0];
@@ -26,15 +31,29 @@ const heroImageId = settings.hero_image_id || featuredPhoto?.public_id || '';
 
 // ── Section visibility (toggled from admin panel) ──────────────────────────
 // Defaults to true if the setting has never been explicitly set.
-const showFeatured = settings.section_featured !== 'false';
-const showGallery  = settings.section_gallery  !== 'false';
-const showPrints   = settings.section_prints   !== 'false';
-const showAbout    = settings.section_about    !== 'false';
-const showContact  = settings.section_contact  !== 'false';
+const showFeatured    = settings.section_featured    !== 'false';
+const showGallery     = settings.section_gallery     !== 'false';
+const showGear        = settings.section_gear        !== 'false';
+const showFilm        = settings.section_film        !== 'false';
+const showPrints      = settings.section_prints      !== 'false';
+const showCommissions = settings.section_commissions !== 'false';
+const showJournal     = settings.section_journal     !== 'false';
+const showAbout       = settings.section_about       !== 'false';
+const showContact     = settings.section_contact     !== 'false';
 ---
 
 <BaseLayout
-  navSections={{ showFeatured, showGallery, showPrints, showAbout, showContact }}
+  navSections={{
+    showFeatured,
+    showGallery,
+    showGear,
+    showFilm,
+    showPrints,
+    showCommissions,
+    showJournal,
+    showAbout,
+    showContact
+  }}
 >
   <Masthead heroPublicId={heroImageId} />
 
@@ -53,7 +72,15 @@ const showContact  = settings.section_contact  !== 'false';
     />
   )}
 
+  {showGear && <Gear settings={settings} />}
+
+  {showFilm && <FilmSimulation settings={settings} />}
+
   {showPrints && <Prints settings={settings} />}
+
+  {showCommissions && <Commissions settings={settings} />}
+
+  {showJournal && <Journal entries={journalEntries} settings={settings} />}
 
   {showAbout && <About settings={settings} />}
 

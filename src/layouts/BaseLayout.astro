@@ -2,7 +2,11 @@
 interface NavSections {
   showFeatured?: boolean;
   showGallery?: boolean;
+  showGear?: boolean;
+  showFilm?: boolean;
   showPrints?: boolean;
+  showCommissions?: boolean;
+  showJournal?: boolean;
   showAbout?: boolean;
   showContact?: boolean;
 }
@@ -21,7 +25,11 @@ const {
   navSections = {
     showFeatured: true,
     showGallery: true,
+    showGear: true,
+    showFilm: true,
     showPrints: true,
+    showCommissions: true,
+    showJournal: true,
     showAbout: true,
     showContact: true,
   },
@@ -102,7 +110,11 @@ const {
           <ul class="navbar-nav ms-auto">
             {navSections.showFeatured !== false && <li class="nav-item"><a class="nav-link" href="#featured">Featured</a></li>}
             {navSections.showGallery  !== false && <li class="nav-item"><a class="nav-link" href="#gallery">Gallery</a></li>}
+            {navSections.showGear     !== false && <li class="nav-item"><a class="nav-link" href="#gear">Gear</a></li>}
+            {navSections.showFilm     !== false && <li class="nav-item"><a class="nav-link" href="#film">Film</a></li>}
             {navSections.showPrints   !== false && <li class="nav-item"><a class="nav-link" href="#prints">Prints</a></li>}
+            {navSections.showCommissions !== false && <li class="nav-item"><a class="nav-link" href="#commissions">Commissions</a></li>}
+            {navSections.showJournal  !== false && <li class="nav-item"><a class="nav-link" href="#journal">Journal</a></li>}
             {navSections.showAbout    !== false && <li class="nav-item"><a class="nav-link" href="#about">About</a></li>}
             {navSections.showContact  !== false && <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>}
           </ul>

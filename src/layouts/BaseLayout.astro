@@ -2,11 +2,13 @@
 interface Props {
   title?: string;
   description?: string;
+  ogImage?: string;
 }
 
 const {
-  title = 'I Think It Was Tuesday',
-  description = 'A film photography portfolio by Paul Rojas. Shot on Nikkormat. Moments that were probably a Tuesday.',
+  title = 'I Think It Was Tuesday — Photography Portfolio',
+  description = 'A film photography portfolio by Paul Rojas. Shot on Nikkormat and Fujifilm simulations. Unremarkable moments worth keeping.',
+  ogImage = 'https://tuesday.paulrojas.quest/favicon.svg',
 } = Astro.props;
 ---
 
@@ -24,11 +26,19 @@ const {
     <!-- Canonical -->
     <link rel="canonical" href="https://tuesday.paulrojas.quest" />
 
-    <!-- Open Graph -->
+    <!-- Open Graph / Facebook / LinkedIn -->
+    <meta property="og:site_name" content="I Think It Was Tuesday" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://tuesday.paulrojas.quest" />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -38,11 +48,17 @@ const {
       rel="stylesheet"
     />
 
-    <!-- Global styles -->
+    <!-- Global styles & A11y Focus States -->
     <style is:global>
       html { scroll-behavior: smooth; }
       * { box-sizing: border-box; }
       img { max-width: 100%; height: auto; }
+      
+      /* Accessibility Focus-Visible outlines for dark theme */
+      :focus-visible {
+        outline: 2px solid #c8a96e !important;
+        outline-offset: 3px !important;
+      }
     </style>
   </head>
 

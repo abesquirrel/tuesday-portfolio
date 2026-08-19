@@ -18,6 +18,7 @@ export interface Photo {
   album_id:       string | null;   // link to album
   sort_order:     number;
   is_featured:    number;          // 0 | 1 (SQLite boolean)
+  spotify_url?:   string | null;   // optional Spotify link
 }
 
 export interface SiteSetting {
@@ -38,6 +39,7 @@ export interface Album {
   title:       string;
   description: string;
   sort_order:  number;
+  spotify_url?: string | null;     // optional Spotify link
 }
 
 export interface JournalEntry {

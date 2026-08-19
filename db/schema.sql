@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS photos (
   film_stock     TEXT,                      -- e.g. 'Kodak Gold 200'
   album_id       TEXT,                      -- foreign key to albums.id
   sort_order     INTEGER  DEFAULT 0,
-  is_featured    INTEGER  DEFAULT 0         -- SQLite boolean: 0 | 1
+  is_featured    INTEGER  DEFAULT 0,        -- SQLite boolean: 0 | 1
+  spotify_url    TEXT                       -- optional Spotify track URL
 );
 
 -- ─── Albums table ─────────────────────────────────────────────────────────────
@@ -29,7 +30,8 @@ CREATE TABLE IF NOT EXISTS albums (
   id             TEXT     PRIMARY KEY,
   title          TEXT     NOT NULL,
   description    TEXT     DEFAULT '',
-  sort_order     INTEGER  DEFAULT 0
+  sort_order     INTEGER  DEFAULT 0,
+  spotify_url    TEXT                       -- optional Spotify album/playlist URL
 );
 
 -- ─── Site Settings table ──────────────────────────────────────────────────────

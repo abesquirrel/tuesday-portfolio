@@ -22,6 +22,7 @@
 import type { APIRoute } from 'astro';
 import { isValidSession } from '../../../lib/db';
 import { CUSTOM_ERROR_THUMBNAIL } from '../../../utils/cloudinary';
+import { slugify, cloudinarySign } from '../../../lib/cloudinaryApi';
 
 export const prerender = false;
 
@@ -35,26 +36,6 @@ function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status, headers: { 'Content-Type': 'application/json' },
   });
-}
-
-/** SHA-1 of (paramsString + apiSecret) — Cloudinary's required signing method */
-async function cloudinarySign(paramsToSign: string, apiSecret: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(paramsToSign + apiSecret);
-  const hashBuffer = await crypto.subtle.digest('SHA-1', data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-}
-
-/** Slugify a string into a URL-safe ID */
-function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .slice(0, 60);
 }
 
 export const GET: APIRoute = async () => {

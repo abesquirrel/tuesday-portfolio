@@ -1765,6 +1765,15 @@ if (Astro.request.method === 'POST') {
           </label>
           <div class="hint">This will un-feature any currently featured photo.</div>
         </div>
+
+        <div class="fgroup">
+          <label class="flabel" style="display:flex;align-items:center;gap:6px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            Spotify URL <span style="font-weight:400;color:var(--muted);font-size:10px;">(optional)</span>
+          </label>
+          <input class="finput" id="ph-spotify_url" type="url" placeholder="https://open.spotify.com/track/...">
+          <div class="hint">Paste a Spotify track or album link. Shows in the lightbox and featured photo.</div>
+        </div>
       </div>
       <div class="modal-foot">
         <button class="btn" onclick="closeModal('modal-photo')">Cancel</button>
@@ -1800,6 +1809,14 @@ if (Astro.request.method === 'POST') {
         <div class="fgroup">
           <label class="flabel">Sort Order</label>
           <input class="finput" id="al-sort_order" type="number" value="0" style="width:100px">
+        </div>
+        <div class="fgroup">
+          <label class="flabel" style="display:flex;align-items:center;gap:6px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            Spotify URL <span style="font-weight:400;color:var(--muted);font-size:10px;">(optional)</span>
+          </label>
+          <input class="finput" id="al-spotify_url" type="url" placeholder="https://open.spotify.com/album/...">
+          <div class="hint">Paste a Spotify album or playlist link. Shown as an embedded player above the album's photos.</div>
         </div>
       </div>
       <div class="modal-foot">
@@ -2813,6 +2830,7 @@ if (Astro.request.method === 'POST') {
       document.getElementById('ph-film_stock').value = p?.film_stock || '';
       document.getElementById('ph-sort_order').value = p?.sort_order ?? 99;
       document.getElementById('ph-is_featured').checked = !!p?.is_featured;
+      document.getElementById('ph-spotify_url').value = p?.spotify_url || '';
       toggleSimField();
       updateCloudPreview();
     }
@@ -2825,6 +2843,7 @@ if (Astro.request.method === 'POST') {
       document.getElementById('al-title').value       = a?.title || '';
       document.getElementById('al-description').value = a?.description || '';
       document.getElementById('al-sort_order').value  = a?.sort_order ?? 0;
+      document.getElementById('al-spotify_url').value = a?.spotify_url || '';
     }
     if (modalId === 'modal-social') {
       const l = (editId && typeof editId === 'number') ? state.social.find(x => x.id === editId) : null;
@@ -2901,6 +2920,7 @@ if (Astro.request.method === 'POST') {
       sort_order:  parseInt(document.getElementById('ph-sort_order').value) || 99,
       is_featured: isFeatured,
       cloudinary_url: document.getElementById('ph-cloudinary_url').value || null,
+      spotify_url: document.getElementById('ph-spotify_url').value || null,
     };
 
     // Snapshot for rollback
@@ -2968,6 +2988,7 @@ if (Astro.request.method === 'POST') {
       id, title,
       description: document.getElementById('al-description').value,
       sort_order: newSortOrder,
+      spotify_url: document.getElementById('al-spotify_url').value || null,
     };
 
     // Auto-reorder: shift other albums when sort_order changes

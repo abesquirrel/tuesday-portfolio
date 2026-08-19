@@ -133,15 +133,16 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
         }
         await db.prepare(`
           INSERT INTO photos
-            (id, public_id, cloudinary_url, title, caption, roll, location, medium, simulation, camera, lens, film_stock, album_id, sort_order, is_featured)
-          VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            (id, public_id, cloudinary_url, title, caption, roll, location, medium, simulation, camera, lens, film_stock, album_id, sort_order, is_featured, spotify_url)
+          VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         `)
           .bind(
             p.id, p.public_id, p.cloudinary_url ?? null, p.title,
             p.caption ?? '', p.roll ?? '', p.location ?? '',
             p.medium ?? 'film', p.simulation ?? null,
             p.camera ?? null, p.lens ?? null, p.film_stock ?? null,
-            p.album_id ?? null, p.sort_order ?? 99, p.is_featured ?? 0
+            p.album_id ?? null, p.sort_order ?? 99, p.is_featured ?? 0,
+            p.spotify_url ?? null
           ).run();
         return json({ ok: true, id: p.id }, 201);
       }
@@ -157,7 +158,7 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
             public_id = ?, cloudinary_url = ?, title = ?, caption = ?,
             roll = ?, location = ?, medium = ?, simulation = ?,
             camera = ?, lens = ?, film_stock = ?, album_id = ?,
-            sort_order = ?, is_featured = ?
+            sort_order = ?, is_featured = ?, spotify_url = ?
           WHERE id = ?
         `).bind(
           p.public_id, p.cloudinary_url ?? null, p.title,
@@ -165,6 +166,7 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
           p.medium ?? 'film', p.simulation ?? null,
           p.camera ?? null, p.lens ?? null, p.film_stock ?? null,
           p.album_id ?? null, p.sort_order ?? 99, p.is_featured ?? 0,
+          p.spotify_url ?? null,
           parts[1]
         ).run();
         return json({ ok: true });
@@ -197,16 +199,16 @@ export const ALL: APIRoute = async ({ params, request, locals, cookies }) => {
         }
 
         await db.prepare(
-          'INSERT INTO albums (id, title, description, sort_order) VALUES (?,?,?,?)'
-        ).bind(a.id, a.title, a.description ?? '', a.sort_order ?? 0).run();
+          'INSERT INTO albums (id, title, description, sort_order, spotify_url) VALUES (?,?,?,?,?)'
+        ).bind(a.id, a.title, a.description ?? '', a.sort_order ?? 0, a.spotify_url ?? null).run();
         return json({ ok: true, id: a.id }, 201);
       }
 
       if (parts[1] && method === 'PUT') {
         const a = await request.json() as any;
         await db.prepare(
-          'UPDATE albums SET title = ?, description = ?, sort_order = ? WHERE id = ?'
-        ).bind(a.title, a.description ?? '', a.sort_order ?? 0, parts[1]).run();
+          'UPDATE albums SET title = ?, description = ?, sort_order = ?, spotify_url = ? WHERE id = ?'
+        ).bind(a.title, a.description ?? '', a.sort_order ?? 0, a.spotify_url ?? null, parts[1]).run();
         return json({ ok: true });
       }
 

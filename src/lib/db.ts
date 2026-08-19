@@ -43,6 +43,7 @@ export async function getPhotos(db?: any): Promise<Photo[]> {
         album_id:       p.albumId ?? null,
         sort_order:     i,
         is_featured:    p.isFeatured ? 1 : 0,
+        spotify_url:    p.spotify_url ?? p.spotifyUrl ?? null,
       }));
     } catch (e) {
       console.error('Local JSON fallback failed:', e);

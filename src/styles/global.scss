@@ -615,6 +615,36 @@ footer {
       color: $accent-amber;
       opacity: 0.8;
     }
+
+    .lightbox-spotify {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+      padding: 0.35rem 0.9rem;
+      background: rgba(#1DB954, 0.15);
+      border: 1px solid rgba(#1DB954, 0.4);
+      border-radius: 20px;
+      color: #1DB954;
+      font-family: 'Courier New', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      pointer-events: auto;
+      transition: all 0.2s ease;
+
+      svg {
+        flex-shrink: 0;
+      }
+
+      &:hover {
+        background: #1DB954;
+        color: $darkroom-black;
+        border-color: #1DB954;
+        box-shadow: 0 0 12px rgba(#1DB954, 0.4);
+      }
+    }
   }
 
   .lightbox-controls {

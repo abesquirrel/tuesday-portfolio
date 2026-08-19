@@ -161,15 +161,16 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
     await db.prepare(`
       INSERT INTO photos
         (id, public_id, cloudinary_url, title, caption, roll, location, medium,
-         simulation, camera, lens, film_stock, album_id, sort_order, is_featured)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+         simulation, camera, lens, film_stock, album_id, sort_order, is_featured, spotify_url)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `).bind(
       dbId,
       uploadResult.public_id,
       uploadResult.secure_url,
       title, caption, roll, location, medium,
       simulation, camera, lens, filmStock,
-      albumId, sortOrder, isFeatured
+      albumId, sortOrder, isFeatured,
+      null
     ).run();
   } catch (dbErr: any) {
     return json({
